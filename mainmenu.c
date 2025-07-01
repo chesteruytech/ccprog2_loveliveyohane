@@ -1,12 +1,10 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 int main(){
-	
     char choice;
-    int quit = 0;
 
     do {
-
         printf("\t************************************************\n");
         printf("\t*            Yohane The Parhelion!             *\n");
         printf("\t*       The Siren in the Mirror World!         *\n");
@@ -18,7 +16,6 @@ int main(){
         printf("\nYour choice: ");
         scanf(" %c", &choice);
 
-
         switch (choice){
             case 'N': case 'n':
                 printf("New game\n");
@@ -28,12 +25,11 @@ int main(){
                 break;
             case 'Q': case 'q':
                 printf("Quit\n");
-                quit = 1;
-                break;
+                return 0;
             default:
-                printf("Invalid input. Please choose N, V, or Q.\n");
+                printf("Invalid input. Please choose N, V, or Q only.\n");
+                system("pause");
+			    system("cls");
         }
-    } while (!quit);
-
-    return 0;
+    } while (choice != 3);
 }
