@@ -18,6 +18,7 @@ struct gameTag{
 	int gold;
 	int hostages[MAX_HOSTAGES];
 	int rescuedCount[MAX_IDOLS];
+	int running;
 };
 
 void showHostages(struct idolDungeonTag idolDungeon[], struct gameTag *game){
@@ -46,13 +47,13 @@ void showDungeonMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game){
 
     for (i = 0; i < 3; i++) {
         idx = game->hostages[i];
-        printf("[%d] Visit %s\n", i+1, idolDungeon[idx].dungeon);
+        printf("[%d] Visit %s\n", i+1, idolDungeon[idx].dungeon); // [X] if already cleared
     }
 
     printf("\n[I]nventory");
     printf("\t\t");
 	printf("[S]ave and Quit\n");
-    printf("Choice: ");
+   
 }
 
 void newGame(struct idolDungeonTag idolDungeon[], struct gameTag *game){
@@ -76,15 +77,31 @@ void newGame(struct idolDungeonTag idolDungeon[], struct gameTag *game){
     showHostages(idolDungeon, game);
     showDungeonMenu(idolDungeon, game);
 
-    scanf(" %c", &choice); // to be continued.
-    printf("To be continued...\n");
+    do{
+    printf("Choice: ");
+    scanf(" %c", &choice);
+
+	    switch (choice){
+	        case '1': case '2': case '3':
+	            printf("Entering Dungeon %c\n", choice);
+	            break;
+	        case 'I': case 'i':
+	            printf("Inventory\n");
+	            break;
+	        case 'S': case 's':
+	            printf("Game Saved\n"); // save to file afterwards
+	            break;
+	        default:
+	            printf("Invalid choice\n");
+	    	}
+	} while (choice != 'S' && choice != 's');
 
 }
 
 int main(){
 	
     char choice;
-
+	
 	struct idolDungeonTag idolDungeon[MAX_IDOLS] = {
 			{"Chika", "Yasudaya Ryokan"},
 			{"Riko", "Numazu Deep Sea Aquarium"},
@@ -97,14 +114,17 @@ int main(){
 			};	
 	
 	struct gameTag game;
-	
+	game.running = 0;
     do {
         printf("\t************************************************\n");
         printf("\t*            Yohane The Parhelion!             *\n");
         printf("\t*       The Siren in the Mirror World!         *\n");
         printf("\t************************************************\n");
-
-        printf("\t\t  [N]ew Game\n");	
+		
+		if (game.running == 0)
+        	printf("\t\t  [N]ew Game\n");
+        else
+        	printf("\t\t  [C]ontinue\n");
         printf("\t\t  [V]iew Achievements\n");
         printf("\t\t  [Q]uit\n");
         printf("\nYour choice: ");
@@ -112,7 +132,11 @@ int main(){
 
         switch (choice){
             case 'N': case 'n':
+            	game.running = 1;
                 newGame(idolDungeon, &game);
+                break;
+            case 'C': case 'c':
+                newGame(idolDungeon, &game); // fix later
                 break;
             case 'V': case 'v':
                 printf("Achievements\n");
