@@ -218,12 +218,14 @@ void hanamaruStore(struct idolDungeonTag idolDungeon[], struct gameTag *game, st
 	int i;
 	char choice;
 	int index;
+	int count = 1;
 	printf("Hanamaru: Yohane-chan, zura! What can I do for you today?\n\n");
 	printf("Total Gold: %d GP\n\n", game->gold);
 	
 	for (i = 0; i < MAX_HANAMARU; i++){
 	    if (hanamaru[i].availability > 0){
-	        printf("[%d] %-30s \t %dGP\n", i+1, hanamaru[i].item, hanamaru[i].price);
+	        printf("[%d] %-30s \t %dGP\n", count, hanamaru[i].item, hanamaru[i].price);
+	        count++;
 	    }
 	}
 	
