@@ -122,7 +122,7 @@ void showDungeonMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, 
 
     printf("\n[I]nventory");
     printf("\t\t");
-	printf("[S]ave and Quit\n");
+	printf("[S]ave and Quit\n\n");
    
 }
 
@@ -164,6 +164,7 @@ void newGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct i
 	system("cls");
 	int i;
 	char choice;
+	int index;
     game->hp = 3;
     game->maxHP = 3;
     game->gold = 0;
@@ -180,11 +181,12 @@ void newGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct i
     do{
     printf("Choice: ");
     scanf(" %c", &choice);
-
+	index = choice - 49;	// for entering dungeon only, this converts '1' that is currently a char into 0, '2' into 1, etc.
 	    switch (choice){
 	        case '1': case '2': case '3':
 	        	system("cls");
-	        	printf("Entering dungeon\n\n");
+	        	printf("Entering dungeon %d\n\n", index+1);
+	        	game->clearStatus[index] = 1; // placeholder dungeon clear
 	        	system("pause");
 	            system("cls");
 	            showHostages(idolDungeon, game);
