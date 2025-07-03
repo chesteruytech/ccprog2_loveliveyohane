@@ -5,7 +5,7 @@
 #define MAX_IDOLS 8
 #define MAX_NAME_LEN 30
 #define MAX_HOSTAGES 3
-
+#define MAX_ITEM_CHAR 50
 typedef char Name[MAX_NAME_LEN];
 
 struct idolDungeonTag{
@@ -14,6 +14,7 @@ struct idolDungeonTag{
 };
 
 struct gameTag{
+	int maxHP;
 	int hp;
 	int gold;
 	int hostages[MAX_HOSTAGES];
@@ -21,6 +22,35 @@ struct gameTag{
 	int clearStatus[MAX_HOSTAGES];
 	int running;
 };
+
+void initializeIdolDungeon(struct idolDungeonTag idolDungeon[]){
+	
+    strcpy(idolDungeon[0].idol, "Chika");
+    strcpy(idolDungeon[0].dungeon, "Yasudaya Ryokan");
+
+    strcpy(idolDungeon[1].idol, "Riko");
+    strcpy(idolDungeon[1].dungeon, "Numazu Deep Sea Aquarium");
+
+    strcpy(idolDungeon[2].idol, "You");
+    strcpy(idolDungeon[2].dungeon, "Izu-Mito Sea Paradise");
+
+    strcpy(idolDungeon[3].idol, "Hanamaru");
+    strcpy(idolDungeon[3].dungeon, "Shougetsu Confectionary");
+
+    strcpy(idolDungeon[4].idol, "Ruby");
+    strcpy(idolDungeon[4].dungeon, "Nagahama Castle Ruins");
+
+    strcpy(idolDungeon[5].idol, "Dia");
+    strcpy(idolDungeon[5].dungeon, "Numazugoyotei");
+
+    strcpy(idolDungeon[6].idol, "Kanan");
+    strcpy(idolDungeon[6].dungeon, "Uchiura Bay Pier");
+
+    strcpy(idolDungeon[7].idol, "Mari");
+    strcpy(idolDungeon[7].dungeon, "Awashima Marine Park");
+    
+}
+
 
 void selectHostages(struct gameTag *game){
 	int index;
@@ -55,7 +85,7 @@ void showDungeonMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game){
 	int i, idx;
 	
     printf("Lailaps: Yohane! Where should we go to now?\n\n");
-    printf("HP: %d / 3", game->hp);
+    printf("HP: %d / %d", game->hp, game->maxHP);
     printf("\t\t\t\t");
     printf("Total Gold: %d GP\n", game->gold);
     printf("Item on hand: N/A\n");	// placeholder, fix later
@@ -76,12 +106,40 @@ void showDungeonMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game){
    
 }
 
+void showInventory(struct idolDungeonTag idolDungeon[], struct gameTag *game){
+	
+	char choice;
+	
+	printf("Lailaps: Here are the items you have, Yohane!\n\n");
+	printf("HP: %d / %d", game->hp, game->maxHP);
+	printf("\t\t\t\t");
+    printf("Total Gold: %d GP\n", game->gold);
+	printf("Items available\n\n");
+	
+	printf("[R]eturn\n\n");
+		
+	do{
+		printf("Choice: ");
+		scanf(" %c", &choice);
+	switch(choice){
+		case 'R': case 'r':
+			system("cls");
+		    showHostages(idolDungeon, game);
+	    	showDungeonMenu(idolDungeon, game);
+	    	break;
+	    default:
+	    	printf("Invalid choice\n");
+		}
+	} while (choice != 'R' && choice != 'r');
+}
+
 void newGame(struct idolDungeonTag idolDungeon[], struct gameTag *game){
 	
 	system("cls");
 	int i;
 	char choice;
     game->hp = 3;
+    game->maxHP = 3;
     game->gold = 0;
 	game->running = 1;
 	
@@ -108,11 +166,7 @@ void newGame(struct idolDungeonTag idolDungeon[], struct gameTag *game){
 	            break;
 	        case 'I': case 'i':
 	        	system("cls");
-	            printf("Inventory\n\n");
-	            system("pause");
-	            system("cls");
-	            showHostages(idolDungeon, game);
-    			showDungeonMenu(idolDungeon, game);
+	            showInventory(idolDungeon, game);
 	            break;
 	        case 'S': case 's':
 	            printf("Game Saved\n\n"); 
@@ -120,11 +174,7 @@ void newGame(struct idolDungeonTag idolDungeon[], struct gameTag *game){
 	            system("cls");
 	            break;
 	        default:
-	            printf("Invalid choice\n\n");
-	            system("pause");
-	            system("cls");
-	            showHostages(idolDungeon, game);
-    			showDungeonMenu(idolDungeon, game);
+	            printf("Invalid choice\n");
 	    	}
 	    	
 	} while (choice != 'S' && choice != 's');
@@ -134,19 +184,10 @@ void newGame(struct idolDungeonTag idolDungeon[], struct gameTag *game){
 int main(){
 	
     char choice;
-	
-	struct idolDungeonTag idolDungeon[MAX_IDOLS] = {
-			{"Chika", "Yasudaya Ryokan"},
-			{"Riko", "Numazu Deep Sea Aquarium"},
-			{"You", "Izu-Mito Sea Paradise"},
-			{"Hanamaru", "Shougetsu Confectionary"},
-			{"Ruby", "Nagahama Castle Ruins"},
-			{"Dia", "Numazugoyotei"},
-			{"Kanan", "Uchiura Bay Pier"},
-			{"Mari", "Awashima Marine Park"}
-			};	
-	
+	struct idolDungeonTag idolDungeon[MAX_IDOLS];
 	struct gameTag game;
+	
+	initializeIdolDungeon(idolDungeon);	
 	game.running = 0;
 	
     do {
@@ -173,8 +214,10 @@ int main(){
                 newGame(idolDungeon, &game); // fix later
                 break;
             case 'V': case 'v':
+        		system("cls");
                 printf("Achievements\n");
                 system("pause");
+                system("cls");
                 break;
             case 'Q': case 'q':
                 printf("Thanks for playing!\n");
