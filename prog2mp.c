@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #define MAX_IDOLS 8
 #define MAX_NAME_LEN 30
@@ -108,7 +109,7 @@ void showDungeonMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, 
     printf("HP: %d / %d", game->hp, game->maxHP);
     printf("\t\t\t\t");
     printf("Total Gold: %d GP\n", game->gold);
-    printf("Item on hand: N/A\n");	// ??? ("More on this later" according to specs)
+    printf("Item on hand: N/A\n");	// placeholder, fix later
     printf("\n");
 
     for (i = 0; i < 3; i++) {
@@ -223,8 +224,12 @@ void newGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct i
 	            system("cls");
 	            break;
 	        case 'H': case 'h':
+	        	if (game->rescuedCount[3] > 0){
 	        	system("cls");
 	            printf("Hanamaru Store\n");
+	        }
+	        	else
+	        		printf("Totally nothing to see here!\n");
 	            break;
 	        default:
 	            printf("Invalid choice\n");
@@ -236,6 +241,7 @@ void newGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct i
 
 int main(){
 	
+	srand(time(NULL));
     char choice;
 	struct idolDungeonTag idolDungeon[MAX_IDOLS];
 	struct gameTag game;
