@@ -8,6 +8,7 @@
 #define MAX_HOSTAGES 3
 #define MAX_ITEM_CHAR 50
 #define MAX_INVENTORY 10
+#define MAX_HANAMARU 9
 
 typedef char Name[MAX_NAME_LEN];
 
@@ -19,6 +20,12 @@ struct idolDungeonTag{
 struct inventoryTag{
 	Name item;
 	int itemCount;
+};
+
+struct hanamaruTag{
+	Name item;
+	int price;
+	int availability;
 };
 
 struct gameTag{
@@ -69,6 +76,46 @@ void initializeInventory(struct inventoryTag inventory[]){
 	
 	strcpy(inventory[2].item, "Choco-mint ice cream");
 	inventory[2].itemCount = 0;
+	
+}
+
+void initializeHanamaru(struct hanamaruTag hanamaru[]){
+	
+	strcpy(hanamaru[0].item, "Tears of a fallen angel");
+	hanamaru[0].price = 30;
+	hanamaru[0].availability = 1;
+	
+	strcpy(hanamaru[1].item, "Noppo Bread");
+	hanamaru[1].price = 100;
+	hanamaru[1].availability = 1;
+	
+	strcpy(hanamaru[2].item, "Shovel Upgrade");
+	hanamaru[2].price = 300;
+	hanamaru[2].availability = 0;
+	
+	strcpy(hanamaru[3].item, "Bat Tamer");
+	hanamaru[3].price = 400;
+	hanamaru[3].availability = 0;
+	
+	strcpy(hanamaru[4].item, "Air Shoes");
+	hanamaru[4].price = 500;
+	hanamaru[4].availability = 0;
+	
+	strcpy(hanamaru[5].item, "Stewshine");
+	hanamaru[5].price = 1000;
+	hanamaru[5].availability = 0;
+	
+	strcpy(hanamaru[6].item, "Mikan Mochi");
+	hanamaru[6].price = 1000;
+	hanamaru[6].availability = 0;
+	
+	strcpy(hanamaru[7].item, "Kurosawa Macha");
+	hanamaru[7].price = 1000;
+	hanamaru[7].availability = 0;
+	
+	strcpy(hanamaru[8].item, "Choco-Mint Ice Cream");
+	hanamaru[8].price = 2000;
+	hanamaru[8].availability = 0;
 	
 }
 
@@ -166,7 +213,45 @@ void showInventory(struct idolDungeonTag idolDungeon[], struct gameTag *game, st
 	} while (choice != 'R' && choice != 'r');
 }
 
-void newGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[]){
+void hanamaruStore(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[], struct hanamaruTag hanamaru[]){
+	
+	int i;
+	char choice;
+	int index;
+	printf("Hanamaru: Yohane-chan, zura! What can I do for you today?\n\n");
+	printf("Total Gold: %d GP\n\n", game->gold);
+	
+	for (i = 0; i < MAX_HANAMARU; i++){
+	    if (hanamaru[i].availability > 0){
+	        printf("[%d] %-30s \t %dGP\n", i+1, hanamaru[i].item, hanamaru[i].price);
+	    }
+	}
+	
+	printf("[R]eturn\n\n");
+	
+	do{
+		printf("Choice: ");
+		scanf(" %c", &choice);
+		index = choice - 49;	// for entering dungeon only, this converts '1' that is currently a char into 0, '2' into 1, etc.
+		switch(choice){
+			case '1': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
+				hanamaru[index].availability = 0;
+				break;
+			case '2':
+				// purchase as much as wanted
+				break;
+			case 'R': case 'r':
+				system("cls");
+			    showHostages(idolDungeon, game);
+		    	showDungeonMenu(idolDungeon, game, inventory);
+		    	break;
+		    default:
+		    	printf("Invalid choice\n");
+			}
+	} while (choice != 'R' && choice != 'r');
+}
+
+void newGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[], struct hanamaruTag hanamaru[]){
 	
 	system("cls");
 	int i;
@@ -208,6 +293,21 @@ void newGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct i
 		        	game->rescuedCount[charIdx]++;
 		        	game->clearStatus[index] = 1;
 		        	
+		        	// had to trace this, but i could add constants to make it less confusing
+					if (charIdx == 0) 
+						hanamaru[6].availability = 1;
+					if (charIdx == 1)
+						hanamaru[3].availability = 1;
+					if (charIdx == 2)
+						hanamaru[4].availability = 1;
+					if (charIdx == 4)
+						hanamaru[8].availability = 1;
+					if (charIdx == 5)
+						hanamaru[7].availability = 1;
+					if (charIdx == 6)
+						hanamaru[2].availability = 1;
+					if (charIdx == 7)
+						hanamaru[5].availability = 1;	        	  
 	        	}
 	        	system("pause");
 	            system("cls");
@@ -226,7 +326,7 @@ void newGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct i
 	        case 'H': case 'h':
 	        	if (game->rescuedCount[3] > 0){
 	        	system("cls");
-	            printf("Hanamaru Store\n");
+	            hanamaruStore(idolDungeon, game, inventory, hanamaru);
 	        }
 	        	else
 	        		printf("Totally nothing to see here!\n");
@@ -246,9 +346,11 @@ int main(){
 	struct idolDungeonTag idolDungeon[MAX_IDOLS];
 	struct gameTag game;
 	struct inventoryTag inventory[MAX_INVENTORY];
+	struct hanamaruTag hanamaru[MAX_HANAMARU];
 	
 	initializeIdolDungeon(idolDungeon);	
 	initializeInventory(inventory);
+	initializeHanamaru(hanamaru);
 	
 	game.running = 0;
 	
@@ -270,10 +372,10 @@ int main(){
 
         switch (choice){
             case 'N': case 'n':
-                newGame(idolDungeon, &game, inventory);
+                newGame(idolDungeon, &game, inventory, hanamaru);
                 break;
             case 'C': case 'c':
-                newGame(idolDungeon, &game, inventory); // fix later
+                newGame(idolDungeon, &game, inventory, hanamaru); // fix later
                 break;
             case 'V': case 'v':
         		system("cls");
@@ -294,3 +396,4 @@ int main(){
     
     return 0; 
 }
+
