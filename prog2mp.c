@@ -108,7 +108,7 @@ void showDungeonMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, 
     printf("HP: %d / %d", game->hp, game->maxHP);
     printf("\t\t\t\t");
     printf("Total Gold: %d GP\n", game->gold);
-    printf("Item on hand: N/A\n");	// placeholder, fix later
+    printf("Item on hand: N/A\n");	// ??? ("More on this later" according to specs)
     printf("\n");
 
     for (i = 0; i < 3; i++) {
@@ -122,7 +122,13 @@ void showDungeonMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, 
 
     printf("\n[I]nventory");
     printf("\t\t");
-	printf("[S]ave and Quit\n\n");
+	printf("[S]ave and Quit");
+	printf("\t\t");
+	
+	if (game->rescuedCount[3] > 0)
+		printf("[H]anamaru Store");
+		
+	printf("\n\n");
    
 }
 
@@ -165,6 +171,7 @@ void newGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct i
 	int i;
 	char choice;
 	int index;
+	int charIdx;
     game->hp = 3;
     game->maxHP = 3;
     game->gold = 0;
@@ -172,6 +179,10 @@ void newGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct i
 	
 	for (i = 0; i < MAX_HOSTAGES; i++) {
     	game->clearStatus[i] = 0;
+	}
+	
+	for (i = 0; i < MAX_IDOLS; i++){
+		game->rescuedCount[i] = 0;
 	}
 	
 	selectHostages(game);
@@ -188,8 +199,14 @@ void newGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct i
 	        	if (game->clearStatus[index] == 1)
 	        		printf("Dungeon is cleared. You can no longer enter\n");
 	        	else{
-	        		printf("Entering dungeon %d\n\n", index+1);
-	        		game->clearStatus[index] = 1; // placeholder dungeon clear
+		        	printf("Entering dungeon %d\n\n", index+1);
+		        	
+		        	// finish dungeon first before this
+		        	charIdx = game->hostages[index]; 
+		        	printf("Idol %s is rescued!\n", idolDungeon[charIdx].idol);
+		        	game->rescuedCount[charIdx]++;
+		        	game->clearStatus[index] = 1;
+		        	
 	        	}
 	        	system("pause");
 	            system("cls");
@@ -204,6 +221,10 @@ void newGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct i
 	            printf("Game Saved\n\n"); 
 	            system("pause");
 	            system("cls");
+	            break;
+	        case 'H': case 'h':
+	        	system("cls");
+	            printf("Hanamaru Store\n");
 	            break;
 	        default:
 	            printf("Invalid choice\n");
@@ -222,6 +243,7 @@ int main(){
 	
 	initializeIdolDungeon(idolDungeon);	
 	initializeInventory(inventory);
+	
 	game.running = 0;
 	
     do {
