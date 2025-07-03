@@ -185,8 +185,12 @@ void newGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct i
 	    switch (choice){
 	        case '1': case '2': case '3':
 	        	system("cls");
-	        	printf("Entering dungeon %d\n\n", index+1);
-	        	game->clearStatus[index] = 1; // placeholder dungeon clear
+	        	if (game->clearStatus[index] == 1)
+	        		printf("Dungeon is cleared. You can no longer enter\n");
+	        	else{
+	        		printf("Entering dungeon %d\n\n", index+1);
+	        		game->clearStatus[index] = 1; // placeholder dungeon clear
+	        	}
 	        	system("pause");
 	            system("cls");
 	            showHostages(idolDungeon, game);
