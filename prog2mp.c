@@ -7,8 +7,17 @@
 #define MAX_NAME_LEN 30
 #define MAX_HOSTAGES 3
 #define MAX_ITEM_CHAR 50
-#define MAX_INVENTORY 10
+#define MAX_INVENTORY 9
 #define MAX_HANAMARU 9
+
+// IDOLS TO HANAMARU SHOP RATIO. DO NOT TOUCH!!!
+#define SHOVEL_UP 2
+#define BAT_TAMER 3
+#define AIR_SHOES 4
+#define STEWSHINE 5
+#define MIKAN_MOCHI 6
+#define KURO_MACHA 7 
+#define ICE_CREAM 8
 
 typedef char Name[MAX_NAME_LEN];
 
@@ -20,6 +29,7 @@ struct idolDungeonTag{
 struct inventoryTag{
 	Name item;
 	int itemCount;
+	int hidden;
 };
 
 struct hanamaruTag{
@@ -70,12 +80,39 @@ void initializeInventory(struct inventoryTag inventory[]){
 	
 	strcpy(inventory[0].item, "Tears of a fallen angel");
 	inventory[0].itemCount = 0;
+	inventory[0].hidden = 0;
 	
-	strcpy(inventory[1].item, "Noppo bread");
+	strcpy(inventory[1].item, "Noppo Bread");
 	inventory[1].itemCount = 0;
+	inventory[1].hidden = 0;
 	
-	strcpy(inventory[2].item, "Choco-mint ice cream");
+	strcpy(inventory[2].item, "Shovel Upgrade");
 	inventory[2].itemCount = 0;
+	inventory[2].hidden = 1;
+	
+	strcpy(inventory[3].item, "Bat Tamer");
+	inventory[3].itemCount = 0;
+	inventory[3].hidden = 1;
+	
+	strcpy(inventory[4].item, "Air Shoes");
+	inventory[4].itemCount = 0;
+	inventory[4].hidden = 1;
+	
+	strcpy(inventory[5].item, "Stewshine");
+	inventory[5].itemCount = 0;
+	inventory[5].hidden = 1;
+	
+	strcpy(inventory[6].item, "Mikan Mochi");
+	inventory[6].itemCount = 0;
+	inventory[6].hidden = 1;
+	
+	strcpy(inventory[7].item, "Kurosawa Macha");
+	inventory[7].itemCount = 0;
+	inventory[7].hidden = 1;
+	
+	strcpy(inventory[8].item, "Choco-Mint Ice Cream");
+	inventory[8].itemCount = 0;
+	inventory[8].hidden = 0;
 	
 }
 
@@ -87,7 +124,7 @@ void initializeHanamaru(struct hanamaruTag hanamaru[]){
 	
 	strcpy(hanamaru[1].item, "Noppo Bread");
 	hanamaru[1].price = 100;
-	hanamaru[1].availability = 1;
+	hanamaru[1].availability = 33550336;
 	
 	strcpy(hanamaru[2].item, "Shovel Upgrade");
 	hanamaru[2].price = 300;
@@ -184,16 +221,18 @@ void showInventory(struct idolDungeonTag idolDungeon[], struct gameTag *game, st
 	
 	char choice;
 	int i;
-	
+	int count = 1;
 	printf("Lailaps: These are the items you have, Yohane!\n\n");
 	printf("HP: %d / %d", game->hp, game->maxHP);
 	printf("\t\t\t\t");
     printf("Total Gold: %d GP\n", game->gold);
 	printf("Items available\n\n");
 	
-	for (i = 0; i < 3; i++)
-		printf("%d. %-30s \t x \t %d\n", i+1,inventory[i].item, inventory[i].itemCount);
-	
+	for (i = 0; i < MAX_INVENTORY; i++)
+		if (!inventory[i].hidden){
+			printf("%d. %-30s \t x \t %d\n", count, inventory[i].item, inventory[i].itemCount);
+			count++;
+		}
 	printf("\n");
 	printf("[R]eturn\n\n");
 		
@@ -213,34 +252,60 @@ void showInventory(struct idolDungeonTag idolDungeon[], struct gameTag *game, st
 	} while (choice != 'R' && choice != 'r');
 }
 
+
 void hanamaruStore(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[], struct hanamaruTag hanamaru[]){
 	
 	int i;
 	char choice;
-	int index;
-	int count = 1;
-	printf("Hanamaru: Yohane-chan, zura! What can I do for you today?\n\n");
-	printf("Total Gold: %d GP\n\n", game->gold);
-	
-	for (i = 0; i < MAX_HANAMARU; i++){
-	    if (hanamaru[i].availability > 0){
-	        printf("[%d] %-30s \t %dGP\n", count, hanamaru[i].item, hanamaru[i].price);
-	        count++;
-	    }
-	}
-	
-	printf("[R]eturn\n\n");
-	
+	int index; // THIS IS ONLY FOR HANAMARU STORE. DO NOT TOUCH	
+
 	do{
+		
+		printf("Hanamaru: Yohane-chan, zura! What can I do for you today?\n\n");
+		printf("Total Gold: %d GP\n\n", game->gold);
+	
+		for (i = 0; i < MAX_HANAMARU; i++)
+		    printf("[%d] %-25s \t %6dGP Stock: %2d\n", i+1, hanamaru[i].item, hanamaru[i].price, hanamaru[i].availability);       
+		
+		printf("[R]eturn\n\n");
 		printf("Choice: ");
 		scanf(" %c", &choice);
+		
 		index = choice - 49;	// for entering dungeon only, this converts '1' that is currently a char into 0, '2' into 1, etc.
 		switch(choice){
 			case '1': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
-				hanamaru[index].availability = 0;
+				if (game->gold >= hanamaru[index].price && hanamaru[index].availability == 1){
+					game->gold -= hanamaru[index].price;
+					inventory[index].itemCount++;
+					hanamaru[index].availability = 0;
+					printf("One %s successfully purchased! You now have %d %s(s)\n", hanamaru[index].item, inventory[index].itemCount,inventory[index].item);
+					system("pause");
+					system("cls");
+				}
+				else if (game->gold < hanamaru[index].price){
+					printf("Not enough GP\n");
+					system("pause");
+					system("cls");
+				}
+				else{
+					printf("This item is no longer available\n");
+					system("pause");
+					system("cls");
+				}
 				break;
-			case '2':
-				// purchase as much as wanted
+			case '2': // Noppo Bread bc unlimited
+				if (game->gold >= hanamaru[index].price){
+					game->gold -= hanamaru[index].price;
+					inventory[index].itemCount++;
+					printf("One %s successfully purchased! You now have %d %s(s)\n", inventory[index].item, inventory[index].itemCount,inventory[index].item);
+					system("pause");
+					system("cls");
+				}
+				else{
+					printf("Not enough GP\n");
+					system("pause");
+					system("cls");
+				}
 				break;
 			case 'R': case 'r':
 				system("cls");
@@ -248,7 +313,7 @@ void hanamaruStore(struct idolDungeonTag idolDungeon[], struct gameTag *game, st
 		    	showDungeonMenu(idolDungeon, game, inventory);
 		    	break;
 		    default:
-		    	printf("Invalid choice\n");
+		    	printf("Invalid choice!\n");
 			}
 	} while (choice != 'R' && choice != 'r');
 }
@@ -262,7 +327,7 @@ void newGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct i
 	int charIdx;
     game->hp = 3;
     game->maxHP = 3;
-    game->gold = 0;
+    game->gold = 20000; // revert to 0 later
 	game->running = 1;
 	
 	for (i = 0; i < MAX_HOSTAGES; i++) {
@@ -295,21 +360,21 @@ void newGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct i
 		        	game->rescuedCount[charIdx]++;
 		        	game->clearStatus[index] = 1;
 		        	
-		        	// had to trace this, but i could add constants to make it less confusing
-					if (charIdx == 0) 
-						hanamaru[6].availability = 1;
-					if (charIdx == 1)
-						hanamaru[3].availability = 1;
-					if (charIdx == 2)
-						hanamaru[4].availability = 1;
-					if (charIdx == 4)
-						hanamaru[8].availability = 1;
-					if (charIdx == 5)
-						hanamaru[7].availability = 1;
-					if (charIdx == 6)
-						hanamaru[2].availability = 1;
-					if (charIdx == 7)
-						hanamaru[5].availability = 1;	        	  
+		        	// Unlock item after clearing dungeon
+					if (charIdx == 0) // Chika
+						hanamaru[MIKAN_MOCHI].availability = 1;
+					if (charIdx == 1) // Riko
+						hanamaru[BAT_TAMER].availability = 1;
+					if (charIdx == 2) // You
+						hanamaru[AIR_SHOES].availability = 1;
+					if (charIdx == 4) // Ruby
+						hanamaru[ICE_CREAM].availability = 1;
+					if (charIdx == 5) // Dia
+						hanamaru[KURO_MACHA].availability = 1;
+					if (charIdx == 6) // Kanan
+						hanamaru[SHOVEL_UP].availability = 1;
+					if (charIdx == 7) // Mari
+						hanamaru[STEWSHINE].availability = 1;	        	  
 	        	}
 	        	system("pause");
 	            system("cls");
