@@ -9,8 +9,9 @@
 #define MAX_ITEM_CHAR 50
 #define MAX_INVENTORY 9
 #define MAX_HANAMARU 9
+#define MAX_ACHIEVEMENTS 28
 
-// IDOLS TO HANAMARU SHOP RATIO. DO NOT TOUCH!!!
+// IDOLS TO HANAMARU SHOP INDEX RATIO. DO NOT TOUCH!!!
 #define SHOVEL_UP 2
 #define BAT_TAMER 3
 #define AIR_SHOES 4
@@ -46,6 +47,11 @@ struct gameTag{
 	int rescuedCount[MAX_IDOLS];
 	int clearStatus[MAX_HOSTAGES];
 	int running;
+};
+
+struct achievementTag{
+	Name achievement;
+	int earned;
 };
 
 void initializeIdolDungeon(struct idolDungeonTag idolDungeon[]){
@@ -154,6 +160,170 @@ void initializeHanamaru(struct hanamaruTag hanamaru[]){
 	hanamaru[8].price = 2000;
 	hanamaru[8].availability = 0;
 	
+}
+
+void initializeAchievements(struct achievementTag achievement[]){
+	
+	strcpy(achievement[0].achievement, "Yohane Descends!");
+	achievement[0].earned = 0;
+	
+	strcpy(achievement[1].achievement, "Mikan Power!");
+	achievement[1].earned = 0;
+	
+	strcpy(achievement[2].achievement, "Riko-chan BEAM!");
+	achievement[2].earned = 0;
+	
+	strcpy(achievement[3].achievement, "Yousoro!");
+	achievement[3].earned = 0;
+	
+	strcpy(achievement[4].achievement, "It’s the future, zura!");
+	achievement[4].earned = 0;
+	
+	strcpy(achievement[5].achievement, "Ganbaruby!");
+	achievement[5].earned = 0;
+	
+	strcpy(achievement[6].achievement, "Buu-buu desu wa!");
+	achievement[6].earned = 0;
+	
+	strcpy(achievement[7].achievement, "Hug!!!");
+	achievement[7].earned = 0;
+	
+	strcpy(achievement[8].achievement, "Shiny!");
+	achievement[8].earned = 0;
+	
+	strcpy(achievement[9].achievement, "In This Unstable World!");
+	achievement[9].earned = 0;
+	
+	strcpy(achievement[10].achievement, "One more sunshine story!");
+	achievement[10].earned = 0;
+	
+	strcpy(achievement[11].achievement, "Pianoforte Monologue!");
+	achievement[11].earned = 0;
+	
+	strcpy(achievement[12].achievement, "Beginner’s Sailing!");
+	achievement[12].earned = 0;
+	
+	strcpy(achievement[13].achievement, "Oyasuminasan!");
+	achievement[13].earned = 0;
+	
+	strcpy(achievement[14].achievement, "Red Gem Wink!");
+	achievement[14].earned = 0;
+	
+	strcpy(achievement[15].achievement, "White First Love!");
+	achievement[15].earned = 0;
+	
+	strcpy(achievement[16].achievement, "Sakana ka Nandaka!");
+	achievement[16].earned = 0;
+	
+	strcpy(achievement[17].achievement, "New Winding Road!");
+	achievement[17].earned = 0;
+	
+	strcpy(achievement[18].achievement, "Deep Resonance!");
+	achievement[18].earned = 0;
+	
+	strcpy(achievement[19].achievement, "No. 10!");
+	achievement[19].earned = 0;
+	
+	strcpy(achievement[20].achievement, "CYaRon!");
+	achievement[20].earned = 0;
+	
+	strcpy(achievement[21].achievement, "AZALEA!");
+	achievement[21].earned = 0;
+	
+	strcpy(achievement[22].achievement, "Guilty Kiss!");
+	achievement[22].earned = 0;
+	
+	strcpy(achievement[23].achievement, "Eikyuu Hours!");
+	achievement[23].earned = 0;
+	
+	strcpy(achievement[24].achievement, "Aozora Jumping Heart!");
+	achievement[24].earned = 0;
+	
+	strcpy(achievement[25].achievement, "Mitaiken Horizon!");
+	achievement[25].earned = 0;
+	
+	strcpy(achievement[26].achievement, "Ruby-chan! Hai? Nani ga suki?");
+	achievement[26].earned = 0;
+	
+	strcpy(achievement[27].achievement, "Step! ZERO to ONE!");
+	achievement[27].earned = 0;
+}
+
+void viewAchievements(struct achievementTag achievement[]){
+	
+    int currentPage = 0;
+    int totalPages = 4;
+	int achievementCount = 0; 
+	int achievementsPerPage = 8;
+    char choice;
+    int i, startIdx, endIdx;
+
+    for (i = 0; i < MAX_ACHIEVEMENTS; i++)
+        if (achievement[i].earned == 1)
+            achievementCount++;
+
+    do {
+    	
+        system("cls");
+        printf("************************************************************\n");
+        printf("                    Achievements module                     \n");
+        printf("                      Obtained: %d / %d                     \n", achievementCount, MAX_ACHIEVEMENTS);
+        printf("************************************************************\n");
+
+
+        startIdx = currentPage * achievementsPerPage;  
+        endIdx = startIdx + achievementsPerPage;
+				
+        if (endIdx > MAX_ACHIEVEMENTS) 
+			endIdx = MAX_ACHIEVEMENTS;
+
+       	for (i = startIdx; i < endIdx; i++){
+			printf("[%d] %-28s", i+1, achievement[i].achievement);
+			printf("\t\t\t");
+			
+			if (achievement[i].earned == 1)
+				printf("EARNED!\n");
+			else
+				printf("NOT EARNED!\n");
+		}
+
+        printf("\n");
+        printf("Page %d of %d\n", currentPage + 1, totalPages);
+    	printf("\n");
+    	printf("[N]ext Page\n");
+		printf("[P]revious Page\n");
+		printf("[R]eturn to Main Menu\n");
+		printf("\n");
+		
+        printf("Choice: ");
+        scanf(" %c", &choice);
+
+        switch (choice) {
+            case 'N': case 'n':
+                if (currentPage < totalPages - 1)
+                    currentPage++;
+                else{
+                	printf("Maximum page reached.\n");
+                	system("pause");
+                }
+                break;
+            case 'P': case 'p':
+                if (currentPage > 0)
+                    currentPage--;
+                else{
+                	printf("Minimum page reached.\n");
+                	system("pause");
+                }
+                break;
+            case 'R': case 'r':
+            	printf("Returning to Main Menu...\n");
+                break;
+            default:
+                printf("Invalid choice!\n");
+                system("pause");
+        }
+
+    } while (choice != 'R' && choice != 'r');
 }
 
 void selectHostages(struct gameTag *game){
@@ -277,7 +447,7 @@ void hanamaruStore(struct idolDungeonTag idolDungeon[], struct gameTag *game, st
 		// For buying the items	
 		if (choice >= '1' && choice <= '9'){ 
 			
-			// this converts '1' that is currently a char into integer 0, '2' into integer 1, etc.
+			// this converts '1' that is currently a char into 0, '2' into 1, etc.
 			index = choice - '1'; 
 			
 			// Noppo Bread bc unlimited
@@ -296,7 +466,7 @@ void hanamaruStore(struct idolDungeonTag idolDungeon[], struct gameTag *game, st
 				}
 			}
 			
-			// For all other items not named Noppo Bread (since everything else is a one-time purchase) (index 0 and 2-8)
+			// For all other items not named Noppo Bread (since everything else is a one-time purchase)
 			else{ 
 		        if (game->gold >= hanamaru[index].price && hanamaru[index].availability == 1){
 		            game->gold -= hanamaru[index].price;
@@ -328,10 +498,11 @@ void hanamaruStore(struct idolDungeonTag idolDungeon[], struct gameTag *game, st
 		    system("cls");
 		}	
 			
-	} while (choice != 'R' && choice != 'r');		
+	} while (choice != 'R' && choice != 'r');
+		
 }
 
-void newGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[], struct hanamaruTag hanamaru[]){
+void newGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[], struct hanamaruTag hanamaru[], struct achievementTag achievement[]){
 	
 	system("cls");
 	
@@ -356,6 +527,7 @@ void newGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct i
 	initializeIdolDungeon(idolDungeon);	
 	initializeInventory(inventory);
 	initializeHanamaru(hanamaru);
+	initializeAchievements(achievement);
 	
 	selectHostages(game);
     showHostages(idolDungeon, game);
@@ -444,10 +616,12 @@ int main(){
 	struct gameTag game;
 	struct inventoryTag inventory[MAX_INVENTORY];
 	struct hanamaruTag hanamaru[MAX_HANAMARU];
+	struct achievementTag achievement[MAX_ACHIEVEMENTS];
 	
 	initializeIdolDungeon(idolDungeon);	
 	initializeInventory(inventory);
 	initializeHanamaru(hanamaru);
+	initializeAchievements(achievement);
 	
 	game.running = 0;
 	
@@ -469,14 +643,14 @@ int main(){
 
         switch (choice){
             case 'N': case 'n':
-                newGame(idolDungeon, &game, inventory, hanamaru);
+                newGame(idolDungeon, &game, inventory, hanamaru, achievement);
                 break;
             case 'C': case 'c':
-                newGame(idolDungeon, &game, inventory, hanamaru); // fix later
+                newGame(idolDungeon, &game, inventory, hanamaru, achievement); // fix later
                 break;
             case 'V': case 'v':
         		system("cls");
-                printf("Achievements\n");
+                viewAchievements(achievement);
                 system("pause");
                 system("cls");
                 break;
@@ -484,13 +658,11 @@ int main(){
                 printf("Thanks for playing!\n");
                 break;
             default:
-                printf("Invalid input. Please choose N, V, or Q only.\n");
+                printf("Invalid choice!\n");
                 system("pause");
 			    system("cls");
         }
     } while (choice != 'Q' && choice != 'q');
     
-    
     return 0; 
 }
-
