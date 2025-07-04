@@ -277,17 +277,17 @@ void hanamaruStore(struct idolDungeonTag idolDungeon[], struct gameTag *game, st
 		// For buying the items	
 		if (choice >= '1' && choice <= '9'){ 
 			
-			// this converts '1' that is currently a char into 0, '2' into 1, etc.
+			// this converts '1' that is currently a char into integer 0, '2' into integer 1, etc.
 			index = choice - '1'; 
 			
 			// Noppo Bread bc unlimited
 		    if (index == 1){  
 		        if (game->gold >= hanamaru[index].price){
-						game->gold -= hanamaru[index].price;
-						inventory[index].itemCount++;
-						printf("One %s successfully purchased! You now have %d %s(s)\n", inventory[index].item, inventory[index].itemCount,inventory[index].item);
-						system("pause");
-						system("cls");
+					game->gold -= hanamaru[index].price;
+					inventory[index].itemCount++;
+					printf("One %s successfully purchased! You now have %d %s(s)\n", inventory[index].item, inventory[index].itemCount,inventory[index].item);
+					system("pause");
+					system("cls");
 					}
 				else{
 					printf("Not enough GP\n");
@@ -296,7 +296,7 @@ void hanamaruStore(struct idolDungeonTag idolDungeon[], struct gameTag *game, st
 				}
 			}
 			
-			// For all other items not named Noppo Bread (since everything else is a one-time purchase)
+			// For all other items not named Noppo Bread (since everything else is a one-time purchase) (index 0 and 2-8)
 			else{ 
 		        if (game->gold >= hanamaru[index].price && hanamaru[index].availability == 1){
 		            game->gold -= hanamaru[index].price;
@@ -328,8 +328,7 @@ void hanamaruStore(struct idolDungeonTag idolDungeon[], struct gameTag *game, st
 		    system("cls");
 		}	
 			
-	} while (choice != 'R' && choice != 'r');
-		
+	} while (choice != 'R' && choice != 'r');		
 }
 
 void newGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[], struct hanamaruTag hanamaru[]){
