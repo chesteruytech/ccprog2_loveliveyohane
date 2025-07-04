@@ -228,11 +228,13 @@ void showInventory(struct idolDungeonTag idolDungeon[], struct gameTag *game, st
     printf("Total Gold: %d GP\n", game->gold);
 	printf("Items available\n\n");
 	
+	// Show only non-hidden items
 	for (i = 0; i < MAX_INVENTORY; i++)
 		if (!inventory[i].hidden){
 			printf("%d. %-30s \t x \t %d\n", count, inventory[i].item, inventory[i].itemCount);
 			count++;
 		}
+		
 	printf("\n");
 	printf("[R]eturn\n\n");
 		
@@ -263,7 +265,8 @@ void hanamaruStore(struct idolDungeonTag idolDungeon[], struct gameTag *game, st
 		
 		printf("Hanamaru: Yohane-chan, zura! What can I do for you today?\n\n");
 		printf("Total Gold: %d GP\n\n", game->gold);
-	
+		
+		// Displays shop
 		for (i = 0; i < MAX_HANAMARU; i++)
 		    printf("[%d] %-25s \t %6dGP Stock: %2d\n", i+1, hanamaru[i].item, hanamaru[i].price, hanamaru[i].availability);       
 		
@@ -271,63 +274,76 @@ void hanamaruStore(struct idolDungeonTag idolDungeon[], struct gameTag *game, st
 		printf("Choice: ");
 		scanf(" %c", &choice);
 		
-		index = choice - 49;	// for entering dungeon only, this converts '1' that is currently a char into 0, '2' into 1, etc.
-		switch(choice){
-			case '1': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
-				if (game->gold >= hanamaru[index].price && hanamaru[index].availability == 1){
-					game->gold -= hanamaru[index].price;
-					inventory[index].itemCount++;
-					hanamaru[index].availability = 0;
-					printf("One %s successfully purchased! You now have %d %s(s)\n", hanamaru[index].item, inventory[index].itemCount,inventory[index].item);
-					system("pause");
-					system("cls");
-				}
-				else if (game->gold < hanamaru[index].price){
-					printf("Not enough GP\n");
-					system("pause");
-					system("cls");
-				}
-				else{
-					printf("This item is no longer available\n");
-					system("pause");
-					system("cls");
-				}
-				break;
-			case '2': // Noppo Bread bc unlimited
-				if (game->gold >= hanamaru[index].price){
-					game->gold -= hanamaru[index].price;
-					inventory[index].itemCount++;
-					printf("One %s successfully purchased! You now have %d %s(s)\n", inventory[index].item, inventory[index].itemCount,inventory[index].item);
-					system("pause");
-					system("cls");
-				}
+		// For buying the items	
+		if (choice >= '1' && choice <= '9'){ 
+			
+			// this converts '1' that is currently a char into 0, '2' into 1, etc.
+			index = choice - '1'; 
+			
+			// Noppo Bread bc unlimited
+		    if (index == 1){  
+		        if (game->gold >= hanamaru[index].price){
+						game->gold -= hanamaru[index].price;
+						inventory[index].itemCount++;
+						printf("One %s successfully purchased! You now have %d %s(s)\n", inventory[index].item, inventory[index].itemCount,inventory[index].item);
+						system("pause");
+						system("cls");
+					}
 				else{
 					printf("Not enough GP\n");
 					system("pause");
 					system("cls");
 				}
-				break;
-			case 'R': case 'r':
-				system("cls");
-			    showHostages(idolDungeon, game);
-		    	showDungeonMenu(idolDungeon, game, inventory);
-		    	break;
-		    default:
-		    	printf("Invalid choice!\n");
 			}
+			
+			// For all other items not named Noppo Bread (since everything else is a one-time purchase)
+			else{ 
+		        if (game->gold >= hanamaru[index].price && hanamaru[index].availability == 1){
+		            game->gold -= hanamaru[index].price;
+		            inventory[index].itemCount++;
+		            hanamaru[index].availability = 0;
+		            printf("One %s successfully purchased! You now have %d %s(s)\n", inventory[index].item, inventory[index].itemCount, inventory[index].item);
+		        } 
+				else if (game->gold < hanamaru[index].price) 
+		            printf("Not enough GP\n");
+				else
+		            printf("This item is no longer available\n");
+	
+			    system("pause");
+			    system("cls");
+			}
+		}
+		
+		// Return
+		else if (choice == 'R' || choice == 'r'){
+		    system("cls");
+		    showHostages(idolDungeon, game);
+		    showDungeonMenu(idolDungeon, game, inventory);
+		}
+		
+		// Anything else
+		else{
+		    printf("Invalid choice!\n");
+		    system("pause");
+		    system("cls");
+		}	
+			
 	} while (choice != 'R' && choice != 'r');
+		
 }
 
 void newGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[], struct hanamaruTag hanamaru[]){
 	
 	system("cls");
+	
+	// feel free to change these around if you want to test something, but make sure to revert it back when done testing
 	int i;
 	char choice;
 	int index;
 	int charIdx;
     game->hp = 3;
     game->maxHP = 3;
-    game->gold = 20000; // revert to 0 later
+    game->gold = 0;  
 	game->running = 1;
 	
 	for (i = 0; i < MAX_HOSTAGES; i++) {
@@ -338,70 +354,85 @@ void newGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct i
 		game->rescuedCount[i] = 0;
 	}
 	
+	initializeIdolDungeon(idolDungeon);	
+	initializeInventory(inventory);
+	initializeHanamaru(hanamaru);
+	
 	selectHostages(game);
     showHostages(idolDungeon, game);
     showDungeonMenu(idolDungeon, game, inventory);
 
     do{
-    printf("Choice: ");
-    scanf(" %c", &choice);
-	index = choice - 49;	// for entering dungeon only, this converts '1' that is currently a char into 0, '2' into 1, etc.
-	    switch (choice){
-	        case '1': case '2': case '3':
-	        	system("cls");
-	        	if (game->clearStatus[index] == 1)
-	        		printf("Dungeon is cleared. You can no longer enter\n");
-	        	else{
-		        	printf("Entering dungeon %d\n\n", index+1);
-		        	
-		        	// finish dungeon first before this
-		        	charIdx = game->hostages[index]; 
-		        	printf("Idol %s is rescued!\n", idolDungeon[charIdx].idol);
-		        	game->rescuedCount[charIdx]++;
-		        	game->clearStatus[index] = 1;
-		        	
-		        	// Unlock item after clearing dungeon
-					if (charIdx == 0) // Chika
-						hanamaru[MIKAN_MOCHI].availability = 1;
-					if (charIdx == 1) // Riko
-						hanamaru[BAT_TAMER].availability = 1;
-					if (charIdx == 2) // You
-						hanamaru[AIR_SHOES].availability = 1;
-					if (charIdx == 4) // Ruby
-						hanamaru[ICE_CREAM].availability = 1;
-					if (charIdx == 5) // Dia
-						hanamaru[KURO_MACHA].availability = 1;
-					if (charIdx == 6) // Kanan
-						hanamaru[SHOVEL_UP].availability = 1;
-					if (charIdx == 7) // Mari
-						hanamaru[STEWSHINE].availability = 1;	        	  
-	        	}
-	        	system("pause");
-	            system("cls");
-	            showHostages(idolDungeon, game);
-    			showDungeonMenu(idolDungeon, game, inventory);
-	            break;
-	        case 'I': case 'i':
-	        	system("cls");
-	            showInventory(idolDungeon, game, inventory);
-	            break;
-	        case 'S': case 's':
-	            printf("Game Saved\n\n"); 
-	            system("pause");
-	            system("cls");
-	            break;
-	        case 'H': case 'h':
-	        	if (game->rescuedCount[3] > 0){
-	        	system("cls");
-	            hanamaruStore(idolDungeon, game, inventory, hanamaru);
-	        }
-	        	else
-	        		printf("Totally nothing to see here!\n");
-	            break;
-	        default:
-	            printf("Invalid choice\n");
-	    	}
-	    	
+    	
+	    printf("Choice: ");
+	    scanf(" %c", &choice);
+		
+		// I put "index = choice - '1'" inside bc the index is only needed for numerical inputs	
+		if (choice >= '1' && choice <= '3'){
+		
+			// for entering dungeon only, this converts '1' that is currently a char into 0, '2' into 1, etc. 
+			index = choice - '1';	
+			
+			system("cls");
+        	if (game->clearStatus[index] == 1)
+        		printf("Dungeon is cleared. You can no longer enter\n");
+        	else{
+	        	printf("Entering dungeon %d\n\n", index+1);
+	        	
+	        	// finish dungeon first before this
+	        	charIdx = game->hostages[index]; 
+	        	printf("%s has been successfully rescued!\n", idolDungeon[charIdx].idol);
+	        	game->rescuedCount[charIdx]++;
+	        	game->clearStatus[index] = 1;
+	        	
+	        	// Unlock item after clearing dungeon
+				if (charIdx == 0) // Chika
+					hanamaru[MIKAN_MOCHI].availability = 1;
+				if (charIdx == 1) // Riko
+					hanamaru[BAT_TAMER].availability = 1;
+				if (charIdx == 2) // You
+					hanamaru[AIR_SHOES].availability = 1;
+				if (charIdx == 4) // Ruby
+					hanamaru[ICE_CREAM].availability = 1;
+				if (charIdx == 5) // Dia
+					hanamaru[KURO_MACHA].availability = 1;
+				if (charIdx == 6) // Kanan
+					hanamaru[SHOVEL_UP].availability = 1;
+				if (charIdx == 7) // Mari
+					hanamaru[STEWSHINE].availability = 1;	        	  
+        	}
+        	system("pause");
+            system("cls");
+            showHostages(idolDungeon, game);
+			showDungeonMenu(idolDungeon, game, inventory);
+		}
+		
+		// Inventory
+		else if (choice == 'I' || choice == 'i'){
+			system("cls");
+		    showInventory(idolDungeon, game, inventory);
+		}
+		
+		// Save and quit 
+		else if (choice == 'S' || choice == 's'){
+			printf("Game Saved\n\n"); 
+			system("pause");
+	        system("cls");
+		}
+		
+		// hanamaru store
+		else if (choice == 'H' || choice == 'h'){
+        	if (game->rescuedCount[3] > 0){
+        	system("cls");
+            hanamaruStore(idolDungeon, game, inventory, hanamaru);
+        }
+        	else
+        		printf("Totally nothing to see here!\n");
+		}
+		
+		else
+			printf("Invalid choice\n");
+			    	
 	} while (choice != 'S' && choice != 's');
 
 }
