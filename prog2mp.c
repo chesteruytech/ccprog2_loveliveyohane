@@ -817,7 +817,7 @@ void saveGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
         	fprintf(ptr, "%s: %d\n", achievement[i].achievement, achievement[i].earned);
 
 	for (i = 0; i < MAX_HANAMARU; i++)
-		fscanf(ptr, "%s stock: %d\n", hanamaru[i].item, hanamaru[i].availability);
+		fprintf(ptr, "%s stock: %d\n", hanamaru[i].item, hanamaru[i].availability);
 
 	
 	fclose(ptr);
