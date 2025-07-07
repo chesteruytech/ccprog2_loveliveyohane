@@ -1,9 +1,9 @@
 /* to do: 
-save game, continue game (must save data to a file)
-dungeons
+dungeons 
 final boss once all dungeons are cleared 
-input validation for hanamaru store and dungeon selection
+save game, continue game (must save data to a file)
 new game+ after clear
+input validation for hanamaru store and dungeon selection
 */
 #include <stdio.h>
 #include <stdlib.h>
@@ -193,7 +193,7 @@ void initializeAchievements(struct achievementTag achievement[]){
 	achievement[3].earned = 0;
 	strcpy(achievement[3].description, "Rescued You for the first time");
 	
-	strcpy(achievement[4].achievement, "It’s the future, zura!");
+	strcpy(achievement[4].achievement, "It's the future, zura!");
 	achievement[4].earned = 0;
 	strcpy(achievement[4].description, "Rescued Hanamaru for the first time");
 	
@@ -779,9 +779,74 @@ void itemUnlock(int charIdx, struct hanamaruTag hanamaru[]){
 			hanamaru[STEWSHINE].availability = 1;	
 }
 
+void saveGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[], 
+			struct hanamaruTag hanamaru[], struct achievementTag achievement[]){
+	
+	int i;
+	FILE *ptr;
+	
+	ptr = fopen("gameData.txt", "w");
+	
+	fprintf(ptr, "GAME DATA:\n\n");
+	fprintf(ptr, "Max HP: %d\n", game->maxHP);
+	fprintf(ptr, "Current HP: %d\n", game->hp);
+	fprintf(ptr, "Gold: %d\n", game->gold);
+	fprintf(ptr, "Total Dungeon Clears: %d\n", game->dungeonClears);
+	fprintf(ptr, "Total Gold Spent: %d\n", game->goldSpent);
+	fprintf(ptr, "Total Damage Taken: %d\n", game->dmgTaken);
+	fprintf(ptr, "Running Status: %d\n", game->running);
+	
+	fprintf(ptr, "\n");
+	
+	for (i = 0; i < MAX_HOSTAGES; i++)
+        fprintf(ptr, "Hostage %d: %s\n", i+1, idolDungeon[game->hostages[i]].idol);
+        
+    fprintf(ptr, "\n");
+
+    for (i = 0; i < MAX_HOSTAGES; i++)
+        fprintf(ptr, "Dungeon %d Clear Status: %d\n", i+1, game->clearStatus[i]);
+        
+    fprintf(ptr, "\n");
+	
+    for (i = 0; i < MAX_IDOLS; i++)
+        fprintf(ptr, "%s rescues: %d\n", idolDungeon[i].idol, game->rescuedCount[i]);
+        
+    fprintf(ptr, "\n");
+
+	fprintf(ptr, "Inventory:\n");
+    for (i = 0; i < MAX_INVENTORY; i++)
+        fprintf(ptr, "%s: %d\n", inventory[i].item, inventory[i].itemCount);
+        
+    fprintf(ptr, "\n");
+
+	fprintf(ptr, "Achievements:\n");
+    for (i = 0; i < MAX_ACHIEVEMENTS; i++)
+    	if (achievement[i].earned == 1)
+        	fprintf(ptr, "%s: %d (Earned %s)\n", achievement[i].achievement, achievement[i].earned, achievement[i].dateEarned);
+        else
+        	fprintf(ptr, "%s: %d (Not yet earned)\n", achievement[i].achievement, achievement[i].earned);
+    fprintf(ptr, "\n");
+
+	fprintf(ptr, "Hanamaru Shop:\n");
+	for (i = 0; i < MAX_HANAMARU; i++)
+		fprintf(ptr, "%s stock: %d\n", hanamaru[i].item, hanamaru[i].availability);
+	fprintf(ptr, "\n");
+	
+	fclose(ptr);
+	
+}
+
+void continueGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[], 
+			struct hanamaruTag hanamaru[], struct achievementTag achievement[]){
 
 
-void newGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[], struct hanamaruTag hanamaru[], struct achievementTag achievement[]){
+	system("cls");
+	printf("WIP");
+				
+}
+
+void newGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[], 
+			struct hanamaruTag hanamaru[], struct achievementTag achievement[]){
 	
 	system("cls");
 	
@@ -855,8 +920,8 @@ void newGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct i
 		
 		// Save and quit 
 		else if (choice == 'S' || choice == 's'){
-			printf("Game Saved\n\n"); 
-			system("pause");
+			saveGame(idolDungeon, game, inventory, hanamaru, achievement);
+			printf("Game Saved!\n\n"); 
 	        system("cls");
 		}
 		
@@ -912,10 +977,21 @@ int main(){
 
         switch (choice){
             case 'N': case 'n':
-                newGame(idolDungeon, &game, inventory, hanamaru, achievement);
+            	if (!game.running)
+                	newGame(idolDungeon, &game, inventory, hanamaru, achievement);
+                else
+                	printf("Invalid choice!\n");
+                	system("pause");
+			    	system("cls");
                 break;
             case 'C': case 'c':
-                newGame(idolDungeon, &game, inventory, hanamaru, achievement); // fix later
+            	if (game.running == 1)
+                	continueGame(idolDungeon, &game, inventory, hanamaru, achievement);
+                else{
+                	printf("Invalid choice!\n");
+                	system("pause");
+			    	system("cls");   	
+            	}
                 break;
             case 'V': case 'v':
         		system("cls");
@@ -924,13 +1000,14 @@ int main(){
                 system("cls");
                 break;
             case 'Q': case 'q':
-                printf("Thanks for playing!\n");
+                printf("See you next time!\n");
                 break;
             default:
                 printf("Invalid choice!\n");
                 system("pause");
 			    system("cls");
         }
+        	
     } while (choice != 'Q' && choice != 'q');
     
     return 0; 
