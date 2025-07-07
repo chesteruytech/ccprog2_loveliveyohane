@@ -797,11 +797,11 @@ void saveGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 	
 	
 	for (i = 0; i < MAX_HOSTAGES; i++)
-        fprintf(ptr, "Hostage %d: %s\n", i+1, idolDungeon[game->hostages[i]].idol);
+        fprintf(ptr, "Hostage: %s\n", idolDungeon[game->hostages[i]].idol);
         
 
     for (i = 0; i < MAX_HOSTAGES; i++)
-        fprintf(ptr, "Dungeon %d Clear Status: %d\n", i+1, game->clearStatus[i]);
+        fprintf(ptr, "Dungeon %s Clear Status: %d\n", idolDungeon[i].dungeon, game->clearStatus[i]);
         
 	
     for (i = 0; i < MAX_IDOLS; i++)
@@ -817,7 +817,7 @@ void saveGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
         	fprintf(ptr, "%s: %d\n", achievement[i].achievement, achievement[i].earned);
 
 	for (i = 0; i < MAX_HANAMARU; i++)
-		fprintf(ptr, "%s stock: %d\n", hanamaru[i].item, hanamaru[i].availability);
+		fscanf(ptr, "%s stock: %d\n", hanamaru[i].item, hanamaru[i].availability);
 
 	
 	fclose(ptr);
