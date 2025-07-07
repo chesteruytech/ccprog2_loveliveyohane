@@ -81,7 +81,7 @@ struct gameTag{
 	int dungeonClears;
 	int goldSpent;
 	int dmgTaken;
-	int playthroughClear;
+	int tempClear;
 };
 
 struct achievementTag{
@@ -818,7 +818,7 @@ void saveGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 	fprintf(ptr, "Total Gold Spent: %d\n", game->goldSpent);
 	fprintf(ptr, "Total Damage Taken: %d\n", game->dmgTaken);
 	fprintf(ptr, "Running Status: %d\n", game->running);
-	fprintf(ptr, "Dungeon Clears in Current Playthrough: %d\n", game->playthroughClear);
+	fprintf(ptr, "Dungeon Clears in Current Playthrough: %d\n", game->tempClear);
 	
 	for (i = 0; i < MAX_HOSTAGES; i++)
         fprintf(ptr, "Hostage: %s\n", idolDungeon[game->hostages[i]].idol);
@@ -869,7 +869,7 @@ void loadGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 		fscanf(ptr, "Total Gold Spent: %d\n", &game->goldSpent);
 		fscanf(ptr, "Total Damage Taken: %d\n", &game->dmgTaken);
 		fscanf(ptr, "Running Status: %d\n", &game->running);
-		fscanf(ptr, "Dungeon Clears in Current Playthrough: %d\n", &game->playthroughClear);
+		fscanf(ptr, "Dungeon Clears in Current Playthrough: %d\n", &game->tempClear);
 		
 		for (i = 0; i < MAX_HOSTAGES; i++){
 	      	fscanf(ptr, "Hostage: %s\n", tempName);
@@ -932,7 +932,7 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 	        	printf("%s has been successfully rescued!\n", idolDungeon[charIdx].idol);
 	        	game->rescuedCount[charIdx]++;
 	        	game->clearStatus[index] = 1;
-			game->playthroughClear++;	// when this goes to 3, final boss time
+			game->tempClear++;	// when this goes to 3, final boss time
 	        	game->dungeonClears++; 
 	        	
 	        	itemUnlock(charIdx, hanamaru);
@@ -1000,7 +1000,7 @@ void newGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct i
 	game->dungeonClears = 0;
 	game->goldSpent = 0;
 	game->dmgTaken = 0;
-	game->playthroughClear = 0;
+	game->tempClear = 0;
 	
 	for (i = 0; i < MAX_IDOLS; i++) {
     	game->clearStatus[i] = 0;
