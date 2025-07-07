@@ -1,9 +1,9 @@
 /* 
 to do by priority: 
-- core gameplay
-- dungeons itself
+- core gameplay 
+- dungeons itself 
 - game over mechanics
-- final boss once all dungeons are cleared 
+- final boss
 - new game+ after clear
 	Carried over:
 	- idols rescued
@@ -26,8 +26,8 @@ Complete:
 - hanamaru shop
 - save file
 - load file
-*/
 
+*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -81,7 +81,7 @@ struct gameTag{
 	int dungeonClears;
 	int goldSpent;
 	int dmgTaken;
-	int tempClear;
+	int currentPlaythroughClear;
 };
 
 struct achievementTag{
@@ -648,7 +648,7 @@ void showDungeonMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, 
     printf("Item on hand: N/A\n");	// placeholder, fix later
     printf("\n");
     
-	if (game->tempClear < 3){
+	if (game->currentPlaythroughClear < 3){
 	    for (i = 0; i < 3; i++){
 	        idx = game->hostages[i];
 	        if (game->clearStatus[i] == 1)
@@ -821,7 +821,7 @@ void saveGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 	fprintf(ptr, "Total Gold Spent: %d\n", game->goldSpent);
 	fprintf(ptr, "Total Damage Taken: %d\n", game->dmgTaken);
 	fprintf(ptr, "Running Status: %d\n", game->running);
-	fprintf(ptr, "Dungeon Clears in Current Playthrough: %d\n", game->tempClear);
+	fprintf(ptr, "Dungeon Clears in Current Playthrough: %d\n", game->currentPlaythroughClear);
 	
 	for (i = 0; i < MAX_HOSTAGES; i++)
         fprintf(ptr, "Hostage: %s\n", idolDungeon[game->hostages[i]].idol);
@@ -872,7 +872,7 @@ void loadGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 		fscanf(ptr, "Total Gold Spent: %d\n", &game->goldSpent);
 		fscanf(ptr, "Total Damage Taken: %d\n", &game->dmgTaken);
 		fscanf(ptr, "Running Status: %d\n", &game->running);
-		fscanf(ptr, "Dungeon Clears in Current Playthrough: %d\n", &game->tempClear);
+		fscanf(ptr, "Dungeon Clears in Current Playthrough: %d\n", &game->currentPlaythroughClear);
 		
 		for (i = 0; i < MAX_HOSTAGES; i++){
 	      	fscanf(ptr, "Hostage: %s\n", tempName);
@@ -913,14 +913,14 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 	char choice;
 	int index;
 	int charIdx;
-	
+
 	do{
     	
 	    printf("Choice: ");
 	    scanf(" %c", &choice);
 		
 		// I put "index = choice - '1'" inside bc the index is only needed for numerical inputs	
-		if (choice >= '1' && choice <= '3'){ 
+		if (choice >= '1' && choice <= '3' && game->currentPlaythroughClear < 3){ 
 			index = choice - '1'; // char to number
 			
 			system("cls");
@@ -935,7 +935,7 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 	        	printf("%s has been successfully rescued!\n", idolDungeon[charIdx].idol);
 	        	game->rescuedCount[charIdx]++;
 	        	game->clearStatus[index] = 1;
-			game->tempClear++;	// when this goes to 3, final boss time
+				game->currentPlaythroughClear++;	// when this goes to 3, final boss time
 	        	game->dungeonClears++; 
 	        	
 	        	itemUnlock(charIdx, hanamaru);
@@ -944,6 +944,15 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
         	system("pause");
             system("cls");
             showHostages(idolDungeon, game);
+			showDungeonMenu(idolDungeon, game, inventory);
+		}
+		
+		else if (choice == '1' && game->currentPlaythroughClear == 3){
+			system("cls");
+			printf("Final boss placeholder\n (PLS FINISH DUNGEONS FIRST)\n");
+			system("pause");
+			system("cls");
+			showHostages(idolDungeon, game);
 			showDungeonMenu(idolDungeon, game, inventory);
 		}
 		
@@ -996,14 +1005,14 @@ void newGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct i
 	
 	// feel free to change these around if you want to test something, but make sure to revert it back when done testing
 	int i;
-  	game->hp = 3;
-  	game->maxHP = 3;
-   	game->gold = 0;  
+    game->hp = 3;
+    game->maxHP = 3;
+    game->gold = 0;  
 	game->running = 1;
 	game->dungeonClears = 0;
 	game->goldSpent = 0;
 	game->dmgTaken = 0;
-	game->tempClear = 0;
+	game->currentPlaythroughClear = 0;
 	
 	for (i = 0; i < MAX_IDOLS; i++) {
     	game->clearStatus[i] = 0;
