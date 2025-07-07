@@ -824,6 +824,16 @@ void saveGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 	
 }
 
+void continueGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[], 
+			struct hanamaruTag hanamaru[], struct achievementTag achievement[]){
+
+
+	system("cls");
+	printf("WIP\n");
+	system("pause");
+				
+}
+
 void newGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[], 
 			struct hanamaruTag hanamaru[], struct achievementTag achievement[]){
 	
@@ -964,8 +974,10 @@ int main(){
 			    	system("cls");
                 break;
             case 'C': case 'c':
-            	if (game.running == 1)
+            	if (game.running == 1){
                 	continueGame(idolDungeon, &game, inventory, hanamaru, achievement);
+			system("cls");
+		}
                 else{
                 	printf("Invalid choice!\n");
                 	system("pause");
