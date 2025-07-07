@@ -786,7 +786,7 @@ void saveGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 	FILE *ptr;
 	
 	ptr = fopen("gameData.txt", "w");
-	;
+	
 	fprintf(ptr, "Max HP: %d\n", game->maxHP);
 	fprintf(ptr, "Current HP: %d\n", game->hp);
 	fprintf(ptr, "Gold: %d\n", game->gold);
