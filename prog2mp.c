@@ -1,10 +1,8 @@
 /* to do: 
-add achievement descriptions in achievement menu
-finish achievement conditions once dungeons are complete 
 save game, continue game (must save data to a file)
-dungeons gameplay (IMPORTANT!!!)
+dungeons
 final boss once all dungeons are cleared 
-item usage
+
 */
 #include <stdio.h>
 #include <stdlib.h>
@@ -18,7 +16,7 @@ item usage
 #define MAX_INVENTORY 9
 #define MAX_HANAMARU 9
 #define MAX_ACHIEVEMENTS 28
-
+#define MAX_DESCRIPTION 200
 // IDOLS TO HANAMARU SHOP INDEX RATIO. DO NOT TOUCH!!!
 #define SHOVEL_UP 2
 #define BAT_TAMER 3
@@ -29,6 +27,7 @@ item usage
 #define ICE_CREAM 8
 
 typedef char Name[MAX_NAME_LEN];
+typedef char Description[MAX_DESCRIPTION];
 
 struct idolDungeonTag{
     Name idol;
@@ -63,6 +62,7 @@ struct gameTag{
 struct achievementTag{
 	Name achievement;
 	int earned;
+	Description description;
 };
 
 void initializeIdolDungeon(struct idolDungeonTag idolDungeon[]){
@@ -177,87 +177,187 @@ void initializeAchievements(struct achievementTag achievement[]){
 	
 	strcpy(achievement[0].achievement, "Yohane Descends!");
 	achievement[0].earned = 0;
+	strcpy(achievement[0].description, "Cleared first dungeon");
 	
 	strcpy(achievement[1].achievement, "Mikan Power!");
 	achievement[1].earned = 0;
+	strcpy(achievement[1].description, "Rescued Chika for the first time");
 	
 	strcpy(achievement[2].achievement, "Riko-chan BEAM!");
 	achievement[2].earned = 0;
+	strcpy(achievement[2].description, "Rescued Riko for the first time");
 	
 	strcpy(achievement[3].achievement, "Yousoro!");
 	achievement[3].earned = 0;
+	strcpy(achievement[3].description, "Rescued You for the first time");
 	
 	strcpy(achievement[4].achievement, "It’s the future, zura!");
 	achievement[4].earned = 0;
+	strcpy(achievement[4].description, "Rescued Hanamaru for the first time");
 	
 	strcpy(achievement[5].achievement, "Ganbaruby!");
 	achievement[5].earned = 0;
+	strcpy(achievement[5].description, "Rescued Ruby for the first time");
 	
 	strcpy(achievement[6].achievement, "Buu-buu desu wa!");
 	achievement[6].earned = 0;
+	strcpy(achievement[6].description, "Rescued Dia for the first time");
 	
 	strcpy(achievement[7].achievement, "Hug!!!");
 	achievement[7].earned = 0;
+	strcpy(achievement[7].description, "Rescued Kanan for the first time");
 	
 	strcpy(achievement[8].achievement, "Shiny!");
 	achievement[8].earned = 0;
+	strcpy(achievement[8].description, "Rescued Mari for the first time");
 	
 	strcpy(achievement[9].achievement, "In This Unstable World!");
 	achievement[9].earned = 0;
+	strcpy(achievement[9].description, "Beat the Final boss for the first time");
 	
 	strcpy(achievement[10].achievement, "One more sunshine story!");
 	achievement[10].earned = 0;
+	strcpy(achievement[10].description, "Rescued Chika twice");
 	
 	strcpy(achievement[11].achievement, "Pianoforte Monologue!");
 	achievement[11].earned = 0;
+	strcpy(achievement[11].description, "Rescued Riko twice");
 	
 	strcpy(achievement[12].achievement, "Beginner’s Sailing!");
 	achievement[12].earned = 0;
+	strcpy(achievement[12].description, "Rescued You twice");
 	
 	strcpy(achievement[13].achievement, "Oyasuminasan!");
 	achievement[13].earned = 0;
+	strcpy(achievement[13].description, "Rescued Hanamaru twice");
 	
 	strcpy(achievement[14].achievement, "Red Gem Wink!");
 	achievement[14].earned = 0;
+	strcpy(achievement[14].description, "Rescued Ruby twice");
 	
 	strcpy(achievement[15].achievement, "White First Love!");
 	achievement[15].earned = 0;
+	strcpy(achievement[15].description, "Rescued Dia twice");
 	
 	strcpy(achievement[16].achievement, "Sakana ka Nandaka!");
 	achievement[16].earned = 0;
+	strcpy(achievement[16].description, "Rescued Kanan twice");
 	
 	strcpy(achievement[17].achievement, "New Winding Road!");
 	achievement[17].earned = 0;
+	strcpy(achievement[17].description, "Rescued Mari twice");
 	
 	strcpy(achievement[18].achievement, "Deep Resonance!");
 	achievement[18].earned = 0;
+	strcpy(achievement[18].description, "Beat the Final boss twice");
 	
 	strcpy(achievement[19].achievement, "No. 10!");
 	achievement[19].earned = 0;
+	strcpy(achievement[19].description, "Clear 10 dungeons");
 	
 	strcpy(achievement[20].achievement, "CYaRon!");
 	achievement[20].earned = 0;
+	strcpy(achievement[20].description, "Rescued Chika, You, and Ruby (Not necessarily in one playthrough)");
 	
 	strcpy(achievement[21].achievement, "AZALEA!");
 	achievement[21].earned = 0;
+	strcpy(achievement[21].description, "Rescued Hanamaru, Dia, and Kanan (Not necessarily in one playthrough)");
 	
 	strcpy(achievement[22].achievement, "Guilty Kiss!");
 	achievement[22].earned = 0;
+	strcpy(achievement[22].description, "Rescued Riko and Mari (Not necessarily in one playthrough)");
 	
 	strcpy(achievement[23].achievement, "Eikyuu Hours!");
 	achievement[23].earned = 0;
+	strcpy(achievement[23].description, "Have Yohane rescue all Aqours members for the first time");
 	
 	strcpy(achievement[24].achievement, "Aozora Jumping Heart!");
 	achievement[24].earned = 0;
+	strcpy(achievement[24].description, "Clear a dungeon without incurring any damage");
 	
 	strcpy(achievement[25].achievement, "Mitaiken Horizon!");
 	achievement[25].earned = 0;
+	strcpy(achievement[25].description, "Accumulate a total of 5000G spent on Hanamaru’s stores across multiple playthroughs");
 	
 	strcpy(achievement[26].achievement, "Ruby-chan! Hai? Nani ga suki?");
 	achievement[26].earned = 0;
+	strcpy(achievement[26].description, "Get saved by a fatal blow from Ruby’s choco-mint ice cream item.");
 	
 	strcpy(achievement[27].achievement, "Step! ZERO to ONE!");
 	achievement[27].earned = 0;
+	strcpy(achievement[27].description, "Complete a playthrough with 0G on-hand at the end");
+}
+
+void viewAchievementsCount(struct achievementTag achievement[], int achievementCount){
+	
+	system("cls");
+    printf("************************************************************\n");
+    printf("                    Achievements module                     \n");
+    printf("                      Obtained: %d / %d                     \n", achievementCount, MAX_ACHIEVEMENTS);
+    printf("************************************************************\n");
+}
+
+// confirms that a char inputted is a number
+int isNumber(char choice[]){
+    int count = 0;
+
+    if (choice[0] == '\0')
+        return 0;
+
+    while (choice[count] != '\0') {
+        if (choice[count] < '0' || choice[count] > '9')
+            return 0;
+		else 
+        	count++;
+    }
+
+    return 1; 
+}
+
+int strToInt(char choice[]){
+    int count = 0;
+    int num = 0;
+
+    while (choice[count] != '\0') {
+        num = num * 10 + (choice[count] - '0');
+        count++;
+    }
+
+    return num;
+}
+
+void viewAchievementDetails(char choice[], struct achievementTag achievement[], int achievementCount){
+	
+	int index;
+    	
+    index = strToInt(choice) - 1;
+		do{
+		    system("cls");
+		    viewAchievementsCount(achievement, achievementCount);
+		    printf("Achievement Name: %s\n", achievement[index].achievement);
+			printf("\n");
+			printf("Status: ");
+			
+			if (achievement[index].earned == 1){
+				printf("EARNED!\n\n");
+				printf("Date Earned: <Insert date>\n\n");
+			}
+			else
+				printf("NOT EARNED!\n\n");	
+				
+			printf("Description: \n");
+			printf("%s\n\n", achievement[index].description);
+			printf("[R]eturn to Achievements Module\n\n");
+		    printf("Choice: ");
+		    scanf("%s", choice);
+			
+			if (!(choice[0] == 'R' || choice[0] == 'r') && choice[1] != '\0'){
+				printf("Invalid choice!\n");
+				system("pause"); 
+			}
+	} while (!(choice[0] == 'R' || choice[0] == 'r') && choice[1] == '\0');
+	
+	choice[0] = '\0'; // If i remove this pressing R will go back to main menu instead of achievement menu. this took me 1 hr to figure out XD
 }
 
 void viewAchievements(struct achievementTag achievement[]){
@@ -266,21 +366,16 @@ void viewAchievements(struct achievementTag achievement[]){
     int totalPages = 4;
 	int achievementCount = 0; 
 	int achievementsPerPage = 8;
-    char choice;
+    char choice[10];
     int i, startIdx, endIdx;
-
+	
     for (i = 0; i < MAX_ACHIEVEMENTS; i++)
         if (achievement[i].earned == 1)
             achievementCount++;
 
     do {
     	
-        system("cls");
-        printf("************************************************************\n");
-        printf("                    Achievements module                     \n");
-        printf("                      Obtained: %d / %d                     \n", achievementCount, MAX_ACHIEVEMENTS);
-        printf("************************************************************\n");
-
+        viewAchievementsCount(achievement, achievementCount);
 
         startIdx = currentPage * achievementsPerPage;  
         endIdx = startIdx + achievementsPerPage;
@@ -307,34 +402,41 @@ void viewAchievements(struct achievementTag achievement[]){
 		printf("\n");
 		
         printf("Choice: ");
-        scanf(" %c", &choice);
-
-        switch (choice) {
-            case 'N': case 'n':
-                if (currentPage < totalPages - 1)
-                    currentPage++;
-                else{
-                	printf("Maximum page reached.\n");
-                	system("pause");
-                }
-                break;
-            case 'P': case 'p':
-                if (currentPage > 0)
-                    currentPage--;
-                else{
-                	printf("Minimum page reached.\n");
-                	system("pause");
-                }
-                break;
-            case 'R': case 'r':
-            	printf("Returning to Main Menu...\n");
-                break;
-            default:
-                printf("Invalid choice!\n");
-                system("pause");
+        scanf("%s", choice);
+		
+		
+		if ((choice[0] == 'N' || choice[0] == 'n') && choice[1] == '\0'){
+			if (currentPage < totalPages - 1)
+                currentPage++;
+            else{
+            	printf("Maximum page reached.\n");
+            	system("pause");
+            }
         }
+        
+        else if ((choice[0] == 'P' || choice[0] == 'p') && choice[1] == '\0'){
+        	if (currentPage > 0)
+                currentPage--;
+            else{
+            	printf("Minimum page reached.\n");
+            	system("pause");
+            }
+		}
+		
+		else if ((choice[0] == 'R' || choice[0] == 'r') && choice[1] == '\0'){
+        	printf("Returning to Main Menu...\n");
+		}
+		
+		else if (isNumber(choice) == 1)
+			viewAchievementDetails(choice, achievement, achievementCount);
+			
+			
+		else{
+			printf("Invalid choice!\n");
+			system("pause");
+		}
 
-    } while (choice != 'R' && choice != 'r');
+    } while (!((choice[0] == 'R' || choice[0] == 'r') && choice[1] == '\0'));
 }
 
 void selectHostages(struct gameTag *game){
@@ -457,9 +559,7 @@ void hanamaruStore(struct idolDungeonTag idolDungeon[], struct gameTag *game, st
 		
 		// For buying the items	
 		if (choice >= '1' && choice <= '9'){ 
-			
-			// this converts '1' that is currently a char into 0, '2' into 1, etc.
-			index = choice - '1'; 
+			index = choice - '1'; // char to number
 			
 			// Noppo Bread bc unlimited
 		    if (index == 1){  
@@ -549,7 +649,6 @@ void achievementUnlock(struct achievementTag achievement[], struct gameTag *game
 			if (game->rescuedCount[i] > 0)
 				rescueCounter++;
 		}
-		
 		
 		// achievement conditions (index 0)
 		if (game->dungeonClears > 0 && achievement[0].earned == 0){
@@ -666,10 +765,8 @@ void newGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct i
 	    scanf(" %c", &choice);
 		
 		// I put "index = choice - '1'" inside bc the index is only needed for numerical inputs	
-		if (choice >= '1' && choice <= '3'){
-		
-			// for entering dungeon only, this converts '1' that is currently a char into 0, '2' into 1, etc. 
-			index = choice - '1';	
+		if (choice >= '1' && choice <= '3'){ 
+			index = choice - '1'; // char to number
 			
 			system("cls");
         	if (game->clearStatus[index] == 1)
