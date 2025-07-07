@@ -2,7 +2,7 @@
 to do by priority: 
 - core gameplay 
 - dungeons itself 
-- game over mechanics
+- game over mechanics (game->hp <= 0)
 - final boss
 - new game+ after clear
 	Carried over:
@@ -77,6 +77,7 @@ struct gameTag{
 	int hostages[MAX_HOSTAGES];
 	int rescuedCount[MAX_IDOLS];
 	int clearStatus[MAX_IDOLS];
+	int clearStatusTemp[MAX_HOSTAGES];
 	int running;
 	int dungeonClears;
 	int goldSpent;
@@ -249,7 +250,7 @@ void initializeAchievements(struct achievementTag achievement[]){
 	achievement[11].earned = 0;
 	strcpy(achievement[11].description, "Rescued Riko twice");
 	
-	strcpy(achievement[12].achievement, "Beginnerâ€™s Sailing!");
+	strcpy(achievement[12].achievement, "Beginner’s Sailing!");
 	achievement[12].earned = 0;
 	strcpy(achievement[12].description, "Rescued You twice");
 	
@@ -303,11 +304,11 @@ void initializeAchievements(struct achievementTag achievement[]){
 	
 	strcpy(achievement[25].achievement, "Mitaiken Horizon!");
 	achievement[25].earned = 0;
-	strcpy(achievement[25].description, "Accumulate a total of 5000G spent on Hanamaruâ€™s stores across multiple playthroughs");
+	strcpy(achievement[25].description, "Accumulate a total of 5000G spent on Hanamaru’s stores across multiple playthroughs");
 	
 	strcpy(achievement[26].achievement, "Ruby-chan! Hai? Nani ga suki?");
 	achievement[26].earned = 0;
-	strcpy(achievement[26].description, "Get saved by a fatal blow from Rubyâ€™s choco-mint ice cream item.");
+	strcpy(achievement[26].description, "Get saved by a fatal blow from Ruby’s choco-mint ice cream item.");
 	
 	strcpy(achievement[27].achievement, "Step! ZERO to ONE!");
 	achievement[27].earned = 0;
@@ -651,7 +652,7 @@ void showDungeonMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, 
 	if (game->currentPlaythroughClear < 3){
 	    for (i = 0; i < 3; i++){
 	        idx = game->hostages[i];
-	        if (game->clearStatus[i] == 1)
+	        if (game->clearStatusTemp[i] == 1)
 	        	printf("[X] Visit %s\n", idolDungeon[idx].dungeon);
 	        else
 	        	printf("[%d] Visit %s\n", i+1, idolDungeon[idx].dungeon);
@@ -825,11 +826,12 @@ void saveGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 	
 	for (i = 0; i < MAX_HOSTAGES; i++)
         fprintf(ptr, "Hostage: %s\n", idolDungeon[game->hostages[i]].idol);
-        
 
     for (i = 0; i < MAX_IDOLS; i++)
         fprintf(ptr, "Dungeon %s: %d\n", idolDungeon[i].dungeon, game->clearStatus[i]);
         
+    for (i = 0; i < MAX_HOSTAGES; i++)
+        fprintf(ptr, "Dungeon Cleared this Playthrough: %d\n", game->clearStatusTemp[i]);    
 	
     for (i = 0; i < MAX_IDOLS; i++)
         fprintf(ptr, "%s rescues: %d\n", idolDungeon[i].idol, game->rescuedCount[i]);
@@ -885,6 +887,9 @@ void loadGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 		for (i = 0; i < MAX_IDOLS; i++)
 		    fscanf(ptr, "%*[^:]: %d\n", &game->clearStatus[i]);
 		
+		for (i = 0; i < MAX_HOSTAGES; i++)
+    		fscanf(ptr, "%*[^:]: %d\n", &game->clearStatusTemp[i]);
+		
 		for (i = 0; i < MAX_IDOLS; i++)
 		    fscanf(ptr, "%*[^:]: %d\n", &game->rescuedCount[i]);
 
@@ -924,7 +929,7 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 			index = choice - '1'; // char to number
 			
 			system("cls");
-        	if (game->clearStatus[index] == 1)
+        	if (game->clearStatusTemp[index] == 1)
         		printf("Dungeon is cleared. You can no longer enter\n");
         	else{
 	        	printf("Entering dungeon %d\n\n", index+1);
@@ -934,7 +939,8 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 	        	charIdx = game->hostages[index]; 
 	        	printf("%s has been successfully rescued!\n", idolDungeon[charIdx].idol);
 	        	game->rescuedCount[charIdx]++;
-	        	game->clearStatus[index] = 1;
+	        	game->clearStatus[charIdx] = 1;
+	        	game->clearStatusTemp[index] = 1;
 				game->currentPlaythroughClear++;	// when this goes to 3, final boss time
 	        	game->dungeonClears++; 
 	        	
@@ -1016,6 +1022,10 @@ void newGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct i
 	
 	for (i = 0; i < MAX_IDOLS; i++) {
     	game->clearStatus[i] = 0;
+	}
+	
+	for (i = 0; i < MAX_HOSTAGES; i++) {
+    	game->clearStatusTemp[i] = 0;
 	}
 	
 	for (i = 0; i < MAX_IDOLS; i++){
@@ -1107,3 +1117,4 @@ int main(){
     
     return 0; 
 }
+
