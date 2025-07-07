@@ -647,16 +647,19 @@ void showDungeonMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, 
     printf("Total Gold: %d GP\n", game->gold);
     printf("Item on hand: N/A\n");	// placeholder, fix later
     printf("\n");
-
-    for (i = 0; i < 3; i++) {
-        idx = game->hostages[i];
-        
-        if (game->clearStatus[i] == 1)
-        	printf("[X] Visit %s\n", idolDungeon[idx].dungeon);
-        else
-        	printf("[%d] Visit %s\n", i+1, idolDungeon[idx].dungeon);
-    }
-
+    
+	if (game->tempClear < 3){
+	    for (i = 0; i < 3; i++){
+	        idx = game->hostages[i];
+	        if (game->clearStatus[i] == 1)
+	        	printf("[X] Visit %s\n", idolDungeon[idx].dungeon);
+	        else
+	        	printf("[%d] Visit %s\n", i+1, idolDungeon[idx].dungeon);
+		}
+	}
+	else
+	    printf("[1] Face the Siren of Numazu\n");
+			
     printf("\n[I]nventory");
     printf("\t\t");
 	printf("[S]ave and Quit");
