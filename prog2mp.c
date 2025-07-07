@@ -1,4 +1,4 @@
-//* 
+/* 
 to do by priority: 
 - core gameplay
 - dungeons itself
@@ -26,8 +26,8 @@ Complete:
 - hanamaru shop
 - save file
 - load file
-
 */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
