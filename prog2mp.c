@@ -1,9 +1,32 @@
-/* to do: 
-dungeons 
-final boss once all dungeons are cleared 
-save game, continue game (must save data to a file)
-new game+ after clear
-input validation for hanamaru store and dungeon selection
+/* 
+to do by priority: 
+- core gameplay
+- dungeons itself
+- game over mechanics
+- final boss once all dungeons are cleared 
+- new game+ after clear
+	Carried over:
+	- idols rescued
+	- gold 
+	- achievements
+	- noppo bread and tears of fallen angel
+	not carried over:
+	- any other shop items
+	- max hp (go back to 3 hp)
+	
+- item on hand (specs did not specify lmao)
+- continue game on main menu if file exists
+
+Complete:
+- Main menu
+- achievements
+- dungeon menu
+- hostage selection
+- inventory
+- hanamaru shop
+- save file
+- load file
+
 */
 #include <stdio.h>
 #include <stdlib.h>
@@ -800,8 +823,8 @@ void saveGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
         fprintf(ptr, "Hostage: %s\n", idolDungeon[game->hostages[i]].idol);
         
 
-    for (i = 0; i < MAX_HOSTAGES; i++)
-        fprintf(ptr, "Dungeon %s Clear Status: %d\n", idolDungeon[i].dungeon, game->clearStatus[i]);
+    for (i = 0; i < MAX_IDOLS; i++)
+        fprintf(ptr, "Dungeon %s: %d\n", idolDungeon[i].dungeon, game->clearStatus[i]);
         
 	
     for (i = 0; i < MAX_IDOLS; i++)
@@ -812,9 +835,9 @@ void saveGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
         
     for (i = 0; i < MAX_ACHIEVEMENTS; i++)
     	if (achievement[i].earned == 1)
-        	fprintf(ptr, "%s: %d (Earned %s)\n", achievement[i].achievement, achievement[i].earned, achievement[i].dateEarned);
+        	fprintf(ptr, "%s: %d %s\n", achievement[i].achievement, achievement[i].earned, achievement[i].dateEarned);
         else
-        	fprintf(ptr, "%s: %d\n", achievement[i].achievement, achievement[i].earned);
+        	fprintf(ptr, "%s: %d %s\n", achievement[i].achievement, 0, "-");
 
 	for (i = 0; i < MAX_HANAMARU; i++)
 		fprintf(ptr, "%s stock: %d\n", hanamaru[i].item, hanamaru[i].availability);
@@ -824,13 +847,135 @@ void saveGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 	
 }
 
+void loadGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[], 
+			struct hanamaruTag hanamaru[], struct achievementTag achievement[]){
+
+	int i, j;
+	char tempName[30];
+	FILE *ptr;
+	
+	ptr = fopen("gameData.txt", "r");
+	
+	if (ptr == NULL){
+		printf("Error opening file.\n");
+		system("pause");
+	}
+	else{
+		fscanf(ptr, "Max HP: %d\n", &game->maxHP);
+		fscanf(ptr, "Current HP: %d\n", &game->hp);
+		fscanf(ptr, "Gold: %d\n", &game->gold);
+		fscanf(ptr, "Total Dungeon Clears: %d\n", &game->dungeonClears);
+		fscanf(ptr, "Total Gold Spent: %d\n", &game->goldSpent);
+		fscanf(ptr, "Total Damage Taken: %d\n", &game->dmgTaken);
+		fscanf(ptr, "Running Status: %d\n", &game->running);
+		
+		
+		for (i = 0; i < MAX_HOSTAGES; i++){
+	      	fscanf(ptr, "Hostage: %s\n", tempName);
+	      	for (j = 0; j < MAX_IDOLS; j++){
+	       		if (strcmp(tempName, idolDungeon[j].idol) == 0)
+	       			game->hostages[i] = j;
+	       		}
+	    }
+	    	 
+		for (i = 0; i < MAX_IDOLS; i++)
+		    fscanf(ptr, "%*[^:]: %d\n", &game->clearStatus[i]);
+		
+		for (i = 0; i < MAX_IDOLS; i++)
+		    fscanf(ptr, "%*[^:]: %d\n", &game->rescuedCount[i]);
+
+		for (i = 0; i < MAX_INVENTORY; i++)
+		    fscanf(ptr, "%*[^:]: %d\n", &inventory[i].itemCount);
+
+		for (i = 0; i < MAX_ACHIEVEMENTS; i++){
+		    fscanf(ptr, "%*[^:]: %d", &achievement[i].earned);
+		    if (achievement[i].earned == 1)
+		        fscanf(ptr, " %[^\n]\n", achievement[i].dateEarned);
+		    else
+		        fscanf(ptr, " %*s\n"); 
+		}
+
+		for (i = 0; i < MAX_HANAMARU; i++)
+		    fscanf(ptr, "%*[^:]: %d\n", &hanamaru[i].availability);
+			}
+			
+		fclose(ptr);
+			
+}
+
 void continueGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[], 
 			struct hanamaruTag hanamaru[], struct achievementTag achievement[]){
 
-
+	loadGame(idolDungeon, game, inventory, hanamaru, achievement);
+		
 	system("cls");
-	printf("WIP\n");
-	system("pause");
+	
+	char choice;
+	int index;
+	int charIdx;
+		
+    showHostages(idolDungeon, game);
+    showDungeonMenu(idolDungeon, game, inventory);
+
+    do{
+    	
+	    printf("Choice: ");
+	    scanf(" %c", &choice);
+		
+		// I put "index = choice - '1'" inside bc the index is only needed for numerical inputs	
+		if (choice >= '1' && choice <= '3'){ 
+			index = choice - '1'; // char to number
+			
+			system("cls");
+        	if (game->clearStatus[index] == 1)
+        		printf("Dungeon is cleared. You can no longer enter\n");
+        	else{
+	        	printf("Entering dungeon %d\n\n", index+1);
+	        	
+	        	// this auto clears right now as placeholder, might move this to a diff func
+	        	// finish dungeon first before this
+	        	charIdx = game->hostages[index]; 
+	        	printf("%s has been successfully rescued!\n", idolDungeon[charIdx].idol);
+	        	game->rescuedCount[charIdx]++;
+	        	game->clearStatus[index] = 1;
+	        	game->dungeonClears++;
+	        	
+	        	itemUnlock(charIdx, hanamaru);
+	        	achievementUnlock(achievement, game);					
+        	}
+        	system("pause");
+            system("cls");
+            showHostages(idolDungeon, game);
+			showDungeonMenu(idolDungeon, game, inventory);
+		}
+		
+		// Inventory
+		else if (choice == 'I' || choice == 'i'){
+			system("cls");
+		    showInventory(idolDungeon, game, inventory);
+		}
+		
+		// Save and quit 
+		else if (choice == 'S' || choice == 's'){
+			saveGame(idolDungeon, game, inventory, hanamaru, achievement);
+			printf("Game Saved!\n\n"); 
+	        system("cls");
+		}
+		
+		// hanamaru store
+		else if (choice == 'H' || choice == 'h'){
+        	if (game->rescuedCount[3] > 0){
+        	system("cls");
+            hanamaruStore(idolDungeon, game, inventory, hanamaru);
+        }
+        	else
+        		printf("Totally nothing to see here!\n");
+		}
+		
+		else
+			printf("Invalid choice\n");
+			    	
+	} while (choice != 'S' && choice != 's');	
 				
 }
 
@@ -957,7 +1102,7 @@ int main(){
 		if (!game.running)
         	printf("\t\t  [N]ew Game\n");
         else
-        	printf("\t\t  [C]ontinue\n"); // NOT YET WORKING
+        	printf("\t\t  [C]ontinue\n");
         	
         printf("\t\t  [V]iew Achievements\n");
         printf("\t\t  [Q]uit\n");
@@ -976,8 +1121,8 @@ int main(){
             case 'C': case 'c':
             	if (game.running == 1){
                 	continueGame(idolDungeon, &game, inventory, hanamaru, achievement);
-			system("cls");
-		}
+                	system("cls");
+                }
                 else{
                 	printf("Invalid choice!\n");
                 	system("pause");
