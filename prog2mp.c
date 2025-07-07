@@ -786,8 +786,7 @@ void saveGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 	FILE *ptr;
 	
 	ptr = fopen("gameData.txt", "w");
-	
-	fprintf(ptr, "GAME DATA:\n\n");
+	;
 	fprintf(ptr, "Max HP: %d\n", game->maxHP);
 	fprintf(ptr, "Current HP: %d\n", game->hp);
 	fprintf(ptr, "Gold: %d\n", game->gold);
@@ -796,53 +795,33 @@ void saveGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 	fprintf(ptr, "Total Damage Taken: %d\n", game->dmgTaken);
 	fprintf(ptr, "Running Status: %d\n", game->running);
 	
-	fprintf(ptr, "\n");
 	
 	for (i = 0; i < MAX_HOSTAGES; i++)
         fprintf(ptr, "Hostage %d: %s\n", i+1, idolDungeon[game->hostages[i]].idol);
         
-    fprintf(ptr, "\n");
 
     for (i = 0; i < MAX_HOSTAGES; i++)
         fprintf(ptr, "Dungeon %d Clear Status: %d\n", i+1, game->clearStatus[i]);
         
-    fprintf(ptr, "\n");
 	
     for (i = 0; i < MAX_IDOLS; i++)
         fprintf(ptr, "%s rescues: %d\n", idolDungeon[i].idol, game->rescuedCount[i]);
         
-    fprintf(ptr, "\n");
-
-	fprintf(ptr, "Inventory:\n");
     for (i = 0; i < MAX_INVENTORY; i++)
         fprintf(ptr, "%s: %d\n", inventory[i].item, inventory[i].itemCount);
         
-    fprintf(ptr, "\n");
-
-	fprintf(ptr, "Achievements:\n");
     for (i = 0; i < MAX_ACHIEVEMENTS; i++)
     	if (achievement[i].earned == 1)
         	fprintf(ptr, "%s: %d (Earned %s)\n", achievement[i].achievement, achievement[i].earned, achievement[i].dateEarned);
         else
-        	fprintf(ptr, "%s: %d (Not yet earned)\n", achievement[i].achievement, achievement[i].earned);
-    fprintf(ptr, "\n");
+        	fprintf(ptr, "%s: %d\n", achievement[i].achievement, achievement[i].earned);
 
-	fprintf(ptr, "Hanamaru Shop:\n");
 	for (i = 0; i < MAX_HANAMARU; i++)
 		fprintf(ptr, "%s stock: %d\n", hanamaru[i].item, hanamaru[i].availability);
-	fprintf(ptr, "\n");
+
 	
 	fclose(ptr);
 	
-}
-
-void continueGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[], 
-			struct hanamaruTag hanamaru[], struct achievementTag achievement[]){
-
-
-	system("cls");
-	printf("WIP");
-				
 }
 
 void newGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[], 
