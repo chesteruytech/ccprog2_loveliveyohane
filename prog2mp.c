@@ -2,7 +2,8 @@
 save game, continue game (must save data to a file)
 dungeons
 final boss once all dungeons are cleared 
-
+input validation for hanamaru store and dungeon selection
+new game+ after clear
 */
 #include <stdio.h>
 #include <stdlib.h>
@@ -63,6 +64,7 @@ struct achievementTag{
 	Name achievement;
 	int earned;
 	Description description;
+	char dateEarned[20];
 };
 
 void initializeIdolDungeon(struct idolDungeonTag idolDungeon[]){
@@ -326,6 +328,149 @@ int strToInt(char choice[]){
     return num;
 }
 
+void intToStr(int num, char* str, int digits) {
+    int i, pos = digits - 1;
+
+    for (i = 0; i < digits; i++)
+        str[i] = '0';
+
+    str[digits] = '\0';
+
+    while (num > 0 && pos >= 0) {
+        str[pos] = (num % 10) + '0';
+        num /= 10;
+        pos--;
+    }
+}
+
+// copied my old MP from previous take for this
+void getCurrentDate(char *output){
+    time_t now = time(NULL);
+    struct tm *t = localtime(&now);
+
+    char mm[3], dd[3], yyyy[5], hh[3], min[3];
+
+    intToStr(t->tm_mon + 1, mm, 2);       // month
+    intToStr(t->tm_mday, dd, 2);          // day
+    intToStr(t->tm_year + 1900, yyyy, 4); // year
+    intToStr(t->tm_hour, hh, 2);          // hour
+    intToStr(t->tm_min, min, 2);          // minutes
+
+ 
+    output[0] = '\0'; 
+
+    strcat(output, mm);
+    strcat(output, "-");
+    strcat(output, dd);
+    strcat(output, "-");
+    strcat(output, yyyy);
+    strcat(output, " ");
+    strcat(output, hh);
+    strcat(output, ":");
+    strcat(output, min);
+}
+
+void achievementUnlock(struct achievementTag achievement[], struct gameTag *game){
+				
+		// index 9 (missing) (beat final boss once)
+		// index 18 (missing) (beat final boss twice)
+		// index 26 (missing) (get saved by ruby item) 
+			
+		int i;
+		int rescueCounter = 0;
+		
+		// rescue counter for achievement index 23 (24) this has to meet 8
+		for (i = 0; i < MAX_IDOLS; i++){
+			if (game->rescuedCount[i] > 0)
+				rescueCounter++;
+		}
+		
+		// achievement conditions (index 0)
+		if (game->dungeonClears > 0 && achievement[0].earned == 0){
+			achievement[0].earned = 1;
+			getCurrentDate(achievement[0].dateEarned);
+			printf("Achievement unlocked: %s\n", achievement[0].achievement);
+		}
+		
+		// achievement rescue for first time, index 1 to 8 
+		for (i = 0; i < MAX_IDOLS; i++) 
+			if (game->rescuedCount[i] > 0 && achievement[i+1].earned == 0){
+			achievement[i+1].earned = 1;
+			getCurrentDate(achievement[i+1].dateEarned);
+			printf("Achievement unlocked: %s\n", achievement[i+1].achievement);	
+		}
+		
+		// index 9 (missing) (beat final boss once)
+		
+		// achievement rescue twice, index 10 to 17 
+		for (i = 0; i < MAX_IDOLS; i++) 
+			if (game->rescuedCount[i] > 1 && achievement[i+10].earned == 0){
+			achievement[i+10].earned = 1;
+			getCurrentDate(achievement[i+10].dateEarned);
+			printf("Achievement unlocked: %s\n", achievement[i+10].achievement);	
+		}
+		
+		// index 18 (missing) (beat final boss twice)
+		
+		// clear 10 dungeons (index 19)
+		if (game->dungeonClears >= 10 && achievement[19].earned == 0){
+			achievement[19].earned = 1;
+			getCurrentDate(achievement[19].dateEarned);
+			printf("Achievement unlocked: %s\n", achievement[19].achievement);
+		}
+		
+		// rescue chika, you, ruby (index 20)
+		if (game->rescuedCount[0] > 0 && game->rescuedCount[2] > 0 && game->rescuedCount[4] > 0 && achievement[20].earned == 0){
+			achievement[20].earned = 1;
+			getCurrentDate(achievement[20].dateEarned);
+			printf("Achievement unlocked: %s\n", achievement[20].achievement);
+		}
+		
+		// rescue hanamaru, dia, kanan (index 21)
+		if (game->rescuedCount[3] > 0 && game->rescuedCount[5] > 0 && game->rescuedCount[6] > 0 && achievement[21].earned == 0){
+			achievement[21].earned = 1;
+			getCurrentDate(achievement[21].dateEarned);
+			printf("Achievement unlocked: %s\n", achievement[21].achievement);
+		}
+		
+		// rescue riko, mari (index 22)
+		if (game->rescuedCount[1] > 0 && game->rescuedCount[7] > 0 && achievement[22].earned == 0){
+			achievement[22].earned = 1;
+			getCurrentDate(achievement[22].dateEarned);
+			printf("Achievement unlocked: %s\n", achievement[22].achievement);
+		}
+		
+		// Have Yohane rescue all Aqours members for the first time (index 23)
+		if (rescueCounter == 8 && achievement[23].earned == 0){
+			achievement[23].earned = 1;
+			getCurrentDate(achievement[23].dateEarned);
+			printf("Achievement unlocked: %s\n", achievement[23].achievement);
+		}
+		
+		// no damage taken (index 24)
+		if (game->dmgTaken == 0 && achievement[24].earned == 0){
+			achievement[24].earned = 1;
+			getCurrentDate(achievement[24].dateEarned);
+			printf("Achievement unlocked: %s\n", achievement[24].achievement);
+		}
+		
+		// 5000g spent across all playthroughs (index 25)
+		if (game->goldSpent >= 5000 && achievement[25].earned == 0){
+			achievement[25].earned = 1;
+			getCurrentDate(achievement[25].dateEarned);
+			printf("Achievement unlocked: %s\n", achievement[25].achievement);
+		}
+		
+		// index 26 (get saved by ruby) missing
+		
+		// finish game with no gold (index 27)
+		if (game->gold == 0 && achievement[27].earned == 0){
+			achievement[27].earned = 1;
+			getCurrentDate(achievement[27].dateEarned);
+			printf("Achievement unlocked: %s\n", achievement[27].achievement);
+		}
+}
+
 void viewAchievementDetails(char choice[], struct achievementTag achievement[], int achievementCount){
 	
 	int index;
@@ -340,7 +485,7 @@ void viewAchievementDetails(char choice[], struct achievementTag achievement[], 
 			
 			if (achievement[index].earned == 1){
 				printf("EARNED!\n\n");
-				printf("Date Earned: <Insert date>\n\n");
+				printf("Date Earned: %s\n\n", achievement[index].dateEarned);
 			}
 			else
 				printf("NOT EARNED!\n\n");	
@@ -351,7 +496,7 @@ void viewAchievementDetails(char choice[], struct achievementTag achievement[], 
 		    printf("Choice: ");
 		    scanf("%s", choice);
 			
-			if (!(choice[0] == 'R' || choice[0] == 'r') && choice[1] != '\0'){
+			if (!(choice[0] == 'R' || choice[0] == 'r') && choice[1] == '\0'){
 				printf("Invalid choice!\n");
 				system("pause"); 
 			}
@@ -634,96 +779,7 @@ void itemUnlock(int charIdx, struct hanamaruTag hanamaru[]){
 			hanamaru[STEWSHINE].availability = 1;	
 }
 
-void achievementUnlock(struct achievementTag achievement[], struct gameTag *game){
-		
-		
-		// index 9 (missing) (beat final boss once)
-		// index 18 (missing) (beat final boss twice)
-		// index 26 (missing) (get saved by ruby item) 
-			
-		int i;
-		int rescueCounter = 0;
-		
-		// rescue counter for achievement index 23 (24) this has to meet 8
-		for (i = 0; i < MAX_IDOLS; i++){
-			if (game->rescuedCount[i] > 0)
-				rescueCounter++;
-		}
-		
-		// achievement conditions (index 0)
-		if (game->dungeonClears > 0 && achievement[0].earned == 0){
-			achievement[0].earned = 1;
-			printf("Achievement unlocked: %s\n", achievement[0].achievement);
-		}
-		
-		// achievement rescue for first time, index 1 to 8 
-		for (i = 0; i < MAX_IDOLS; i++) 
-			if (game->rescuedCount[i] > 0 && achievement[i+1].earned == 0){
-			achievement[i+1].earned = 1;
-			printf("Achievement unlocked: %s\n", achievement[i+1].achievement);	
-		}
-		
-		// index 9 (missing) (beat final boss once)
-		
-		// achievement rescue twice, index 10 to 17 
-		for (i = 0; i < MAX_IDOLS; i++) 
-			if (game->rescuedCount[i] > 1 && achievement[i+10].earned == 0){
-			achievement[i+10].earned = 1;
-			printf("Achievement unlocked: %s\n", achievement[i+10].achievement);	
-		}
-		
-		// index 18 (missing) (beat final boss twice)
-		
-		// clear 10 dungeons (index 19)
-		if (game->dungeonClears >= 10 && achievement[19].earned == 0){
-			achievement[19].earned = 1;
-			printf("Achievement unlocked: %s\n", achievement[19].achievement);
-		}
-		
-		// rescue chika, you, ruby (index 20)
-		if (game->rescuedCount[0] > 0 && game->rescuedCount[2] > 0 && game->rescuedCount[4] > 0 && achievement[20].earned == 0){
-			achievement[20].earned = 1;
-			printf("Achievement unlocked: %s\n", achievement[20].achievement);
-		}
-		
-		// rescue hanamaru, dia, kanan (index 21)
-		if (game->rescuedCount[3] > 0 && game->rescuedCount[5] > 0 && game->rescuedCount[6] > 0 && achievement[21].earned == 0){
-			achievement[21].earned = 1;
-			printf("Achievement unlocked: %s\n", achievement[21].achievement);
-		}
-		
-		// rescue riko, mari (index 22)
-		if (game->rescuedCount[1] > 0 && game->rescuedCount[7] > 0 && achievement[22].earned == 0){
-			achievement[22].earned = 1;
-			printf("Achievement unlocked: %s\n", achievement[22].achievement);
-		}
-		
-		// Have Yohane rescue all Aqours members for the first time (index 23)
-		if (rescueCounter == 8 && achievement[23].earned == 0){
-			achievement[23].earned = 1;
-			printf("Achievement unlocked: %s\n", achievement[23].achievement);
-		}
-		
-		// no damage taken (index 24)
-		if (game->dmgTaken == 0 && achievement[24].earned == 0){
-			achievement[24].earned = 1;
-			printf("Achievement unlocked: %s\n", achievement[24].achievement);
-		}
-		
-		// 5000g spent across all playthroughs (index 25)
-		if (game->goldSpent >= 5000 && achievement[25].earned == 0){
-			achievement[25].earned = 1;
-			printf("Achievement unlocked: %s\n", achievement[25].achievement);
-		}
-		
-		// index 26 (get saved by ruby) missing
-		
-		// finish game with no gold (index 27)
-		if (game->gold == 0 && achievement[27].earned == 0){
-			achievement[27].earned = 1;
-			printf("Achievement unlocked: %s\n", achievement[27].achievement);
-		}
-}
+
 
 void newGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[], struct hanamaruTag hanamaru[], struct achievementTag achievement[]){
 	
