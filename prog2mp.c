@@ -1,8 +1,10 @@
-/* to do: add achievement descriptions in menu 
+/* to do: 
+add achievement descriptions in achievement menu
+finish achievement conditions once dungeons are complete 
 save game, continue game (must save data to a file)
-dungeons
+dungeons gameplay (IMPORTANT!!!)
 final boss once all dungeons are cleared 
-
+item usage
 */
 #include <stdio.h>
 #include <stdlib.h>
