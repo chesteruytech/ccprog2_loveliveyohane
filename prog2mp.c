@@ -500,34 +500,40 @@ void viewAchievementDetails(char choice[], struct achievementTag achievement[], 
 	
 	int index;
     	
-    index = strToInt(choice) - 1;
 		do{
+			
+			index = strToInt(choice) - 1;
 		    system("cls");
 		    viewAchievementsCount(achievement, achievementCount);
-		    printf("Achievement Name: %s\n", achievement[index].achievement);
-			printf("\n");
-			printf("Status: ");
-			
-			if (achievement[index].earned == 1){
-				printf("EARNED!\n\n");
-				printf("Date Earned: %s\n\n", achievement[index].dateEarned);
-			}
-			else
-				printf("NOT EARNED!\n\n");	
+		    
+		    if (index >= 0 && index < 28){
+			    printf("Achievement Name: %s\n", achievement[index].achievement);
+				printf("\n");
+				printf("Status: ");
 				
-			printf("Description: \n");
-			printf("%s\n\n", achievement[index].description);
+				if (achievement[index].earned == 1){
+					printf("EARNED!\n\n");
+					printf("Date Earned: %s\n\n", achievement[index].dateEarned);
+				}
+				else
+					printf("NOT EARNED!\n\n");	
+					
+				printf("Description: \n");
+				printf("%s\n\n", achievement[index].description);
+			}
+			
+			else
+				printf("Invalid choice!\n\n");
+							
 			printf("[R]eturn to Achievements Module\n\n");
 		    printf("Choice: ");
 		    scanf("%s", choice);
 			
-			if (!(choice[0] == 'R' || choice[0] == 'r') && choice[1] == '\0'){
-				printf("Invalid choice!\n");
-				system("pause"); 
-			}
+			
 	} while (!(choice[0] == 'R' || choice[0] == 'r') && choice[1] == '\0');
 	
-	choice[0] = '\0'; // If i remove this pressing R will go back to main menu instead of achievement menu. this took me 1 hr to figure out XD
+	choice[0] = '\0';
+	
 }
 
 void viewAchievements(struct achievementTag achievement[]){
