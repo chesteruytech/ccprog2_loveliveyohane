@@ -1,4 +1,4 @@
-/* 
+//* 
 to do by priority: 
 - core gameplay
 - dungeons itself
@@ -76,7 +76,7 @@ struct gameTag{
 	int gold;
 	int hostages[MAX_HOSTAGES];
 	int rescuedCount[MAX_IDOLS];
-	int clearStatus[MAX_HOSTAGES];
+	int clearStatus[MAX_IDOLS];
 	int running;
 	int dungeonClears;
 	int goldSpent;
@@ -903,21 +903,14 @@ void loadGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 			
 }
 
-void continueGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[], 
+void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[], 
 			struct hanamaruTag hanamaru[], struct achievementTag achievement[]){
-
-	loadGame(idolDungeon, game, inventory, hanamaru, achievement);
-		
-	system("cls");
 	
 	char choice;
 	int index;
 	int charIdx;
-		
-    showHostages(idolDungeon, game);
-    showDungeonMenu(idolDungeon, game, inventory);
-
-    do{
+	int clear = 0;
+	do{
     	
 	    printf("Choice: ");
 	    scanf(" %c", &choice);
@@ -938,104 +931,8 @@ void continueGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, str
 	        	printf("%s has been successfully rescued!\n", idolDungeon[charIdx].idol);
 	        	game->rescuedCount[charIdx]++;
 	        	game->clearStatus[index] = 1;
-	        	game->dungeonClears++;
-	        	
-	        	itemUnlock(charIdx, hanamaru);
-	        	achievementUnlock(achievement, game);					
-        	}
-        	system("pause");
-            system("cls");
-            showHostages(idolDungeon, game);
-			showDungeonMenu(idolDungeon, game, inventory);
-		}
-		
-		// Inventory
-		else if (choice == 'I' || choice == 'i'){
-			system("cls");
-		    showInventory(idolDungeon, game, inventory);
-		}
-		
-		// Save and quit 
-		else if (choice == 'S' || choice == 's'){
-			saveGame(idolDungeon, game, inventory, hanamaru, achievement);
-			printf("Game Saved!\n\n"); 
-	        system("cls");
-		}
-		
-		// hanamaru store
-		else if (choice == 'H' || choice == 'h'){
-        	if (game->rescuedCount[3] > 0){
-        	system("cls");
-            hanamaruStore(idolDungeon, game, inventory, hanamaru);
-        }
-        	else
-        		printf("Totally nothing to see here!\n");
-		}
-		
-		else
-			printf("Invalid choice\n");
-			    	
-	} while (choice != 'S' && choice != 's');	
-				
-}
-
-void newGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[], 
-			struct hanamaruTag hanamaru[], struct achievementTag achievement[]){
-	
-	system("cls");
-	
-	// feel free to change these around if you want to test something, but make sure to revert it back when done testing
-	int i;
-	char choice;
-	int index;
-	int charIdx;
-    game->hp = 3;
-    game->maxHP = 3;
-    game->gold = 0;  
-	game->running = 1;
-	game->dungeonClears = 0;
-	game->goldSpent = 0;
-	game->dmgTaken = 0;
-	
-	for (i = 0; i < MAX_HOSTAGES; i++) {
-    	game->clearStatus[i] = 0;
-	}
-	
-	for (i = 0; i < MAX_IDOLS; i++){
-		game->rescuedCount[i] = 0;
-	}
-	
-	initializeIdolDungeon(idolDungeon);	
-	initializeInventory(inventory);
-	initializeHanamaru(hanamaru);
-	initializeAchievements(achievement);
-	
-	selectHostages(game);
-    showHostages(idolDungeon, game);
-    showDungeonMenu(idolDungeon, game, inventory);
-
-    do{
-    	
-	    printf("Choice: ");
-	    scanf(" %c", &choice);
-		
-		// I put "index = choice - '1'" inside bc the index is only needed for numerical inputs	
-		if (choice >= '1' && choice <= '3'){ 
-			index = choice - '1'; // char to number
-			
-			system("cls");
-        	if (game->clearStatus[index] == 1)
-        		printf("Dungeon is cleared. You can no longer enter\n");
-        	else{
-	        	printf("Entering dungeon %d\n\n", index+1);
-	        	
-	        	// this auto clears right now as placeholder, might move this to a diff func
-	        	// finish dungeon first before this
-	        	charIdx = game->hostages[index]; 
-	        	printf("%s has been successfully rescued!\n", idolDungeon[charIdx].idol);
-	        	game->rescuedCount[charIdx]++;
-	        	game->clearStatus[index] = 1;
-	        	game->dungeonClears++;
+				clear++;	// when this goes to 3, final boss time
+	        	game->dungeonClears++; 
 	        	
 	        	itemUnlock(charIdx, hanamaru);
 	        	achievementUnlock(achievement, game);					
@@ -1073,6 +970,54 @@ void newGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct i
 			printf("Invalid choice\n");
 			    	
 	} while (choice != 'S' && choice != 's');
+}
+
+void continueGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[], 
+			struct hanamaruTag hanamaru[], struct achievementTag achievement[]){
+		
+	system("cls");
+	
+	loadGame(idolDungeon, game, inventory, hanamaru, achievement);	
+    showHostages(idolDungeon, game);
+    showDungeonMenu(idolDungeon, game, inventory);
+
+    gameMenu(idolDungeon, game, inventory, hanamaru, achievement);
+				
+}
+
+void newGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[], 
+			struct hanamaruTag hanamaru[], struct achievementTag achievement[]){
+	
+	system("cls");
+	
+	// feel free to change these around if you want to test something, but make sure to revert it back when done testing
+	int i;
+    game->hp = 3;
+    game->maxHP = 3;
+    game->gold = 0;  
+	game->running = 1;
+	game->dungeonClears = 0;
+	game->goldSpent = 0;
+	game->dmgTaken = 0;
+	
+	for (i = 0; i < MAX_IDOLS; i++) {
+    	game->clearStatus[i] = 0;
+	}
+	
+	for (i = 0; i < MAX_IDOLS; i++){
+		game->rescuedCount[i] = 0;
+	}
+	
+	initializeIdolDungeon(idolDungeon);	
+	initializeInventory(inventory);
+	initializeHanamaru(hanamaru);
+	initializeAchievements(achievement);
+	
+	selectHostages(game);
+    showHostages(idolDungeon, game);
+    showDungeonMenu(idolDungeon, game, inventory);
+	
+    gameMenu(idolDungeon, game, inventory, hanamaru, achievement);
 
 }
 
