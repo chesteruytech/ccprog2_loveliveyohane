@@ -15,7 +15,8 @@ to do by priority:
 	- max hp (go back to 3 hp)
 	
 - item on hand (specs did not specify lmao)
-- continue game on main menu if file exists
+
+IMPORTANT: un-comment line 1075 to make new game regardless of file exisiting or not.
 
 Complete:
 - Main menu
@@ -91,6 +92,32 @@ struct achievementTag{
 	Description description;
 	char dateEarned[20];
 };
+
+void initializeGame(struct gameTag *game){
+	
+	// feel free to change these around if you want to test something, but make sure to revert it back when done testing
+	int i;
+	game->hp = 3;
+    game->maxHP = 3;
+    game->gold = 0;  
+	game->running = 1;
+	game->dungeonClears = 0;
+	game->goldSpent = 0;
+	game->dmgTaken = 0;
+	game->currentPlaythroughClear = 0;
+	
+	for (i = 0; i < MAX_IDOLS; i++) {
+    	game->clearStatus[i] = 0;
+	}
+	
+	for (i = 0; i < MAX_HOSTAGES; i++) {
+    	game->clearStatusTemp[i] = 0;
+	}
+	
+	for (i = 0; i < MAX_IDOLS; i++){
+		game->rescuedCount[i] = 0;
+	}
+}
 
 void initializeIdolDungeon(struct idolDungeonTag idolDungeon[]){
 	
@@ -868,10 +895,8 @@ void loadGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 	
 	ptr = fopen("gameData.txt", "r");
 	
-	if (ptr == NULL){
-		printf("Error opening file.\n");
-		system("pause");
-	}
+	if (ptr == NULL)
+		game->running = 0;
 	else{
 		fscanf(ptr, "Max HP: %d\n", &game->maxHP);
 		fscanf(ptr, "Current HP: %d\n", &game->hp);
@@ -915,6 +940,7 @@ void loadGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 			}
 			
 		fclose(ptr);
+	
 			
 }
 
@@ -1015,29 +1041,7 @@ void newGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct i
 	
 	system("cls");
 	
-	// feel free to change these around if you want to test something, but make sure to revert it back when done testing
-	int i;
-    game->hp = 3;
-    game->maxHP = 3;
-    game->gold = 0;  
-	game->running = 1;
-	game->dungeonClears = 0;
-	game->goldSpent = 0;
-	game->dmgTaken = 0;
-	game->currentPlaythroughClear = 0;
-	
-	for (i = 0; i < MAX_IDOLS; i++) {
-    	game->clearStatus[i] = 0;
-	}
-	
-	for (i = 0; i < MAX_HOSTAGES; i++) {
-    	game->clearStatusTemp[i] = 0;
-	}
-	
-	for (i = 0; i < MAX_IDOLS; i++){
-		game->rescuedCount[i] = 0;
-	}
-	
+	initializeGame(game);
 	initializeIdolDungeon(idolDungeon);	
 	initializeInventory(inventory);
 	initializeHanamaru(hanamaru);
@@ -1060,13 +1064,15 @@ int main(){
 	struct inventoryTag inventory[MAX_INVENTORY];
 	struct hanamaruTag hanamaru[MAX_HANAMARU];
 	struct achievementTag achievement[MAX_ACHIEVEMENTS];
-	
+
+	initializeGame(&game);
 	initializeIdolDungeon(idolDungeon);	
 	initializeInventory(inventory);
 	initializeHanamaru(hanamaru);
 	initializeAchievements(achievement);
 	
-	game.running = 0;
+	loadGame(idolDungeon, &game, inventory, hanamaru, achievement);	
+	//game.running = 0; // comment this out if you want to test the continue game
 	
     do {
         printf("\t************************************************\n");
@@ -1076,9 +1082,9 @@ int main(){
 		
 		if (!game.running)
         	printf("\t\t  [N]ew Game\n");
-        else
+        else	
         	printf("\t\t  [C]ontinue\n");
-        	
+    	
         printf("\t\t  [V]iew Achievements\n");
         printf("\t\t  [Q]uit\n");
         printf("\nYour choice: ");
@@ -1088,10 +1094,11 @@ int main(){
             case 'N': case 'n':
             	if (!game.running)
                 	newGame(idolDungeon, &game, inventory, hanamaru, achievement);
-                else
+                else{
                 	printf("Invalid choice!\n");
                 	system("pause");
 			    	system("cls");
+			    }
                 break;
             case 'C': case 'c':
             	if (game.running == 1){
