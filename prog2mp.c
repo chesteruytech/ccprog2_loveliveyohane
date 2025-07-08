@@ -506,7 +506,7 @@ void viewAchievementDetails(char choice[], struct achievementTag achievement[], 
 		    system("cls");
 		    viewAchievementsCount(achievement, achievementCount);
 		    
-		    if (index >= 0 && index < 28){
+		    if (index >= 0 && index < 28 && isNumber(choice) == 1){
 			    printf("Achievement Name: %s\n", achievement[index].achievement);
 				printf("\n");
 				printf("Status: ");
