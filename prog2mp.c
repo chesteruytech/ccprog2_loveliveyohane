@@ -14,7 +14,7 @@ to do by priority:
 	- any other shop items
 	- max hp (go back to 3 hp)
 	
-- item on hand (specs did not specify lmao)
+- item on hand (think of a specific key to go back and forth)
 
 IMPORTANT: un-comment line 1075 to make new game regardless of file exisiting or not.
 
@@ -27,7 +27,6 @@ Complete:
 - hanamaru shop
 - save file
 - load file
-
 */
 #include <stdio.h>
 #include <stdlib.h>
@@ -646,26 +645,46 @@ void selectHostages(struct gameTag *game){
 	int index;
     int selected = 0;
     int used[MAX_IDOLS] = {0};
+    int attempts = 0;
+    int i;
     
-    while (selected < MAX_HOSTAGES){
+    while (selected < MAX_HOSTAGES && attempts < 100){
         index = rand() % MAX_IDOLS;
-        if (used[index] == 0){
+        attempts++;
+        if (used[index] == 0 && game->rescuedCount[index] == 0){
             used[index] = 1;
             game->hostages[selected] = index;	// randomly selected indexes go to hostage array
             selected++;
         }
     }
+    
+    for (i = selected; i < MAX_HOSTAGES; i++)  // if there are less than three hostages left
+    	game->hostages[i] = -1;
+
+		
 }
 
 void showHostages(struct idolDungeonTag idolDungeon[], struct gameTag *game){
 
 	int i, idx;
+	int rescued = 0;
 
 	printf("Hostages: \n");
-    for (i = 0; i < 3; i++){
+    for (i = 0; i < MAX_HOSTAGES; i++){
         idx = game->hostages[i];
-        printf("- %s in %s\n", idolDungeon[idx].idol, idolDungeon[idx].dungeon);
+        
+        if (game->hostages[i] != -1)
+        	printf("- %s in %s\n", idolDungeon[idx].idol, idolDungeon[idx].dungeon);
+        	
     }
+    
+    for (i = 0; i < MAX_IDOLS; i++){
+		if (game->rescuedCount[i] > 0)
+			rescued++;
+	}
+	
+	if (rescued == 8)
+		printf("None\n");
     
     printf("\n\n");
 }
