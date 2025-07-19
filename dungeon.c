@@ -1,9 +1,9 @@
 /* 
-	Please use #include "dungeon.c" in the main part of the Machine project. 
+	Please use #include "dungeon.c" in the main part of the Machine Project. 
 
 	This Machine Project is made by:
-	1. Jon Regan Choa
-	2. Chester Aldrin G. Uy
+	1. Jon Regan Choa | prog2mp.c
+	2. Chester Aldrin G. Uy | dungeon.c
 
 	Subject: CCPROG2 | Programming with Structured Data Types
 	Checked by: Arturo P. Caronongan III
@@ -52,6 +52,14 @@ void dungeonIdentifier(grid dimension2D, int nRow, int nCol){
 				printf("b");
 			else if(dimension2D[i][j] == 9) //Yohane
 				printf("Y");
+				
+			// Additional identifiers not specified in specs
+			else if(dimension2D[i][j] == 10) //Gold Tile
+				printf("g");
+			else if(dimension2D[i][j] == 11) //Got attacked bat Tile
+				printf("B");
+			else if(dimension2D[i][j] == 12) //Siren tile
+				printf("S");
 		}
 		printf("\n");
 	}
@@ -169,6 +177,34 @@ void yohane(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol){
 	}
 }
 
+void gold(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol){
+	*tRow = -1;
+	*tCol = -1;
+
+	for(int i = 0; i < nRow; i++){
+		for(int j = 0; j < nCol; j++){
+			if(dimension2D[i][j] == 10){
+				*tRow = i;
+				*tCol = j;
+			}
+		}
+	}
+}
+
+void hit(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol){
+	*tRow = -1;
+	*tCol = -1;
+
+	for(int i = 0; i < nRow; i++){
+		for(int j = 0; j < nCol; j++){
+			if(dimension2D[i][j] == 11){
+				*tRow = i;
+				*tCol = j;
+			}
+		}
+	}
+}
+
 int tileValidation(grid dimension2D, int nRow, int nCol, int cRow, int cCol, int nDir){
 	int valid = 0;
 
@@ -194,40 +230,35 @@ int tileValidation(grid dimension2D, int nRow, int nCol, int cRow, int cCol, int
 }
 
 //Base Logic Package (e.g., character moving, tile finding and validation, winning, quitting)
-void yohaneBaseLogic(grid dimension2D)
+int yohaneBaseLogic(grid dimension2D)
 {
 	int row = MAX_ROW;
 	int col = MAX_COL;
-	int quit = 0, win = 0;
-	int wlRow, wlCol, sRow, sCol, wtRow, wtCol, hRow, hCol, tRow, tCol, eRow, eCol, bRow, bCol, yRow, yCol;
+	int quit = 0, verdict = 0;
+	int wlRow, wlCol, sRow, sCol, wtRow, wtCol, heatRow, heatCol, tRow, tCol, eRow, eCol, bRow, bCol, yRow, yCol, gRow, gCol, hitRow, hitCol;
 	char move;
 
-	wall(dimension2D,row,col,&wlRow,&wlCol);
+	wall(dimension2D,row,col,&wlRow,&wlCol); //OK
 	spike(dimension2D,row,col,&sRow,&sCol);
 	water(dimension2D,row,col,&wtRow,&wtCol);
-	heat(dimension2D,row,col,&hRow,&hCol);
+	heat(dimension2D,row,col,&heatRow,&heatCol);
 	treasure(dimension2D,row,col,&tRow,&tCol);
 	freedom(dimension2D,row,col,&eRow,&eCol);
-	bats(dimension2D,row,col,&bRow,&bCol);
-	yohane(dimension2D,row,col,&yRow,&yCol);
+	bats(dimension2D,row,col,&bRow,&bCol); //OK
+	yohane(dimension2D,row,col,&yRow,&yCol); //OK
+	gold(dimension2D,row,col,&gRow,&gCol); //OK
+	hit(dimension2D,row,col,&hitRow,&hitCol);
 	do{
 		system("cls");
-		// if(pRow != -1 && pCol != -1)
-		// 	printf("Yohane found at R%dC%d!\n", pRow, pCol);
-		// else
-		// 	printf("Error 404: Yohane is missing, game over!");
 		dungeonIdentifier(dimension2D,row,col);
-		printf("\n Game Controls \n");
-		printf("[W] Up | [A] Left | [S] Down | [D] Right | [X] Freeze | [Q] Save and Quit \n");
+		printf("\n Game Controls | ゲームコントロール \n");
+		printf("[W] Up | [A] Left | [S] Down | [D] Right | [X] Freeze \n");
+		printf("[W] 上 | [A] 左 | [S] 下 | [D] 右 | [X] フリーズ \n");		
 		move = getch();
 
 		switch(move){
 			case 'W': case 'w':
 				if(tileValidation(dimension2D,row,col,yRow,yCol,1)){
-					// Dig a wall
-					if(dimension2D[yRow-1][yCol] == 2)
-						dimension2D[yRow-1][yCol] = 1;
-					
 					//Check next tile if passable
 					if(dimension2D[yRow-1][yCol] == 1){
 						dimension2D[yRow][yCol] = 1;
@@ -235,14 +266,21 @@ void yohaneBaseLogic(grid dimension2D)
 						yRow--;
 					}else //Yohane stays at the same tile if impassable
 						dimension2D[yRow][yCol] = 9;
+
+					// Tile identification
+					if(dimension2D[yRow-1][yCol] == 2) //Wall digging
+						dimension2D[yRow-1][yCol] = 1;
+					else if(dimension2D[yRow-1][yCol] == 8){ //Yohane attacks bat
+						dimension2D[yRow-1][yCol] = 10;
+						if(dimension2D[yRow-1][yCol] == 10){
+							dimension2D[yRow][yCol] = 1;
+							dimension2D[yRow-1][yCol] = 9; //Yohane obtains gold
+							yRow--;
+						}
+					}
 				}
-				break;
 			case 'A': case 'a':
 				if(tileValidation(dimension2D,row,col,yRow,yCol,2)){
-					// Dig a wall
-					if(dimension2D[yRow][yCol-1] == 2)
-						dimension2D[yRow][yCol-1] = 1;
-
 					//Check next tile if passable
 					if(dimension2D[yRow][yCol-1] == 1){
 						dimension2D[yRow][yCol] = 1;
@@ -250,14 +288,22 @@ void yohaneBaseLogic(grid dimension2D)
 						yCol--;
 					}else //Yohane stays at the same tile if impassable
 						dimension2D[yRow][yCol] = 9;
+						
+					// Tile identification
+					if(dimension2D[yRow][yCol-1] == 2) //Wall digging
+						dimension2D[yRow][yCol-1] = 1;
+					else if(dimension2D[yRow][yCol-1] == 8){ //Yohane attacks bat
+						dimension2D[yRow][yCol-1] = 10; //Gold spotted!
+						if(dimension2D[yRow][yCol-1] == 10){
+							dimension2D[yRow][yCol] = 1;
+							dimension2D[yRow][yCol-1] = 9;  //Yohane obtains gold
+							yCol--;
+						}
+					}
 				}
 				break;
 			case 'S': case 's':
 				if(tileValidation(dimension2D,row,col,yRow,yCol,3)){
-					// Dig a wall
-					if(dimension2D[yRow+1][yCol] == 2)
-						dimension2D[yRow+1][yCol] = 1;
-
 					//Check next tile if passable
 					if(dimension2D[yRow+1][yCol] == 1){
 						dimension2D[yRow][yCol] = 1;
@@ -265,14 +311,22 @@ void yohaneBaseLogic(grid dimension2D)
 						yRow++;
 					}else //Yohane stays at the same tile if impassable
 						dimension2D[yRow][yCol] = 9;
+					
+					// Tile identification
+					if(dimension2D[yRow+1][yCol] == 2) //Wall digging
+						dimension2D[yRow+1][yCol] = 1;
+					else if(dimension2D[yRow+1][yCol] == 8){ //Yohane attacks bat
+						dimension2D[yRow+1][yCol] = 10; //Gold spotted!
+						if(dimension2D[yRow+1][yCol] == 10){
+							dimension2D[yRow][yCol] = 1;
+							dimension2D[yRow+1][yCol] = 9;  //Yohane obtains gold
+							yRow++;
+						}
+					}
 				}
 				break;
 			case 'D': case 'd':
 				if(tileValidation(dimension2D,row,col,yRow,yCol,4)){
-					// Dig a wall
-					if(dimension2D[yRow][yCol+1] == 2)
-						dimension2D[yRow][yCol+1] = 1;
-
 					// Check next tile if passable
 					if(dimension2D[yRow][yCol+1] == 1){
 						dimension2D[yRow][yCol] = 1;
@@ -280,97 +334,52 @@ void yohaneBaseLogic(grid dimension2D)
 						yCol++;
 					}else //Yohane stays at the same tile if impassable
 						dimension2D[yRow][yCol] = 9;
+						
+					// Tile identification
+					if(dimension2D[yRow][yCol+1] == 2) //Wall digging
+						dimension2D[yRow][yCol+1] = 1; 
+					else if(dimension2D[yRow][yCol+1] == 8){ //Yohane attacks bat
+						dimension2D[yRow][yCol+1] = 10; //Gold spotted!
+						if(dimension2D[yRow][yCol+1] == 10){
+							dimension2D[yRow][yCol] = 1;
+							dimension2D[yRow][yCol+1] = 9;  //Yohane obtains gold
+							yCol++;
+						}
+					}
 				}
 				break;
 			case 'X': case 'x':
 				dimension2D[yRow][yCol] = 9;
 				break;
-			case 'Q': case 'q':
-				quit = 1;
-				break;
+			default:
+				printf("Error 7611111810176105118101: Your choice is invalid. Please try again.");
+				printf("エラー 7611111810176105118101: 無効な選択肢です。もう一度やり直してください。");
 		}
-		
-		// if(move == 'W' || move == 'w'){
-		// 	if(tileValidation(dimension2D,row,col,yRow,yCol,1)){
-		// 		// Dig a wall
-		// 		if(dimension2D[yRow-1][yCol] == 2)
-		// 			dimension2D[yRow-1][yCol] = 1;
-					
-		// 		//Check next tile if passable
-		// 		if(dimension2D[yRow][yCol+1] == 1){
-		// 			dimension2D[yRow][yCol] = 1;
-		// 			dimension2D[yRow][yCol+1] = 9;
-		// 			yRow--;
-		// 		}else //Yohane stays at the same tile if impassable
-		// 			dimension2D[yRow][yCol] = 9;
-		// 	}
-		// }else if (move == 'A' || move == 'a'){
-		// 	if(tileValidation(dimension2D,row,col,yRow,yCol,2)){
-		// 		// Dig a wall
-		// 		if(dimension2D[yRow][yCol-1] == 2)
-		// 			dimension2D[yRow][yCol-1] = 1;
-
-		// 		//Check next tile if passable
-		// 		if(dimension2D[yRow][yCol+1] == 1){
-		// 			dimension2D[yRow][yCol] = 1;
-		// 			dimension2D[yRow][yCol+1] = 9;
-		// 			yCol--;
-		// 		}else //Yohane stays at the same tile if impassable
-		// 			dimension2D[yRow][yCol] = 9;
-		// 	}
-		// }else if (move == 'S' || move == 's'){
-		// 	if(tileValidation(dimension2D,row,col,yRow,yCol,3)){
-		// 		// Dig a wall
-		// 		if(dimension2D[yRow+1][yCol] == 2)
-		// 			dimension2D[yRow+1][yCol] = 1;
-
-		// 		//Check next tile if passable
-		// 		if(dimension2D[yRow+1][yCol] == 1){
-		// 			dimension2D[yRow][yCol] = 1;
-		// 			dimension2D[yRow+1][yCol] = 9;
-		// 			yRow++;
-		// 		}else //Yohane stays at the same tile if impassable
-		// 			dimension2D[yRow][yCol] = 9;
-		// 	}
-		// }else if (move == 'D' || move == 'd'){
-		// 	if(tileValidation(dimension2D,row,col,yRow,yCol,4)){
-		// 		// Dig a wall
-		// 		if(dimension2D[yRow][yCol+1] == 2)
-		// 			dimension2D[yRow][yCol+1] = 1;
-
-		// 		// Check next tile if passable
-		// 		if(dimension2D[yRow][yCol+1] == 1){
-		// 			dimension2D[yRow][yCol] = 1;
-		// 			dimension2D[yRow][yCol+1] = 9;
-		// 			yCol++;
-		// 		}else //Yohane stays at the same tile if impassable
-		// 			dimension2D[yRow][yCol] = 9;
-		// 	}
-		// }else if (move == 'X' || move == 'x'){
-		// 	dimension2D[yRow][yCol] = 9;
-		// }else if (move == 'Q' || move == 'q')
-		// 	quit = 1;
 
 		if(yRow == eRow && yCol == eCol)
-			win = 1;
-	}while(!quit && !win);
+			verdict = 1;
+	}while(!quit && !verdict);
 	
 	printf("\n");
-	if(win)
-		printf("You have found the door to the exit. おめでとうございます!!!");
+	if(verdict){
+		printf("You have found the door to the exit. Congratulations!!!");
+		printf("あなたは出口への扉を見つけた。おめでとうございます!!!");
+	}
+
+	return verdict;
 }
 
 // Dungeon Level One: Awashima Marine Park
 void awashimaMarinePark(){
 	grid dungeon = {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, 
-				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,7,0}, 
-				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
-				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
-				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0},
-				 	{0,1,1,1,1,1,1,1,1,9,1,1,1,1,1,1,1,1,1,0}, 
-				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
-				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
-				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
+				 	{0,1,2,2,1,2,2,1,1,1,1,1,1,2,1,1,2,2,7,0}, 
+				 	{0,1,2,2,1,2,2,1,1,1,8,1,1,2,1,1,2,2,2,0}, 
+				 	{0,1,2,1,2,1,2,1,1,1,1,1,1,2,1,1,2,2,2,0}, 
+				 	{0,1,2,1,2,1,2,1,1,1,1,1,1,2,1,1,1,1,1,0},
+				 	{0,1,2,2,1,2,2,1,1,9,1,1,1,4,1,1,1,8,1,0}, 
+				 	{0,1,2,2,1,2,2,2,1,1,1,1,1,4,1,1,1,1,1,0}, 
+				 	{0,1,1,1,1,1,1,2,1,1,1,1,3,3,3,1,1,1,1,0}, 
+				 	{0,1,1,1,1,1,1,2,1,1,1,1,3,8,3,1,1,1,1,0}, 
 					{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}};
 
 	yohaneBaseLogic(dungeon);
@@ -384,9 +393,9 @@ void izumitoSeaParadise(){
 				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 				 	{0,1,1,1,1,1,1,1,1,9,1,1,1,1,1,1,1,1,1,0}, 
-				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
-				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
-				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,7,0}, 
+				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,0}, 
+				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,0}, 
+				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,7,0}, 
 					{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}};
 
 	yohaneBaseLogic(dungeon);
@@ -400,9 +409,9 @@ void shougetsuConfectionary(){
 				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 				 	{0,1,1,1,1,1,1,1,1,9,1,1,1,1,1,1,1,1,1,0}, 
-				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
-				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
-				 	{0,7,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
+				 	{0,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
+				 	{0,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
+				 	{0,7,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 					{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}};
 
 	yohaneBaseLogic(dungeon);
@@ -431,6 +440,7 @@ void sirenOfTheMirrorWorld(){
 				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,9,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 					{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}};
 
-	printf("Final Battle: Siren of the Mirror World!");
+	printf("Final Battle: Siren of the Mirror World!\n");
+	printf("最終決戦: 鏡の世界のセイレーン!\n");
 	yohaneBaseLogic(dungeon);
 }
