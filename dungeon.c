@@ -71,7 +71,77 @@ void wall(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol){
 	}
 }
 
+void spike(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol){
+	*tRow = -1;
+	*tCol = -1;
+
+	for(int i = 0; i < nRow; i++){
+		for(int j = 0; j < nCol; j++){
+			if(dimension2D[i][j] == 3){
+				*tRow = i;
+				*tCol = j;
+			}
+		}
+	}
+}
+
+void water(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol){
+	*tRow = -1;
+	*tCol = -1;
+
+	for(int i = 0; i < nRow; i++){
+		for(int j = 0; j < nCol; j++){
+			if(dimension2D[i][j] == 4){
+				*tRow = i;
+				*tCol = j;
+			}
+		}
+	}
+}
+
+void heat(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol){
+	*tRow = -1;
+	*tCol = -1;
+
+	for(int i = 0; i < nRow; i++){
+		for(int j = 0; j < nCol; j++){
+			if(dimension2D[i][j] == 5){
+				*tRow = i;
+				*tCol = j;
+			}
+		}
+	}
+}
+
+void treasure(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol){
+	*tRow = -1;
+	*tCol = -1;
+
+	for(int i = 0; i < nRow; i++){
+		for(int j = 0; j < nCol; j++){
+			if(dimension2D[i][j] == 6){
+				*tRow = i;
+				*tCol = j;
+			}
+		}
+	}
+}
+
 void freedom(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol){
+	*tRow = -1;
+	*tCol = -1;
+
+	for(int i = 0; i < nRow; i++){
+		for(int j = 0; j < nCol; j++){
+			if(dimension2D[i][j] == 7){
+				*tRow = i;
+				*tCol = j;
+			}
+		}
+	}
+}
+
+void bats(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol){
 	*tRow = -1;
 	*tCol = -1;
 
@@ -129,11 +199,16 @@ void yohaneBaseLogic(grid dimension2D)
 	int row = MAX_ROW;
 	int col = MAX_COL;
 	int quit = 0, win = 0;
-	int wRow, wCol, eRow, eCol, yRow, yCol;
+	int wlRow, wlCol, sRow, sCol, wtRow, wtCol, hRow, hCol, tRow, tCol, eRow, eCol, bRow, bCol, yRow, yCol;
 	char move;
 
-	wall(dimension2D,row,col,&wRow,&wCol);
+	wall(dimension2D,row,col,&wlRow,&wlCol);
+	spike(dimension2D,row,col,&sRow,&sCol);
+	water(dimension2D,row,col,&wtRow,&wtCol);
+	heat(dimension2D,row,col,&hRow,&hCol);
+	treasure(dimension2D,row,col,&tRow,&tCol);
 	freedom(dimension2D,row,col,&eRow,&eCol);
+	bats(dimension2D,row,col,&bRow,&bCol);
 	yohane(dimension2D,row,col,&yRow,&yCol);
 	do{
 		system("cls");
@@ -191,6 +266,7 @@ void yohaneBaseLogic(grid dimension2D)
 					}else //Yohane stays at the same tile if impassable
 						dimension2D[yRow][yCol] = 9;
 				}
+				break;
 			case 'D': case 'd':
 				if(tileValidation(dimension2D,row,col,yRow,yCol,4)){
 					// Dig a wall
