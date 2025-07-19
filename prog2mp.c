@@ -32,7 +32,7 @@ Complete:
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-
+#include "dungeon.c"
 #define MAX_IDOLS 8
 #define MAX_NAME_LEN 30
 #define MAX_HOSTAGES 3
@@ -985,8 +985,14 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
         	else{
 	        	printf("Entering dungeon %d\n\n", index+1);
 	        	
-	        	// this auto clears right now as placeholder, might move this to a diff func
-	        	// finish dungeon first before this
+	        	if (index == 0)
+	        		awashimaMarinePark();
+	        	if (index == 1)
+	        		izumitoSeaParadise();
+	        	if (index == 2)
+	        		shougetsuConfectionary();
+	        	
+	        	// if win (still incomplete)
 	        	charIdx = game->hostages[index]; 
 	        	printf("%s has been successfully rescued!\n", idolDungeon[charIdx].idol);
 	        	game->rescuedCount[charIdx]++;
@@ -1006,7 +1012,7 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 		
 		else if (choice == '1' && game->currentPlaythroughClear == 3){
 			system("cls");
-			printf("Final boss placeholder\n (PLS FINISH DUNGEONS FIRST)\n");
+			sirenOfTheMirrorWorld();
 			system("pause");
 			system("cls");
 			showHostages(idolDungeon, game);
@@ -1091,7 +1097,7 @@ int main(){
 	initializeAchievements(achievement);
 	
 	loadGame(idolDungeon, &game, inventory, hanamaru, achievement);	
-	//game.running = 0; // comment this out if you want to test the continue game
+	game.running = 0; // comment this out if you want to test the continue game
 	
     do {
         printf("\t************************************************\n");
