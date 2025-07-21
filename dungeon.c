@@ -279,6 +279,7 @@ int yohaneBaseLogic(grid dimension2D)
 						}
 					}
 				}
+				break;
 			case 'A': case 'a':
 				if(tileValidation(dimension2D,row,col,yRow,yCol,2)){
 					//Check next tile if passable
