@@ -1,9 +1,12 @@
 /* 
 to do by priority: 
-- core gameplay 
-- dungeons itself 
-- game over mechanics (game->hp <= 0)
-- final boss
+final boss (last prio)
+bat movements and attack
+largen b to B if bat hit player
+fix heat tile     dimension2D[yRow-1][yCol] == 5	
+dungeon floors
+use item and shuffle item in hand
+lailaps
 - new game+ after clear
 	Carried over:
 	- idols rescued
@@ -13,10 +16,15 @@ to do by priority:
 	not carried over:
 	- any other shop items
 	- max hp (go back to 3 hp)
-	
-- item on hand (think of a specific key to go back and forth)
 
-IMPORTANT: un-comment line 1075 to make new game regardless of file exisiting or not.
+what I did:
+changed dungeon layout
+added dungeon header like in the specs
+added grid for the final boss
+added player details in dungeon 
+added obtain treasure and obtain gold from bat funcs
+merged the movements into one function (working!!!)
+game over
 
 Complete:
 - Main menu
@@ -27,12 +35,13 @@ Complete:
 - hanamaru shop
 - save file
 - load file
+- game over
 */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include "dungeon.c"
+#include <conio.h>
 #define MAX_IDOLS 8
 #define MAX_NAME_LEN 30
 #define MAX_HOSTAGES 3
@@ -49,6 +58,14 @@ Complete:
 #define MIKAN_MOCHI 6
 #define KURO_MACHA 7 
 #define ICE_CREAM 8
+
+#define MAX_ROW 12
+#define MAX_COL 55
+#define SIREN_ROW 100
+#define SIREN_COL 100
+
+typedef int grid[MAX_ROW][MAX_COL]; //Global declaration for the grid
+typedef int finalGrid[SIREN_ROW][SIREN_ROW]; //Global declaration for the grid
 
 typedef char Name[MAX_NAME_LEN];
 typedef char Description[MAX_DESCRIPTION];
@@ -72,7 +89,7 @@ struct hanamaruTag{
 
 struct gameTag{
 	int maxHP;
-	int hp;
+	float hp;
 	int gold;
 	int hostages[MAX_HOSTAGES];
 	int rescuedCount[MAX_IDOLS];
@@ -81,8 +98,9 @@ struct gameTag{
 	int running;
 	int dungeonClears;
 	int goldSpent;
-	int dmgTaken;
+	float dmgTaken;
 	int currentPlaythroughClear;
+	Name killed;
 };
 
 struct achievementTag{
@@ -91,6 +109,7 @@ struct achievementTag{
 	Description description;
 	char dateEarned[20];
 };
+
 
 void initializeGame(struct gameTag *game){
 	
@@ -340,6 +359,7 @@ void initializeAchievements(struct achievementTag achievement[]){
 	achievement[27].earned = 0;
 	strcpy(achievement[27].description, "Complete a playthrough with 0G on-hand at the end");
 }
+
 
 void viewAchievementsCount(struct achievementTag achievement[], int achievementCount){
 	
@@ -695,7 +715,7 @@ void showDungeonMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, 
 	
     printf("Lailaps: Yohane! Where should we go to now?\n\n");
     
-    printf("HP: %d / %d", game->hp, game->maxHP);
+    printf("HP: %.1f / %d", game->hp, game->maxHP);
     printf("\t\t\t\t");
     printf("Total Gold: %d GP\n", game->gold);
     printf("Item on hand: N/A\n");	// placeholder, fix later
@@ -704,7 +724,7 @@ void showDungeonMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, 
 	if (game->currentPlaythroughClear < 3){
 	    for (i = 0; i < 3; i++){
 	        idx = game->hostages[i];
-	        if (game->clearStatusTemp[i] == 1)
+	        if (game->clearStatusTemp[i] == 1 || game->rescuedCount[idx] > 0)
 	        	printf("[X] Visit %s\n", idolDungeon[idx].dungeon);
 	        else
 	        	printf("[%d] Visit %s\n", i+1, idolDungeon[idx].dungeon);
@@ -731,7 +751,7 @@ void showInventory(struct idolDungeonTag idolDungeon[], struct gameTag *game, st
 	int i;
 	int count = 1;
 	printf("Lailaps: These are the items you have, Yohane!\n\n");
-	printf("HP: %d / %d", game->hp, game->maxHP);
+	printf("HP: %.1f / %d", game->hp, game->maxHP);
 	printf("\t\t\t\t");
     printf("Total Gold: %d GP\n", game->gold);
 	printf("Items available\n\n");
@@ -868,11 +888,11 @@ void saveGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 	ptr = fopen("gameData.txt", "w");
 	
 	fprintf(ptr, "Max HP: %d\n", game->maxHP);
-	fprintf(ptr, "Current HP: %d\n", game->hp);
+	fprintf(ptr, "Current HP: %.1f\n", game->hp);
 	fprintf(ptr, "Gold: %d\n", game->gold);
 	fprintf(ptr, "Total Dungeon Clears: %d\n", game->dungeonClears);
 	fprintf(ptr, "Total Gold Spent: %d\n", game->goldSpent);
-	fprintf(ptr, "Total Damage Taken: %d\n", game->dmgTaken);
+	fprintf(ptr, "Total Damage Taken: %.1f\n", game->dmgTaken);
 	fprintf(ptr, "Running Status: %d\n", game->running);
 	fprintf(ptr, "Dungeon Clears in Current Playthrough: %d\n", game->currentPlaythroughClear);
 	
@@ -918,11 +938,11 @@ void loadGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 		game->running = 0;
 	else{
 		fscanf(ptr, "Max HP: %d\n", &game->maxHP);
-		fscanf(ptr, "Current HP: %d\n", &game->hp);
+		fscanf(ptr, "Current HP: %f\n", &game->hp);
 		fscanf(ptr, "Gold: %d\n", &game->gold);
 		fscanf(ptr, "Total Dungeon Clears: %d\n", &game->dungeonClears);
 		fscanf(ptr, "Total Gold Spent: %d\n", &game->goldSpent);
-		fscanf(ptr, "Total Damage Taken: %d\n", &game->dmgTaken);
+		fscanf(ptr, "Total Damage Taken: %f\n", &game->dmgTaken);
 		fscanf(ptr, "Running Status: %d\n", &game->running);
 		fscanf(ptr, "Dungeon Clears in Current Playthrough: %d\n", &game->currentPlaythroughClear);
 		
@@ -963,13 +983,588 @@ void loadGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 			
 }
 
+void dungeonIdentifier(grid dimension2D, int nRow, int nCol){
+	for(int i = 0; i < MAX_ROW; i++){
+		for(int j = 0; j < MAX_COL; j++){
+			if(dimension2D[i][j] == 0) //Dungeon Border
+				printf("*");
+			else if(dimension2D[i][j] == 1) //Passable Tiles
+				printf(".");
+			else if(dimension2D[i][j] == 2) //Wall Tiles
+				printf("v");
+			else if(dimension2D[i][j] == 3) //Spike Tiles
+				printf("x");
+			else if(dimension2D[i][j] == 4){ //Water Tiles
+				printf("\e[0;34m"); //Blue color
+				printf("w");
+				printf("\e[0m"); //Resets the color to default
+			}else if(dimension2D[i][j] == 5){ //Heat Tile
+				printf("\e[0;3214m"); //Orange color
+				printf("h");
+				printf("\e[0m"); //Resets the color to default
+			}else if(dimension2D[i][j] == 6){ //Treasure Tile
+				printf("\e[0;33m"); //Yellow color
+				printf("T");
+				printf("\e[0m"); //Resets the color to default
+			}else if(dimension2D[i][j] == 7){ //Exit Tile
+				printf("\e[0;33m"); //Yellow color
+				printf("E");
+				printf("\e[0m"); //Resets the color to default
+			}else if(dimension2D[i][j] == 8){ //Bats Tile
+				printf("\e[0;31m"); //Red color
+				printf("b");
+				printf("\e[0m"); //Resets the color to default
+			}else if(dimension2D[i][j] == 9){ //Yohane
+				printf("\e[1;34m"); //Bold blue color
+				printf("Y");
+				printf("\e[0m"); //Resets the color to default
+			}
+				
+			// Additional identifiers not specified in specs
+			else if(dimension2D[i][j] == 10){ //Gold Tile
+				printf("\e[0;33m"); //Yellow color
+				printf("g");
+				printf("\e[0m"); //Resets the color to default
+			}else if(dimension2D[i][j] == 11){ //Got attacked bat Tile
+				printf("\e[0;31m"); //Red color
+				printf("B");
+				printf("\e[0m"); //Resets the color to default
+			}else if(dimension2D[i][j] == 12){ //Siren tile
+				printf("\e[0;31m"); //Red color
+				printf("S");
+				printf("\e[0m"); //Resets the color to default
+			}else if(dimension2D[i][j] == 13){ //Lailaps
+				printf("\e[0;38m"); //Grey color
+				printf("S");
+				printf("\e[0m"); //Resets the color to default
+			}
+		}
+		printf("\n");
+	}
+}
+
+void wall(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol){
+	*tRow = -1;
+	*tCol = -1;
+
+	for(int i = 0; i < nRow; i++){
+		for(int j = 0; j < nCol; j++){
+			if(dimension2D[i][j] == 2){
+				*tRow = i;
+				*tCol = j;
+			}
+		}
+	}
+}
+
+void spike(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol){
+	*tRow = -1;
+	*tCol = -1;
+
+	for(int i = 0; i < nRow; i++){
+		for(int j = 0; j < nCol; j++){
+			if(dimension2D[i][j] == 3){
+				*tRow = i;
+				*tCol = j;
+			}
+		}
+	}
+}
+
+void water(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol){
+	*tRow = -1;
+	*tCol = -1;
+
+	for(int i = 0; i < nRow; i++){
+		for(int j = 0; j < nCol; j++){
+			if(dimension2D[i][j] == 4){
+				*tRow = i;
+				*tCol = j;
+			}
+		}
+	}
+}
+
+void heat(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol){
+	*tRow = -1;
+	*tCol = -1;
+
+	for(int i = 0; i < nRow; i++){
+		for(int j = 0; j < nCol; j++){
+			if(dimension2D[i][j] == 5){
+				*tRow = i;
+				*tCol = j;
+			}
+		}
+	}
+}
+
+void treasure(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol){
+	*tRow = -1;
+	*tCol = -1;
+
+	for(int i = 0; i < nRow; i++){
+		for(int j = 0; j < nCol; j++){
+			if(dimension2D[i][j] == 6){
+				*tRow = i;
+				*tCol = j;
+			}
+		}
+	}
+}
+
+void freedom(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol){
+	*tRow = -1;
+	*tCol = -1;
+
+	for(int i = 0; i < nRow; i++){
+		for(int j = 0; j < nCol; j++){
+			if(dimension2D[i][j] == 7){
+				*tRow = i;
+				*tCol = j;
+			}
+		}
+	}
+}
+
+void bats(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol){
+	*tRow = -1;
+	*tCol = -1;
+
+	for(int i = 0; i < nRow; i++){
+		for(int j = 0; j < nCol; j++){
+			if(dimension2D[i][j] == 8){
+				*tRow = i;
+				*tCol = j;
+			}
+		}
+	}
+}
+
+void yohane(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol){
+	*tRow = -1;
+	*tCol = -1;
+
+	for(int i = 0; i < nRow; i++){
+		for(int j = 0; j < nCol; j++){
+			if(dimension2D[i][j] == 9){
+				*tRow = i;
+				*tCol = j;
+			}
+		}
+	}
+}
+
+void gold(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol){
+	*tRow = -1;
+	*tCol = -1;
+
+	for(int i = 0; i < nRow; i++){
+		for(int j = 0; j < nCol; j++){
+			if(dimension2D[i][j] == 10){
+				*tRow = i;
+				*tCol = j;
+			}
+		}
+	}
+}
+
+void hit(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol){
+	*tRow = -1;
+	*tCol = -1;
+
+	for(int i = 0; i < nRow; i++){
+		for(int j = 0; j < nCol; j++){
+			if(dimension2D[i][j] == 11){
+				*tRow = i;
+				*tCol = j;
+			}
+		}
+	}
+}
+
+void siren(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol){
+	*tRow = -1;
+	*tCol = -1;
+
+	for(int i = 0; i < nRow; i++){
+		for(int j = 0; j < nCol; j++){
+			if(dimension2D[i][j] == 12){
+				*tRow = i;
+				*tCol = j;
+			}
+		}
+	}
+}
+
+void lailaps(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol){
+	*tRow = -1;
+	*tCol = -1;
+
+	for(int i = 0; i < nRow; i++){
+		for(int j = 0; j < nCol; j++){
+			if(dimension2D[i][j] == 13){
+				*tRow = i;
+				*tCol = j;
+			}
+		}
+	}
+}
+
+int tileValidation(grid dimension2D, int nRow, int nCol, int cRow, int cCol, int nDir){
+	int valid = 0;
+
+	if(nDir == 1){
+		cRow--;
+		if(cRow >= 0 && dimension2D[cRow][cCol] != 0)
+			valid = 1;
+	}else if(nDir == 2){
+		cCol--;
+		if(cCol >= 0 && dimension2D[cRow][cCol] != 0)
+			valid = 1;	
+	}else if(nDir == 3){
+		cRow++;
+		if(cRow < nRow && dimension2D[cRow][cCol] != 0)
+			valid = 1;
+	}else if(nDir == 4){
+		cCol++;
+		if(cCol < nCol && dimension2D[cRow][cCol] != 0)
+			valid = 1;
+	}
+
+	return valid;
+}
+
+void obtainTreasure(struct inventoryTag inventory[], struct gameTag game[]){
+	
+	srand(time(NULL));
+	int random = rand() % 2;
+	int goldRandom = (rand() % 90) + 10 + 1;
+	if (random == 0){
+		printf("Obtained: Noppo Bread (1)!\n");
+		inventory[1].itemCount += 1;
+	}
+	else{
+		printf("Obtained %d gold!\n", goldRandom);
+		game->gold += goldRandom;	
+	}
+	
+	system("pause");
+}
+
+void obtainGoldBat(struct gameTag *game){
+	
+	if (game->currentPlaythroughClear == 0)
+		game->gold += 5;
+	if (game->currentPlaythroughClear == 1)
+		game->gold += 10;
+	if (game->currentPlaythroughClear == 2)
+		game->gold += 15;
+}
+
+void movement(grid dimension2D, struct gameTag *game, struct inventoryTag inventory[], int *yRow, int *yCol, int targetRow, int targetCol, int *verdict){
+
+	int currentRow = *yRow;
+	int currentCol = *yCol;
+
+		// Checks if there is wall (the old one moved forward into a tile just dug
+		if (dimension2D[targetRow][targetCol] == 2){ // Wall digging (done)
+			dimension2D[targetRow][targetCol] = 1; // dig first  
+			dimension2D[currentRow][currentCol] = 9;  // stay still     
+		}
+		else if (dimension2D[targetRow][targetCol] == 3){ // Spike (done)
+			dimension2D[targetRow][targetCol] = 1; // dig first  
+			dimension2D[currentRow][currentCol] = 9;  // stay still
+			game->hp -= 0.5; // take damage
+			game->dmgTaken += 0.5;
+			if (game->hp <= 0)
+				strcpy(game->killed, "Spike");
+		}
+		else if (dimension2D[targetRow][targetCol] == 4){ // Water tile (almost done, just need bats to pass thry after bat movement)
+			dimension2D[currentRow][currentCol] = 9; 
+		}
+		else if (dimension2D[targetRow][targetCol] == 5){ // Heat tile is bugged, doesn't take damage
+		    dimension2D[currentRow][currentCol] = 1; 
+			dimension2D[targetRow][targetCol] = 9;
+			*yRow = targetRow; // update current position
+			*yCol = targetCol; // update current position
+		}
+		else if (dimension2D[targetRow][targetCol] == 6){ // treasure (done)
+		    dimension2D[currentRow][currentCol] = 1; 
+			dimension2D[targetRow][targetCol] = 9;
+			*yRow = targetRow; 
+			*yCol = targetCol; 
+			
+			obtainTreasure(inventory, game);
+		}
+		else if (dimension2D[targetRow][targetCol] == 1){ // FREE SPACE (done)
+			dimension2D[currentRow][currentCol] = 1; 
+			dimension2D[targetRow][targetCol] = 9;
+			*yRow = targetRow; 
+			*yCol = targetCol; 
+		}
+		else if (dimension2D[targetRow][targetCol] == 8 || dimension2D[targetRow][targetCol] == 11){ // Yohane attacks bat
+			dimension2D[targetRow][targetCol] = 10;  // Gold spotted!       
+			dimension2D[currentRow][currentCol] = 9; // stay still
+		}
+		else if (dimension2D[targetRow][targetCol] == 10){ // gold tile	
+			dimension2D[currentRow][currentCol] = 1; 
+			dimension2D[targetRow][targetCol] = 9;
+			*yRow = targetRow; 
+			*yCol = targetCol; 
+			
+			obtainGoldBat(game);	
+		}
+		else if (dimension2D[targetRow][targetCol] == 7){ // Exit
+			dimension2D[currentRow][currentCol] = 1; 
+			dimension2D[targetRow][targetCol] = 9;
+			*yRow = targetRow; 
+			*yCol = targetCol;
+			*verdict = 1;
+		}
+			
+		else 
+			dimension2D[currentRow][currentCol] = 9; 
+	
+		
+}
+
+
+void cycleItem(){
+  printf("cycle item");
+}
+
+
+void useItem(struct inventoryTag inventory[], struct gameTag *game){
+	printf("use item\n");
+}
+
+void gameOver(struct gameTag *game, struct inventoryTag inventory[]) {
+    int i;
+
+	game->maxHP = 3;
+    game->hp = 3.0;
+    game->currentPlaythroughClear = 0;
+	
+
+    for (i = 0; i < 3; i++)
+        game->clearStatusTemp[i] = 0;
+
+    for (i = 2; i < MAX_INVENTORY; i++){
+    	inventory[i].hidden = 1;
+    	inventory[i].itemCount = 0;
+	}
+}
+
+
+//Base Logic Package (e.g., character moving, tile finding and validation, winning, quitting)
+int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct idolDungeonTag idolDungeon[], int dungeonIndex, struct inventoryTag inventory[])
+{
+	int row = MAX_ROW;
+	int col = MAX_COL;
+	int quit = 0, verdict = 0;
+	int wlRow, wlCol, spikeRow, spikeCol, wtRow, wtCol, heatRow, heatCol, tRow, tCol, eRow, eCol, bRow, bCol, yRow, yCol, gRow, gCol, hitRow, hitCol, sirenRow, sirenCol, lRow, lCol;
+	char move;
+	
+	int playerMoveCount = 0;
+	
+	// Tile location/s
+	wall(dimension2D,row,col,&wlRow,&wlCol);
+	spike(dimension2D,row,col,&spikeRow,&spikeCol);
+	water(dimension2D,row,col,&wtRow,&wtCol);
+	heat(dimension2D,row,col,&heatRow,&heatCol);
+	treasure(dimension2D,row,col,&tRow,&tCol);
+	freedom(dimension2D,row,col,&eRow,&eCol);
+	bats(dimension2D,row,col,&bRow,&bCol);
+	yohane(dimension2D,row,col,&yRow,&yCol);
+	gold(dimension2D,row,col,&gRow,&gCol);
+	hit(dimension2D,row,col,&hitRow,&hitCol);
+	siren(dimension2D,row,col,&sirenRow,&sirenCol);
+	lailaps(dimension2D,row,col,&lRow,&lCol);
+
+	
+	int floorCount = dungeonIndex;
+	
+	if (game->currentPlaythroughClear == 0){
+		floorCount = 1;
+	}
+	else if (game->currentPlaythroughClear == 1){
+		floorCount = (rand() % 2) + 2;
+	}
+	else if (game->currentPlaythroughClear == 2){
+		floorCount = (rand() % 2) + 3;
+	}
+			
+
+	do{
+		system("cls");
+		
+		if (game->currentPlaythroughClear < 3){
+			printf("Dungeon #%d: %s\n", dungeonIndex+1, idolDungeon[charIdx].dungeon);
+			printf("Floor 1 of %d\n", floorCount);
+		}
+		else
+			printf("Final Battle: Siren of the Mirror World!\n");
+			
+		printf("\n");
+		printf("HP: %.1f / %d", game->hp, game->maxHP);
+	    printf("\t\t\t\t");
+	    printf("Total Gold: %d GP\n", game->gold);
+	    printf("Item on hand: N/A\n");	// placeholder, fix later
+	    printf("\n");
+	    
+		dungeonIdentifier(dimension2D,row,col);
+		printf("\n Game Controls \n"); //  | ゲームコントロール
+		printf("[W] Up | [A] Left | [S] Down | [D] Right | [X] Freeze\n[[] Cycle Previous Item | []] Cycle Next Item | [SPACE] Use Item on Hand\n");
+		// printf("[W] 上 | [A] 左 | [S] 下 | [D] 右 | [X] フリーズ \n");		
+		move = getch();
+
+		switch(move){
+			case 'W': case 'w':
+				if(tileValidation(dimension2D,row,col,yRow,yCol,1))
+					movement(dimension2D,game,inventory,&yRow,&yCol,yRow-1,yCol,&verdict);
+					break;
+			case 'A': case 'a':
+				if(tileValidation(dimension2D,row,col,yRow,yCol,2))
+					movement(dimension2D,game,inventory,&yRow,&yCol,yRow,yCol-1,&verdict);
+					break;
+			case 'S': case 's':
+				if(tileValidation(dimension2D,row,col,yRow,yCol,3))
+					movement(dimension2D,game,inventory,&yRow,&yCol,yRow+1,yCol,&verdict);
+					break;
+			case 'D': case 'd':
+				if(tileValidation(dimension2D,row,col,yRow,yCol,4))
+					movement(dimension2D,game,inventory,&yRow,&yCol,yRow,yCol+1,&verdict);
+					break;
+			case 'X': case 'x':
+				dimension2D[yRow][yCol] = 9;
+				break;
+			case '[': case ']':
+				cycleItem();
+				break;
+			case ' ': 
+				useItem(inventory,game);
+				break;
+			default:
+				printf("Error 7611111810176105118101: Your choice is invalid. Please try again.");
+				system("pause");
+				// printf("エラー 7611111810176105118101: 無効な選択肢です。もう一度やり直してください。");
+		}
+		
+		playerMoveCount++;
+		if (dimension2D[yRow][yCol] == 5 && (move == 'X' || move == 'x')) // take damage if no moving in heat tile (bugged)
+			game->hp -= 1;
+		
+		if (game->hp <= 0){
+			printf("\t\t\t\t  You Died!\n");
+			printf("\t\t\t\tKilled by: %s\n", game->killed);
+			system("pause");
+			
+			gameOver(game, inventory);
+			quit = 1;
+		}
+		
+	}while(!quit && !verdict);
+	
+	printf("\n");
+	if(verdict){
+		printf("You have found the door to the exit. Congratulations!!!\n");
+		system("pause");
+		system("cls");
+		// printf("あなたは出口への扉を見つけた。おめでとうございます!!!");
+	}
+
+	return verdict;
+}
+
+// Dungeon Level One: Awashima Marine Park 1/2/3/4/5/7/8/9
+int awashimaMarinePark(struct gameTag *game, int charIdx, struct idolDungeonTag idolDungeon[], int dungeonIndex, struct inventoryTag inventory[]){
+				
+	grid dungeon = {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, 
+				 	{0,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
+				 	{0,1,1,6,1,1,3,1,1,1,1,5,1,1,1,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,8,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
+				 	{0,1,1,1,1,1,3,1,1,1,1,5,5,1,1,1,1,1,1,1,3,1,1,1,1,1,1,1,4,4,1,1,1,1,1,1,1,1,3,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
+				 	{0,1,1,1,1,1,3,1,1,1,1,1,1,1,1,8,1,1,1,3,3,1,1,1,1,1,1,1,4,4,1,1,1,1,1,1,1,1,3,3,1,1,1,1,3,1,1,1,8,1,1,1,1,1,0},
+				 	{0,1,1,1,1,1,3,1,1,1,1,2,1,1,1,1,1,1,1,3,3,1,1,3,1,1,1,1,4,4,1,1,1,1,1,1,1,1,3,3,1,8,1,1,3,1,1,1,1,1,1,1,1,1,0},
+				 	{0,1,3,1,1,1,3,1,1,1,1,3,1,1,1,1,1,1,1,2,3,1,1,3,1,1,1,1,4,4,1,1,1,1,1,1,1,1,3,3,1,1,1,1,3,1,1,1,1,1,1,1,1,1,0},
+				 	{0,1,3,1,1,9,3,1,1,1,1,3,1,1,1,1,1,1,1,2,3,1,1,1,1,1,1,1,4,4,1,1,1,1,1,1,1,1,3,3,1,1,2,2,2,1,1,1,3,3,3,8,3,3,0},
+				 	{0,1,1,3,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,2,2,2,2,2,4,4,1,1,1,1,1,1,1,1,3,3,1,5,1,1,1,1,1,2,2,1,1,1,1,1,0}, 
+					{0,1,1,3,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,5,1,1,1,1,1,2,2,1,1,1,1,1,0},
+					{0,1,1,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,8,1,1,1,1,1,5,1,1,1,1,1,2,2,1,8,1,1,7,0},
+					{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
+				};
+	
+	return yohaneBaseLogic(dungeon, game, charIdx, idolDungeon, dungeonIndex, inventory);
+}
+
+
+// Dungeon Level Two: Izu-mito Sea Paradise
+int izumitoSeaParadise(struct gameTag *game, int charIdx, struct idolDungeonTag idolDungeon[], int dungeonIndex, struct inventoryTag inventory[]){
+	
+	grid dungeon = {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, 
+				 	{0,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
+				 	{0,1,1,6,1,1,3,1,1,1,1,5,1,1,1,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,8,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
+				 	{0,1,1,1,1,1,3,1,1,1,1,5,5,1,1,1,1,1,1,1,3,1,1,1,1,1,1,1,4,4,1,1,1,1,1,1,1,1,3,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
+				 	{0,1,1,1,1,1,3,1,1,1,1,1,1,1,1,8,1,1,1,3,3,1,1,1,1,1,1,1,4,4,1,1,1,1,1,1,1,1,3,3,1,1,1,1,3,1,1,1,8,1,1,1,1,1,0},
+				 	{0,1,1,1,1,1,3,1,1,1,1,2,1,1,1,1,1,1,1,3,3,1,1,3,1,1,1,1,4,4,1,1,1,1,1,1,1,1,3,3,1,8,1,1,3,1,1,1,1,1,1,1,1,1,0},
+				 	{0,1,3,1,1,1,3,1,1,1,1,3,1,1,1,1,1,1,1,2,3,1,1,3,1,1,1,1,4,4,1,1,1,1,1,1,1,1,3,3,1,1,1,1,3,1,1,1,1,1,1,1,1,1,0},
+				 	{0,1,3,1,1,9,3,1,1,1,1,3,1,1,1,1,1,1,1,2,3,1,1,1,1,1,1,1,4,4,1,1,1,1,1,1,1,1,3,3,1,1,2,2,2,1,1,1,3,3,3,8,3,3,0},
+				 	{0,1,1,3,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,2,2,2,2,2,4,4,1,1,1,1,1,1,1,1,3,3,1,5,1,1,1,1,1,2,2,1,1,1,1,1,0}, 
+					{0,1,1,3,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,5,1,1,1,1,1,2,2,1,1,1,1,1,0},
+					{0,1,1,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,8,1,1,1,1,1,5,1,1,1,1,1,2,2,1,8,1,1,7,0},
+					{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
+				};
+
+	return yohaneBaseLogic(dungeon, game, charIdx, idolDungeon, dungeonIndex, inventory);
+}
+
+// Dungeon Level Three: Shougetsu Confectionary
+int shougetsuConfectionary(struct gameTag *game, int charIdx, struct idolDungeonTag idolDungeon[], int dungeonIndex, struct inventoryTag inventory[]){
+	grid dungeon = {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, 
+				 	{0,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
+				 	{0,1,1,6,1,1,3,1,1,1,1,5,1,1,1,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,8,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
+				 	{0,1,1,1,1,1,3,1,1,1,1,5,5,1,1,1,1,1,1,1,3,1,1,1,1,1,1,1,4,4,1,1,1,1,1,1,1,1,3,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
+				 	{0,1,1,1,1,1,3,1,1,1,1,1,1,1,1,8,1,1,1,3,3,1,1,1,1,1,1,1,4,4,1,1,1,1,1,1,1,1,3,3,1,1,1,1,3,1,1,1,8,1,1,1,1,1,0},
+				 	{0,1,1,1,1,1,3,1,1,1,1,2,1,1,1,1,1,1,1,3,3,1,1,3,1,1,1,1,4,4,1,1,1,1,1,1,1,1,3,3,1,8,1,1,3,1,1,1,1,1,1,1,1,1,0},
+				 	{0,1,3,1,1,1,3,1,1,1,1,3,1,1,1,1,1,1,1,2,3,1,1,3,1,1,1,1,4,4,1,1,1,1,1,1,1,1,3,3,1,1,1,1,3,1,1,1,1,1,1,1,1,1,0},
+				 	{0,1,3,1,1,9,3,1,1,1,1,3,1,1,1,1,1,1,1,2,3,1,1,1,1,1,1,1,4,4,1,1,1,1,1,1,1,1,3,3,1,1,2,2,2,1,1,1,3,3,3,8,3,3,0},
+				 	{0,1,1,3,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,2,2,2,2,2,4,4,1,1,1,1,1,1,1,1,3,3,1,5,1,1,1,1,1,2,2,1,1,1,1,1,0}, 
+					{0,1,1,3,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,5,1,1,1,1,1,2,2,1,1,1,1,1,0},
+					{0,1,1,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,8,1,1,1,1,1,5,1,1,1,1,1,2,2,1,8,1,1,7,0},
+					{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
+				};
+
+	return yohaneBaseLogic(dungeon, game, charIdx, idolDungeon, dungeonIndex, inventory);
+}
+
+// Dungeon Level Boss: Siren in the Mirror World! Later for Lailaps
+int sirenOfTheMirrorWorld(struct gameTag *game, int charIdx, struct idolDungeonTag idolDungeon[], int dungeonIndex, struct inventoryTag inventory[]){
+	grid dungeon = {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, 
+				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,12,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
+				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
+				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
+				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
+				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
+				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
+				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
+				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
+				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
+				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,9,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
+					{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0} 
+				 	};
+
+	//printf("Final Battle: Siren of the Mirror World!\n");
+	// printf("最終決戦: 鏡の世界のセイレーン!\n");
+	return yohaneBaseLogic(dungeon, game, charIdx, idolDungeon, dungeonIndex, inventory);
+}
+
 void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[], 
 			struct hanamaruTag hanamaru[], struct achievementTag achievement[]){
 	
 	char choice;
 	int index;
 	int charIdx;
-
+	int win = 0;
 	do{
     	
 	    printf("Choice: ");
@@ -978,23 +1573,25 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 		// I put "index = choice - '1'" inside bc the index is only needed for numerical inputs	
 		if (choice >= '1' && choice <= '3' && game->currentPlaythroughClear < 3){ 
 			index = choice - '1'; // char to number
-			
+			charIdx = game->hostages[index]; 
 			system("cls");
-        	if (game->clearStatusTemp[index] == 1)
+        	if (game->clearStatusTemp[index] == 1 || game->rescuedCount[charIdx] > 0)
         		printf("Dungeon is cleared. You can no longer enter\n");
         	else{
 	        	printf("Entering dungeon %d\n\n", index+1);
 	        	
+ 
+	        	win = 0;
 	        	if (index == 0)
-	        		awashimaMarinePark();
+	        		win = awashimaMarinePark(game, charIdx, idolDungeon, index, inventory);
 	        	if (index == 1)
-	        		izumitoSeaParadise();
+	        		win = izumitoSeaParadise(game, charIdx, idolDungeon, index, inventory);
 	        	if (index == 2)
-	        		shougetsuConfectionary();
+	        		win = shougetsuConfectionary(game, charIdx, idolDungeon, index, inventory);
 	        	
-	        	// if win (still incomplete)
-	        	charIdx = game->hostages[index]; 
-	        	printf("%s has been successfully rescued!\n", idolDungeon[charIdx].idol);
+	        	
+	        	if (win == 1){
+	        	printf("\n%s has been successfully rescued!\n", idolDungeon[charIdx].idol);
 	        	game->rescuedCount[charIdx]++;
 	        	game->clearStatus[charIdx] = 1;
 	        	game->clearStatusTemp[index] = 1;
@@ -1002,7 +1599,8 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 	        	game->dungeonClears++; 
 	        	
 	        	itemUnlock(charIdx, hanamaru);
-	        	achievementUnlock(achievement, game);					
+	        	achievementUnlock(achievement, game);
+			}
         	}
         	system("pause");
             system("cls");
@@ -1012,7 +1610,13 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 		
 		else if (choice == '1' && game->currentPlaythroughClear == 3){
 			system("cls");
-			sirenOfTheMirrorWorld();
+			win = sirenOfTheMirrorWorld(game, charIdx, idolDungeon, index, inventory);
+			if (win == 1){
+				printf("Win!\n");
+			}
+			else
+				printf("Lose\n");
+				
 			system("pause");
 			system("cls");
 			showHostages(idolDungeon, game);
@@ -1097,7 +1701,7 @@ int main(){
 	initializeAchievements(achievement);
 	
 	loadGame(idolDungeon, &game, inventory, hanamaru, achievement);	
-	game.running = 0; // comment this out if you want to test the continue game
+	//game.running = 0; // comment this out if you want to test the continue game
 	
     do {
         printf("\t************************************************\n");
