@@ -473,7 +473,12 @@ void achievementUnlock(struct achievementTag achievement[], struct gameTag *game
 			printf("Achievement unlocked: %s\n", achievement[i+1].achievement);	
 		}
 		
-		// index 9 (missing) (beat final boss once)
+		// beat final boss once (index 9)
+		if (game->totalPlaythroughClear == 1 && achievement[9].earned == 0){		
+			achievement[9].earned = 1;
+			getCurrentDate(achievement[9].dateEarned);
+			printf("Achievement unlocked: %s\n", achievement[9].achievement);
+		}
 		
 		// achievement rescue twice, index 10 to 17 
 		for (i = 0; i < MAX_IDOLS; i++) 
@@ -483,7 +488,12 @@ void achievementUnlock(struct achievementTag achievement[], struct gameTag *game
 			printf("Achievement unlocked: %s\n", achievement[i+10].achievement);	
 		}
 		
-		// index 18 (missing) (beat final boss twice)
+		// beat final boss twice (index 18)
+		if (game->totalPlaythroughClear == 2 && achievement[18].earned == 0){		
+			achievement[18].earned = 1;
+			getCurrentDate(achievement[18].dateEarned);
+			printf("Achievement unlocked: %s\n", achievement[18].achievement);
+		}
 		
 		// clear 10 dungeons (index 19)
 		if (game->dungeonClears >= 10 && achievement[19].earned == 0){
