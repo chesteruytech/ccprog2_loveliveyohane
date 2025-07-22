@@ -24,6 +24,7 @@ Complete:
 - save file
 - load file
 - game over
+- use and cycle items
 */
 #include <stdio.h>
 #include <stdlib.h>
@@ -91,7 +92,8 @@ struct gameTag{
 	int handIndex[3];
 	int currentHandIndex;
 	int chocoMintUsageCount;
-	int totalPlaythroughClear;
+	int totalPlaythroughClear; // for ng+
+	int flawless; // for step 0 to 1 achievement
 };
 
 struct achievementTag{
@@ -134,6 +136,7 @@ void initializeGame(struct gameTag *game){
 	
 	game->chocoMintUsageCount = 0;
 	game->totalPlaythroughClear = 0;
+	game->flawless = 0;
 }
 
 void initializeIdolDungeon(struct idolDungeonTag idolDungeon[]){
@@ -538,7 +541,7 @@ void achievementUnlock(struct achievementTag achievement[], struct gameTag *game
 		}
 		
 		// finish game with no gold (index 27)
-		if (game->gold == 0 && achievement[27].earned == 0 && game->totalPlaythroughClear != 0){
+		if (game->gold == 0 && achievement[27].earned == 0 && game->flawless == 1){
 			achievement[27].earned = 1;
 			getCurrentDate(achievement[27].dateEarned);
 			printf("Achievement unlocked: %s\n", achievement[27].achievement);
@@ -1763,11 +1766,13 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 			if (win == 1){
 				printf("Win!\n");
 				game->totalPlaythroughClear++;
+				
+				if (game->gold == 0)
+					game->flawless = 1;
+				
 				itemUnlock(charIdx, hanamaru);
 	        	achievementUnlock(achievement, game);
 			}
-			else
-				printf("Lose\n");
 				
 			system("pause");
 			system("cls");
