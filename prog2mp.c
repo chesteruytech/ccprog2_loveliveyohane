@@ -1,11 +1,11 @@
 /* 
 to do by priority: 
-final boss 
 bat movements and attack
 largen b to B if bat hit player	
 dungeon floors
-use item and shuffle item in hand
-lailaps for the final battle
+use item 
+final boss 
+lailaps mechanics
 - new game+ after clear
 	Carried over:
 	- idols rescued
@@ -13,7 +13,7 @@ lailaps for the final battle
 	- achievements
 	- noppo bread and tears of fallen angel
 	not carried over:
-	- any other shop items
+	- any other items bought from shop
 	- max hp (go back to 3 hp)
 
 Complete:
@@ -90,6 +90,8 @@ struct gameTag{
 	float dmgTaken;
 	int currentPlaythroughClear;
 	Name killed;
+	int handIndex[3];
+	int currentHandIndex;
 };
 
 struct achievementTag{
@@ -124,6 +126,11 @@ void initializeGame(struct gameTag *game){
 	for (i = 0; i < MAX_IDOLS; i++){
 		game->rescuedCount[i] = 0;
 	}
+	
+	game->handIndex[0] = 0; // Noppo 
+	game->handIndex[1] = 1; // Tears
+	game->handIndex[2] = 8; // Icecream
+	game->currentHandIndex = -1; // N/A
 }
 
 void initializeIdolDungeon(struct idolDungeonTag idolDungeon[]){
@@ -700,14 +707,29 @@ void showHostages(struct idolDungeonTag idolDungeon[], struct gameTag *game){
 
 void showDungeonMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[]){
 	
-	int i, idx;
+	int i, idx, invIdx;
 	
     printf("Lailaps: Yohane! Where should we go to now?\n\n");
     
     printf("HP: %.1f / %d", game->hp, game->maxHP);
     printf("\t\t\t\t");
     printf("Total Gold: %d GP\n", game->gold);
-    printf("Item on hand: N/A\n");	// placeholder, fix later
+    
+    if (game->currentHandIndex != -1){
+	    invIdx = game->handIndex[game->currentHandIndex];
+	    
+		    if (inventory[invIdx].itemCount > 0){
+		    	if (inventory[invIdx].itemCount == 1)
+			    	printf("Item on hand: %s\n", inventory[invIdx].item);
+			    else
+			        printf("Item on hand: %s (%d)\n", inventory[invIdx].item, inventory[invIdx].itemCount);
+			}
+			else
+				printf("Item on hand: N/A\n");
+	} 
+	else
+	    printf("Item on hand: N/A\n");
+		    
     printf("\n");
     
 	if (game->currentPlaythroughClear < 3){
@@ -1331,10 +1353,73 @@ void movement(grid dimension2D, struct gameTag *game, struct inventoryTag invent
 }
 
 
-void cycleItem(){
-  printf("cycle item");
+void cycleItemForward(struct inventoryTag inventory[], struct gameTag *game){
+	
+    int i;
+    int currentPos = game->currentHandIndex;
+    int found = 0;
+    int invIdx, nextIdx;
+    int availableCount = 0;
+    
+    for (i = 0; i < 3; i++){
+        invIdx = game->handIndex[i];
+        if (inventory[invIdx].itemCount > 0){
+            availableCount++;
+        }
+    }
+
+    if (availableCount > 0){
+        for (i = 1; i <= 3; i++){
+            nextIdx = (currentPos + i) % 3;
+            invIdx = game->handIndex[nextIdx];
+            if (inventory[invIdx].itemCount > 0 && found == 0){
+                game->currentHandIndex = nextIdx;
+               /* printf("DEBUG: Item on hand: %s x%d equipped.\n",
+                       inventory[invIdx].item,
+                       inventory[invIdx].itemCount);*/
+                found = 1;
+            }
+        }
+    }
+    
+    else{
+    	game->currentHandIndex = -1;
+	}
+    
 }
 
+void cycleItemBackward(struct inventoryTag inventory[], struct gameTag *game){
+    int i;
+    int currentPos = game->currentHandIndex;
+    int found = 0;
+	int invIdx, nextIdx;
+    int availableCount = 0;
+    
+    for (i = 0; i < 3; i++){
+        invIdx = game->handIndex[i];
+        if (inventory[invIdx].itemCount > 0){
+            availableCount++;
+        }
+    }
+
+    if (availableCount > 0){
+        for (i = 1; i <= 3; i++){
+            nextIdx = (currentPos - i + 3) % 3;
+            invIdx = game->handIndex[nextIdx];
+            if (inventory[invIdx].itemCount > 0 && found == 0){
+                game->currentHandIndex = nextIdx;
+                /* printf("DEBUG: Item on hand: %s x%d equipped.\n",
+	                   inventory[invIdx].item,
+	                   inventory[invIdx].itemCount);*/
+                found = 1;
+            }
+        }
+    }
+    
+    else{
+    	game->currentHandIndex = -1;
+	}
+}
 
 void useItem(struct inventoryTag inventory[], struct gameTag *game){
 	printf("use item\n");
@@ -1344,9 +1429,7 @@ void gameOver(struct gameTag *game, struct inventoryTag inventory[]) {
     int i;
 
 	game->maxHP = 3;
-    game->hp = 3.0;
-    //game->currentPlaythroughClear = 0;
-	
+    game->hp = 3.0;	
 
     for (i = 0; i < 3; i++)
         game->clearStatusTemp[i] = 0;
@@ -1371,6 +1454,7 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 	int currentTile = 1;
 	int yRowOld, yColOld;
 	int moved;
+	int invIdx;
 	// Tile location/s
 	wall(dimension2D,row,col,&wlRow,&wlCol);
 	spike(dimension2D,row,col,&spikeRow,&spikeCol);
@@ -1413,7 +1497,23 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 		printf("HP: %.1f / %d", game->hp, game->maxHP);
 	    printf("\t\t\t\t");
 	    printf("Total Gold: %d GP\n", game->gold);
-	    printf("Item on hand: N/A\n");	// placeholder, fix later
+	    
+	    if (game->currentHandIndex != -1){
+	    invIdx = game->handIndex[game->currentHandIndex];
+	    
+		    if (inventory[invIdx].itemCount > 0){
+		    	if (inventory[invIdx].itemCount == 1)
+			    	printf("Item on hand: %s\n", inventory[invIdx].item);
+			    else
+			        printf("Item on hand: %s (%d)\n", inventory[invIdx].item, inventory[invIdx].itemCount);
+			}
+			else
+				printf("Item on hand: N/A\n");
+		} 
+		else
+	    	printf("Item on hand: N/A\n");
+
+
 	    printf("\n");
 	    
 		dungeonIdentifier(dimension2D,row,col);
@@ -1446,9 +1546,12 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 			case 'X': case 'x':
 				playerMoveCount++;
 				break;
-			case '[': case ']':
-				cycleItem();
+			case '[': 
+				cycleItemForward(inventory,game);
 				break;
+			case ']':
+				cycleItemBackward(inventory,game);
+				break;	
 			case ' ': 
 				useItem(inventory,game);
 				break;
@@ -1717,7 +1820,7 @@ int main(){
 	initializeAchievements(achievement);
 	
 	loadGame(idolDungeon, &game, inventory, hanamaru, achievement);	
-	//game.running = 0; // comment this out if you want to test the continue game
+	game.running = 0; // comment this out if you want to test the continue game
 	
     do {
         printf("\t************************************************\n");
