@@ -2,8 +2,7 @@
 to do by priority: 
 final boss 
 bat movements and attack
-largen b to B if bat hit player
-fix heat tile     dimension2D[yRow-1][yCol] == 5	
+largen b to B if bat hit player	
 dungeon floors
 use item and shuffle item in hand
 lailaps for the final battle
@@ -56,7 +55,6 @@ Complete:
 #define SIREN_COL 100
 
 typedef int grid[MAX_ROW][MAX_COL]; //Global declaration for the grid
-typedef int finalGrid[SIREN_ROW][SIREN_ROW]; //Global declaration for the grid
 
 typedef char Name[MAX_NAME_LEN];
 typedef char Description[MAX_DESCRIPTION];
@@ -1261,8 +1259,7 @@ void movement(grid dimension2D, struct gameTag *game, struct inventoryTag invent
 	// THIS IS FOR PRESERVING TILES THAT HAVE BEEN PASSED THORUGH, THE OLD ONE OVERWROTE 
 	dimension2D[currentRow][currentCol] = *currentTile;
 	
-		// Restore the previous tile Yohane was standing on if it was a heat tile
-		if (dimension2D[currentRow][currentCol] == 9 && *currentTile == 5) {
+		if (dimension2D[currentRow][currentCol] == 9 && *currentTile == 5){
 		    dimension2D[currentRow][currentCol] = 5;
 		} 
 		else if (dimension2D[currentRow][currentCol] == 9){
@@ -1372,7 +1369,8 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 	
 	int playerMoveCount = 0;
 	int currentTile = 1;
-	
+	int yRowOld, yColOld;
+	int moved;
 	// Tile location/s
 	wall(dimension2D,row,col,&wlRow,&wlCol);
 	spike(dimension2D,row,col,&spikeRow,&spikeCol);
@@ -1424,6 +1422,10 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 		// printf("[W] 上 | [A] 左 | [S] 下 | [D] 右 | [X] フリーズ \n");		
 		move = getch();
 		
+		yRowOld = yRow;
+		yColOld = yCol;
+		moved = 0;
+		
 		switch(move){
 			case 'W': case 'w':
 				if(tileValidation(dimension2D,row,col,yRow,yCol,1))
@@ -1456,9 +1458,18 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 				// printf("エラー 7611111810176105118101: 無効な選択肢です。もう一度やり直してください。");
 		}
 		
+		if (yRow != yRowOld || yCol != yColOld)
+		    moved = 1; 
+		else 
+		    moved = 0;
+		
 		playerMoveCount++;
-		if (currentTile == 5 && (move == 'X' || move == 'x' || move == '[' || move == ']' || move == ' '))  
+		
+		if (currentTile == 5 && moved == 0){
 			game->hp -= 1;
+			if (game->hp <= 0)
+				strcpy(game->killed, "Heat Tile");
+		}
 		
 		if (game->hp <= 0){
 			printf("\t\t\t\t  You Died!\n");
