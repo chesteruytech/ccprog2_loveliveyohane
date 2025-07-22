@@ -1,12 +1,12 @@
 /* 
 to do by priority: 
-final boss (last prio)
+final boss 
 bat movements and attack
 largen b to B if bat hit player
 fix heat tile     dimension2D[yRow-1][yCol] == 5	
 dungeon floors
 use item and shuffle item in hand
-lailaps
+lailaps for the final battle
 - new game+ after clear
 	Carried over:
 	- idols rescued
@@ -16,15 +16,6 @@ lailaps
 	not carried over:
 	- any other shop items
 	- max hp (go back to 3 hp)
-
-what I did:
-changed dungeon layout
-added dungeon header like in the specs
-added grid for the final boss
-added player details in dungeon 
-added obtain treasure and obtain gold from bat funcs
-merged the movements into one function (working!!!)
-game over
 
 Complete:
 - Main menu
@@ -295,7 +286,7 @@ void initializeAchievements(struct achievementTag achievement[]){
 	achievement[11].earned = 0;
 	strcpy(achievement[11].description, "Rescued Riko twice");
 	
-	strcpy(achievement[12].achievement, "Beginner’s Sailing!");
+	strcpy(achievement[12].achievement, "Beginner�s Sailing!");
 	achievement[12].earned = 0;
 	strcpy(achievement[12].description, "Rescued You twice");
 	
@@ -349,11 +340,11 @@ void initializeAchievements(struct achievementTag achievement[]){
 	
 	strcpy(achievement[25].achievement, "Mitaiken Horizon!");
 	achievement[25].earned = 0;
-	strcpy(achievement[25].description, "Accumulate a total of 5000G spent on Hanamaru’s stores across multiple playthroughs");
+	strcpy(achievement[25].description, "Accumulate a total of 5000G spent on Hanamaru�s stores across multiple playthroughs");
 	
 	strcpy(achievement[26].achievement, "Ruby-chan! Hai? Nani ga suki?");
 	achievement[26].earned = 0;
-	strcpy(achievement[26].description, "Get saved by a fatal blow from Ruby’s choco-mint ice cream item.");
+	strcpy(achievement[26].description, "Get saved by a fatal blow from Ruby�s choco-mint ice cream item.");
 	
 	strcpy(achievement[27].achievement, "Step! ZERO to ONE!");
 	achievement[27].earned = 0;
@@ -1262,10 +1253,21 @@ void obtainGoldBat(struct gameTag *game){
 		game->gold += 15;
 }
 
-void movement(grid dimension2D, struct gameTag *game, struct inventoryTag inventory[], int *yRow, int *yCol, int targetRow, int targetCol, int *verdict){
+void movement(grid dimension2D, struct gameTag *game, struct inventoryTag inventory[], int *yRow, int *yCol, int targetRow, int targetCol, int *verdict, int *currentTile){
 
 	int currentRow = *yRow;
 	int currentCol = *yCol;
+	
+	// THIS IS FOR PRESERVING TILES THAT HAVE BEEN PASSED THORUGH, THE OLD ONE OVERWROTE 
+	dimension2D[currentRow][currentCol] = *currentTile;
+	
+		// Restore the previous tile Yohane was standing on if it was a heat tile
+		if (dimension2D[currentRow][currentCol] == 9 && *currentTile == 5) {
+		    dimension2D[currentRow][currentCol] = 5;
+		} 
+		else if (dimension2D[currentRow][currentCol] == 9){
+		    dimension2D[currentRow][currentCol] = 1;
+		}
 
 		// Checks if there is wall (the old one moved forward into a tile just dug
 		if (dimension2D[targetRow][targetCol] == 2){ // Wall digging (done)
@@ -1283,14 +1285,15 @@ void movement(grid dimension2D, struct gameTag *game, struct inventoryTag invent
 		else if (dimension2D[targetRow][targetCol] == 4){ // Water tile (almost done, just need bats to pass thry after bat movement)
 			dimension2D[currentRow][currentCol] = 9; 
 		}
-		else if (dimension2D[targetRow][targetCol] == 5){ // Heat tile is bugged, doesn't take damage
-		    dimension2D[currentRow][currentCol] = 1; 
-			dimension2D[targetRow][targetCol] = 9;
-			*yRow = targetRow; // update current position
-			*yCol = targetCol; // update current position
+		else if (dimension2D[targetRow][targetCol] == 5){
+		    *currentTile = 5;
+		    dimension2D[targetRow][targetCol] = 9;
+		    *yRow = targetRow;
+		    *yCol = targetCol;
 		}
+
 		else if (dimension2D[targetRow][targetCol] == 6){ // treasure (done)
-		    dimension2D[currentRow][currentCol] = 1; 
+		    *currentTile = 1; 
 			dimension2D[targetRow][targetCol] = 9;
 			*yRow = targetRow; 
 			*yCol = targetCol; 
@@ -1298,11 +1301,12 @@ void movement(grid dimension2D, struct gameTag *game, struct inventoryTag invent
 			obtainTreasure(inventory, game);
 		}
 		else if (dimension2D[targetRow][targetCol] == 1){ // FREE SPACE (done)
-			dimension2D[currentRow][currentCol] = 1; 
+			*currentTile = 1; 
 			dimension2D[targetRow][targetCol] = 9;
 			*yRow = targetRow; 
 			*yCol = targetCol; 
 		}
+		
 		else if (dimension2D[targetRow][targetCol] == 8 || dimension2D[targetRow][targetCol] == 11){ // Yohane attacks bat
 			dimension2D[targetRow][targetCol] = 10;  // Gold spotted!       
 			dimension2D[currentRow][currentCol] = 9; // stay still
@@ -1367,6 +1371,7 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 	char move;
 	
 	int playerMoveCount = 0;
+	int currentTile = 1;
 	
 	// Tile location/s
 	wall(dimension2D,row,col,&wlRow,&wlCol);
@@ -1414,30 +1419,30 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 	    printf("\n");
 	    
 		dungeonIdentifier(dimension2D,row,col);
-		printf("\n Game Controls \n"); //  | ã‚²ãƒ¼ãƒ ã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ«
+		printf("\n Game Controls \n"); //  | ゲームコントロール
 		printf("[W] Up | [A] Left | [S] Down | [D] Right | [X] Freeze\n[[] Cycle Previous Item | []] Cycle Next Item | [SPACE] Use Item on Hand\n");
-		// printf("[W] ä¸Š | [A] å·¦ | [S] ä¸‹ | [D] å³ | [X] ãƒ•ãƒªãƒ¼ã‚º \n");		
+		// printf("[W] 上 | [A] 左 | [S] 下 | [D] 右 | [X] フリーズ \n");		
 		move = getch();
-
+		
 		switch(move){
 			case 'W': case 'w':
 				if(tileValidation(dimension2D,row,col,yRow,yCol,1))
-					movement(dimension2D,game,inventory,&yRow,&yCol,yRow-1,yCol,&verdict);
+					movement(dimension2D,game,inventory,&yRow,&yCol,yRow-1,yCol,&verdict,&currentTile);
 					break;
 			case 'A': case 'a':
 				if(tileValidation(dimension2D,row,col,yRow,yCol,2))
-					movement(dimension2D,game,inventory,&yRow,&yCol,yRow,yCol-1,&verdict);
+					movement(dimension2D,game,inventory,&yRow,&yCol,yRow,yCol-1,&verdict,&currentTile);
 					break;
 			case 'S': case 's':
 				if(tileValidation(dimension2D,row,col,yRow,yCol,3))
-					movement(dimension2D,game,inventory,&yRow,&yCol,yRow+1,yCol,&verdict);
+					movement(dimension2D,game,inventory,&yRow,&yCol,yRow+1,yCol,&verdict,&currentTile);
 					break;
 			case 'D': case 'd':
 				if(tileValidation(dimension2D,row,col,yRow,yCol,4))
-					movement(dimension2D,game,inventory,&yRow,&yCol,yRow,yCol+1,&verdict);
+					movement(dimension2D,game,inventory,&yRow,&yCol,yRow,yCol+1,&verdict,&currentTile);
 					break;
 			case 'X': case 'x':
-				dimension2D[yRow][yCol] = 9;
+				playerMoveCount++;
 				break;
 			case '[': case ']':
 				cycleItem();
@@ -1448,11 +1453,11 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 			default:
 				printf("Error 7611111810176105118101: Your choice is invalid. Please try again.");
 				system("pause");
-				// printf("ã‚¨ãƒ©ãƒ¼ 7611111810176105118101: ç„¡åŠ¹ãªé¸æŠžè‚¢ã§ã™ã€‚ã‚‚ã†ä¸€åº¦ã‚„ã‚Šç›´ã—ã¦ãã ã•ã„ã€‚");
+				// printf("エラー 7611111810176105118101: 無効な選択肢です。もう一度やり直してください。");
 		}
 		
 		playerMoveCount++;
-		if (dimension2D[yRow][yCol] == 5 && (move == 'X' || move == 'x')) // take damage if no moving in heat tile (bugged)
+		if (currentTile == 5 && (move == 'X' || move == 'x' || move == '[' || move == ']' || move == ' '))  
 			game->hp -= 1;
 		
 		if (game->hp <= 0){
@@ -1471,7 +1476,7 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 		printf("You have found the door to the exit. Congratulations!!!\n");
 		system("pause");
 		system("cls");
-		// printf("ã‚ãªãŸã¯å‡ºå£ã¸ã®æ‰‰ã‚’è¦‹ã¤ã‘ãŸã€‚ãŠã‚ã§ã¨ã†ã”ã–ã„ã¾ã™!!!");
+		// printf("あなたは出口への扉を見つけた。おめでとうございます!!!");
 	}
 
 	return verdict;
@@ -1554,7 +1559,7 @@ int sirenOfTheMirrorWorld(struct gameTag *game, int charIdx, struct idolDungeonT
 				 	};
 
 	//printf("Final Battle: Siren of the Mirror World!\n");
-	// printf("æœ€çµ‚æ±ºæˆ¦: é¡ã®ä¸–ç•Œã®ã‚»ã‚¤ãƒ¬ãƒ¼ãƒ³!\n");
+	// printf("最終決戦: 鏡の世界のセイレーン!\n");
 	return yohaneBaseLogic(dungeon, game, charIdx, idolDungeon, dungeonIndex, inventory);
 }
 
