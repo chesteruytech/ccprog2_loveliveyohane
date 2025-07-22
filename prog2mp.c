@@ -1,11 +1,9 @@
 /* 
 to do by priority: 
-bat movements and attack
-largen b to B if bat hit player	
-dungeon floors
-use item 
-final boss 
-lailaps mechanics
+- bat movements and attack
+- largen b to B if bat hit player	
+- dungeon floors
+- final boss 
 - new game+ after clear
 	Carried over:
 	- idols rescued
@@ -92,6 +90,8 @@ struct gameTag{
 	Name killed;
 	int handIndex[3];
 	int currentHandIndex;
+	int chocoMintUsageCount;
+	int totalPlaythroughClear;
 };
 
 struct achievementTag{
@@ -131,6 +131,9 @@ void initializeGame(struct gameTag *game){
 	game->handIndex[1] = 1; // Tears
 	game->handIndex[2] = 8; // Icecream
 	game->currentHandIndex = -1; // N/A
+	
+	game->chocoMintUsageCount = 0;
+	game->totalPlaythroughClear = 0;
 }
 
 void initializeIdolDungeon(struct idolDungeonTag idolDungeon[]){
@@ -441,7 +444,7 @@ void achievementUnlock(struct achievementTag achievement[], struct gameTag *game
 				
 		// index 9 (missing) (beat final boss once)
 		// index 18 (missing) (beat final boss twice)
-		// index 26 (missing) (get saved by ruby item) 
+	 
 			
 		int i;
 		int rescueCounter = 0;
@@ -528,10 +531,14 @@ void achievementUnlock(struct achievementTag achievement[], struct gameTag *game
 			printf("Achievement unlocked: %s\n", achievement[25].achievement);
 		}
 		
-		// index 26 (get saved by ruby) missing
+		if (game->chocoMintUsageCount == 1 && achievement[26].earned == 0){
+			achievement[26].earned = 1;
+			getCurrentDate(achievement[26].dateEarned);
+			printf("Achievement unlocked: %s\n", achievement[26].achievement);
+		}
 		
 		// finish game with no gold (index 27)
-		if (game->gold == 0 && achievement[27].earned == 0){
+		if (game->gold == 0 && achievement[27].earned == 0 && game->totalPlaythroughClear != 0){
 			achievement[27].earned = 1;
 			getCurrentDate(achievement[27].dateEarned);
 			printf("Achievement unlocked: %s\n", achievement[27].achievement);
@@ -1422,7 +1429,23 @@ void cycleItemBackward(struct inventoryTag inventory[], struct gameTag *game){
 }
 
 void useItem(struct inventoryTag inventory[], struct gameTag *game){
-	printf("use item\n");
+	
+		
+	int invIdx = game->handIndex[game->currentHandIndex];
+	
+		if (inventory[invIdx].itemCount > 0 && invIdx != 8)
+			inventory[invIdx].itemCount--;
+		
+		if (invIdx == 0 || invIdx == 1){ // Tears and Noppo
+			if (game->hp < game->maxHP){
+				game->hp += 0.5;
+			}
+			if (game->hp >= game->maxHP){
+				game->hp = game->maxHP;
+			}
+			
+		}
+	
 }
 
 void gameOver(struct gameTag *game, struct inventoryTag inventory[]) {
@@ -1442,7 +1465,7 @@ void gameOver(struct gameTag *game, struct inventoryTag inventory[]) {
 
 
 //Base Logic Package (e.g., character moving, tile finding and validation, winning, quitting)
-int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct idolDungeonTag idolDungeon[], int dungeonIndex, struct inventoryTag inventory[])
+int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct idolDungeonTag idolDungeon[], int dungeonIndex, struct inventoryTag inventory[], struct achievementTag achievement[])
 {
 	int row = MAX_ROW;
 	int col = MAX_COL;
@@ -1574,12 +1597,19 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 				strcpy(game->killed, "Heat Tile");
 		}
 		
-		if (game->hp <= 0){
+		if (game->currentHandIndex == 2 && game->hp <= 0 && inventory[8].itemCount > 0){
+				game->hp = game->maxHP;
+				inventory[8].itemCount--;
+				game->chocoMintUsageCount++;
+		}
+	
+		else if (game->hp <= 0){
 			printf("\t\t\t\t  You Died!\n");
 			printf("\t\t\t\tKilled by: %s\n", game->killed);
 			system("pause");
 			
 			gameOver(game, inventory);
+	        achievementUnlock(achievement, game);
 			quit = 1;
 		}
 		
@@ -1597,7 +1627,7 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 }
 
 // Dungeon Level One: Awashima Marine Park 1/2/3/4/5/7/8/9
-int awashimaMarinePark(struct gameTag *game, int charIdx, struct idolDungeonTag idolDungeon[], int dungeonIndex, struct inventoryTag inventory[]){
+int awashimaMarinePark(struct gameTag *game, int charIdx, struct idolDungeonTag idolDungeon[], int dungeonIndex, struct inventoryTag inventory[], struct achievementTag achievement[]){
 				
 	grid dungeon = {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, 
 				 	{0,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
@@ -1613,12 +1643,12 @@ int awashimaMarinePark(struct gameTag *game, int charIdx, struct idolDungeonTag 
 					{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
 				};
 	
-	return yohaneBaseLogic(dungeon, game, charIdx, idolDungeon, dungeonIndex, inventory);
+	return yohaneBaseLogic(dungeon, game, charIdx, idolDungeon, dungeonIndex, inventory, achievement);
 }
 
 
 // Dungeon Level Two: Izu-mito Sea Paradise
-int izumitoSeaParadise(struct gameTag *game, int charIdx, struct idolDungeonTag idolDungeon[], int dungeonIndex, struct inventoryTag inventory[]){
+int izumitoSeaParadise(struct gameTag *game, int charIdx, struct idolDungeonTag idolDungeon[], int dungeonIndex, struct inventoryTag inventory[], struct achievementTag achievement[]){
 	
 	grid dungeon = {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, 
 				 	{0,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
@@ -1634,11 +1664,11 @@ int izumitoSeaParadise(struct gameTag *game, int charIdx, struct idolDungeonTag 
 					{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
 				};
 
-	return yohaneBaseLogic(dungeon, game, charIdx, idolDungeon, dungeonIndex, inventory);
+	return yohaneBaseLogic(dungeon, game, charIdx, idolDungeon, dungeonIndex, inventory, achievement);
 }
 
 // Dungeon Level Three: Shougetsu Confectionary
-int shougetsuConfectionary(struct gameTag *game, int charIdx, struct idolDungeonTag idolDungeon[], int dungeonIndex, struct inventoryTag inventory[]){
+int shougetsuConfectionary(struct gameTag *game, int charIdx, struct idolDungeonTag idolDungeon[], int dungeonIndex, struct inventoryTag inventory[], struct achievementTag achievement[]){
 	grid dungeon = {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, 
 				 	{0,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 				 	{0,1,1,6,1,1,3,1,1,1,1,5,1,1,1,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,8,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
@@ -1653,11 +1683,11 @@ int shougetsuConfectionary(struct gameTag *game, int charIdx, struct idolDungeon
 					{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
 				};
 
-	return yohaneBaseLogic(dungeon, game, charIdx, idolDungeon, dungeonIndex, inventory);
+	return yohaneBaseLogic(dungeon, game, charIdx, idolDungeon, dungeonIndex, inventory, achievement);
 }
 
 // Dungeon Level Boss: Siren in the Mirror World! Later for Lailaps
-int sirenOfTheMirrorWorld(struct gameTag *game, int charIdx, struct idolDungeonTag idolDungeon[], int dungeonIndex, struct inventoryTag inventory[]){
+int sirenOfTheMirrorWorld(struct gameTag *game, int charIdx, struct idolDungeonTag idolDungeon[], int dungeonIndex, struct inventoryTag inventory[], struct achievementTag achievement[]){
 	grid dungeon = {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, 
 				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,12,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
@@ -1668,13 +1698,13 @@ int sirenOfTheMirrorWorld(struct gameTag *game, int charIdx, struct idolDungeonT
 				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
-				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,9,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
+				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,7,9,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 					{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0} 
 				 	};
 
 	//printf("Final Battle: Siren of the Mirror World!\n");
 	// printf("最終決戦: 鏡の世界のセイレーン!\n");
-	return yohaneBaseLogic(dungeon, game, charIdx, idolDungeon, dungeonIndex, inventory);
+	return yohaneBaseLogic(dungeon, game, charIdx, idolDungeon, dungeonIndex, inventory, achievement);
 }
 
 void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[], 
@@ -1702,11 +1732,11 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
  
 	        	win = 0;
 	        	if (index == 0)
-	        		win = awashimaMarinePark(game, charIdx, idolDungeon, index, inventory);
+	        		win = awashimaMarinePark(game, charIdx, idolDungeon, index, inventory, achievement);
 	        	if (index == 1)
-	        		win = izumitoSeaParadise(game, charIdx, idolDungeon, index, inventory);
+	        		win = izumitoSeaParadise(game, charIdx, idolDungeon, index, inventory, achievement);
 	        	if (index == 2)
-	        		win = shougetsuConfectionary(game, charIdx, idolDungeon, index, inventory);
+	        		win = shougetsuConfectionary(game, charIdx, idolDungeon, index, inventory, achievement);
 	        	
 	        	
 	        	if (win == 1){
@@ -1729,9 +1759,12 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 		
 		else if (choice == '1' && game->currentPlaythroughClear == 3){
 			system("cls");
-			win = sirenOfTheMirrorWorld(game, charIdx, idolDungeon, index, inventory);
+			win = sirenOfTheMirrorWorld(game, charIdx, idolDungeon, index, inventory, achievement);
 			if (win == 1){
 				printf("Win!\n");
+				game->totalPlaythroughClear++;
+				itemUnlock(charIdx, hanamaru);
+	        	achievementUnlock(achievement, game);
 			}
 			else
 				printf("Lose\n");
