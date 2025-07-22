@@ -1470,10 +1470,12 @@ void gameOver(struct gameTag *game, struct inventoryTag inventory[]) {
     for (i = 0; i < 3; i++)
         game->clearStatusTemp[i] = 0;
 
-    for (i = 2; i < MAX_INVENTORY - 1; i++){
+    for (i = 2; i < MAX_INVENTORY - 1; i++)
     	inventory[i].hidden = 1;
-    	inventory[i].itemCount = 0;
-	}
+	
+	for (i = 2; i < MAX_INVENTORY; i++)
+		inventory[i].itemCount = 0;
+		
 }
 
 
