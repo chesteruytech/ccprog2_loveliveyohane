@@ -10,6 +10,7 @@ to do by priority:
 regan will do this
 - shop upgrades (once bat behavior is implemented i'll do this)
 - fix the files bc of adjustments (last priority, do this once done with dungeons completetly)
+- fix hostage selection
 
 Complete:
 - Main menu
@@ -25,85 +26,7 @@ Complete:
 - new game
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <conio.h>
-#define MAX_IDOLS 8
-#define MAX_NAME_LEN 30
-#define MAX_HOSTAGES 3
-#define MAX_ITEM_CHAR 50
-#define MAX_INVENTORY 9
-#define MAX_HANAMARU 9
-#define MAX_ACHIEVEMENTS 28
-#define MAX_DESCRIPTION 200
-// IDOLS TO HANAMARU SHOP INDEX RATIO. DO NOT TOUCH!!!
-#define SHOVEL_UP 2
-#define BAT_TAMER 3
-#define AIR_SHOES 4
-#define STEWSHINE 5
-#define MIKAN_MOCHI 6
-#define KURO_MACHA 7 
-#define ICE_CREAM 8
-
-#define MAX_ROW 12
-#define MAX_COL 55
-#define SIREN_ROW 100
-#define SIREN_COL 100
-
-typedef int grid[MAX_ROW][MAX_COL]; //Global declaration for the grid
-
-typedef char Name[MAX_NAME_LEN];
-typedef char Description[MAX_DESCRIPTION];
-
-struct idolDungeonTag{
-    Name idol;
-    Name dungeon;
-};
-
-struct inventoryTag{
-	Name item;
-	int itemCount;
-	int hidden;
-};
-
-struct hanamaruTag{
-	Name item;
-	int price;
-	int availability;
-};
-
-struct gameTag{
-	int maxHP;
-	float hp;
-	int gold;
-	int hostages[MAX_HOSTAGES];
-	int rescuedCount[MAX_IDOLS];
-	int clearStatus[MAX_IDOLS];
-	int clearStatusTemp[MAX_HOSTAGES];
-	int running;
-	int dungeonClears;
-	int goldSpent;
-	float dmgTaken; 
-	int currentPlaythroughClear;
-	Name killed; // killed by
-	int handIndex[3];
-	int currentHandIndex; 
-	int chocoMintUsageCount; // for that one ahievement
-	int totalPlaythroughClear; // for ng+
-	int flawless; // for step 0 to 1 achievement
-	int newGamePlus;
-	
-};
-
-struct achievementTag{
-	Name achievement;
-	int earned;
-	Description description;
-	char dateEarned[20];
-};
-
+#include "prog2mp.h"
 
 void initializeGame(struct gameTag *game){
 	
@@ -1299,7 +1222,8 @@ void obtainGoldBat(struct gameTag *game){
 		game->gold += 15;
 }
 
-void movement(grid dimension2D, struct gameTag *game, struct inventoryTag inventory[], int *yRow, int *yCol, int targetRow, int targetCol, int *verdict, int *currentTile){
+void movement(grid dimension2D, struct gameTag *game, struct inventoryTag inventory[], 
+				int *yRow, int *yCol, int targetRow, int targetCol, int *verdict, int *currentTile){
 
 	int currentRow = *yRow;
 	int currentCol = *yCol;
@@ -1473,7 +1397,7 @@ void useItem(struct inventoryTag inventory[], struct gameTag *game){
 	
 }
 
-void gameOver(struct gameTag *game, struct inventoryTag inventory[]) {
+void gameOver(struct gameTag *game, struct inventoryTag inventory[]){
     int i;
 
 	game->maxHP = 3;
@@ -1492,7 +1416,8 @@ void gameOver(struct gameTag *game, struct inventoryTag inventory[]) {
 
 
 //Base Logic Package (e.g., character moving, tile finding and validation, winning, quitting)
-int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct idolDungeonTag idolDungeon[], int dungeonIndex, struct inventoryTag inventory[], struct achievementTag achievement[])
+int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct idolDungeonTag idolDungeon[], 
+					int dungeonIndex, struct inventoryTag inventory[], struct achievementTag achievement[])
 {
 	int row = MAX_ROW;
 	int col = MAX_COL;
@@ -1654,7 +1579,8 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 }
 
 // Dungeon Level One: Awashima Marine Park 1/2/3/4/5/7/8/9
-int awashimaMarinePark(struct gameTag *game, int charIdx, struct idolDungeonTag idolDungeon[], int dungeonIndex, struct inventoryTag inventory[], struct achievementTag achievement[]){
+int awashimaMarinePark(struct gameTag *game, int charIdx, struct idolDungeonTag idolDungeon[], 
+					int dungeonIndex, struct inventoryTag inventory[], struct achievementTag achievement[]){
 				
 	grid dungeon = {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, 
 				 	{0,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
@@ -1675,7 +1601,8 @@ int awashimaMarinePark(struct gameTag *game, int charIdx, struct idolDungeonTag 
 
 
 // Dungeon Level Two: Izu-mito Sea Paradise
-int izumitoSeaParadise(struct gameTag *game, int charIdx, struct idolDungeonTag idolDungeon[], int dungeonIndex, struct inventoryTag inventory[], struct achievementTag achievement[]){
+int izumitoSeaParadise(struct gameTag *game, int charIdx, struct idolDungeonTag idolDungeon[], 
+					int dungeonIndex, struct inventoryTag inventory[], struct achievementTag achievement[]){
 	
 	grid dungeon = {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, 
 				 	{0,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
@@ -1695,7 +1622,8 @@ int izumitoSeaParadise(struct gameTag *game, int charIdx, struct idolDungeonTag 
 }
 
 // Dungeon Level Three: Shougetsu Confectionary
-int shougetsuConfectionary(struct gameTag *game, int charIdx, struct idolDungeonTag idolDungeon[], int dungeonIndex, struct inventoryTag inventory[], struct achievementTag achievement[]){
+int shougetsuConfectionary(struct gameTag *game, int charIdx, struct idolDungeonTag idolDungeon[], 
+					int dungeonIndex, struct inventoryTag inventory[], struct achievementTag achievement[]){
 	grid dungeon = {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, 
 				 	{0,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 				 	{0,1,1,6,1,1,3,1,1,1,1,5,1,1,1,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,8,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
@@ -1714,7 +1642,8 @@ int shougetsuConfectionary(struct gameTag *game, int charIdx, struct idolDungeon
 }
 
 // Dungeon Level Boss: Siren in the Mirror World! Later for Lailaps
-int sirenOfTheMirrorWorld(struct gameTag *game, int charIdx, struct idolDungeonTag idolDungeon[], int dungeonIndex, struct inventoryTag inventory[], struct achievementTag achievement[]){
+int sirenOfTheMirrorWorld(struct gameTag *game, int charIdx, struct idolDungeonTag idolDungeon[], 
+					int dungeonIndex, struct inventoryTag inventory[], struct achievementTag achievement[]){
 	grid dungeon = {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, 
 				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,12,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
