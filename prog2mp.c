@@ -4,9 +4,10 @@ to do by priority:
 - largen b to B if bat hit player	
 - dungeon floors
 - final boss 
+
 regan will do this
-- shop upgrades
-- fix the files bc of adjustments
+- shop upgrades (complete once bat is done)
+- fix the files bc of adjustments (last priority)
 
 Complete:
 - Main menu
@@ -19,6 +20,8 @@ Complete:
 - load file
 - game over
 - use and cycle items
+- shop upgrades (missing bat tamer, 0.5 dmg taken if hit no matter what)
+- ng+ (needs optimization)
 */
 #include <stdio.h>
 #include <stdlib.h>
@@ -295,7 +298,7 @@ void initializeAchievements(struct achievementTag achievement[]){
 	achievement[11].earned = 0;
 	strcpy(achievement[11].description, "Rescued Riko twice");
 	
-	strcpy(achievement[12].achievement, "Beginner�s Sailing!");
+	strcpy(achievement[12].achievement, "Beginner’s Sailing!");
 	achievement[12].earned = 0;
 	strcpy(achievement[12].description, "Rescued You twice");
 	
@@ -349,11 +352,11 @@ void initializeAchievements(struct achievementTag achievement[]){
 	
 	strcpy(achievement[25].achievement, "Mitaiken Horizon!");
 	achievement[25].earned = 0;
-	strcpy(achievement[25].description, "Accumulate a total of 5000G spent on Hanamaru�s stores across multiple playthroughs");
+	strcpy(achievement[25].description, "Accumulate a total of 5000G spent on Hanamaru’s stores across multiple playthroughs");
 	
 	strcpy(achievement[26].achievement, "Ruby-chan! Hai? Nani ga suki?");
 	achievement[26].earned = 0;
-	strcpy(achievement[26].description, "Get saved by a fatal blow from Ruby�s choco-mint ice cream item.");
+	strcpy(achievement[26].description, "Get saved by a fatal blow from Ruby’s choco-mint ice cream item.");
 	
 	strcpy(achievement[27].achievement, "Step! ZERO to ONE!");
 	achievement[27].earned = 0;
@@ -1562,9 +1565,9 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 	    printf("\n");
 	    
 		dungeonIdentifier(dimension2D,row,col);
-		printf("\n Game Controls \n"); //  | ゲームコントロール
+		printf("\n Game Controls \n"); //  | ã‚²ãƒ¼ãƒ ã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ«
 		printf("[W] Up | [A] Left | [S] Down | [D] Right | [X] Freeze\n[[] Cycle Previous Item | []] Cycle Next Item | [SPACE] Use Item on Hand\n");
-		// printf("[W] 上 | [A] 左 | [S] 下 | [D] 右 | [X] フリーズ \n");		
+		// printf("[W] ä¸Š | [A] å·¦ | [S] ä¸‹ | [D] å³ | [X] ãƒ•ãƒªãƒ¼ã‚º \n");		
 		move = getch();
 		
 		yRowOld = yRow;
@@ -1603,7 +1606,7 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 			default:
 				printf("Error 7611111810176105118101: Your choice is invalid. Please try again.");
 				system("pause");
-				// printf("エラー 7611111810176105118101: 無効な選択肢です。もう一度やり直してください。");
+				// printf("ã‚¨ãƒ©ãƒ¼ 7611111810176105118101: ç„¡åŠ¹ãªé¸æŠžè‚¢ã§ã™ã€‚ã‚‚ã†ä¸€åº¦ã‚„ã‚Šç›´ã—ã¦ãã ã•ã„ã€‚");
 		}
 		
 		if (yRow != yRowOld || yCol != yColOld)
@@ -1642,7 +1645,7 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 		printf("You have found the door to the exit. Congratulations!!!\n");
 		system("pause");
 		system("cls");
-		// printf("あなたは出口への扉を見つけた。おめでとうございます!!!");
+		// printf("ã‚ãªãŸã¯å‡ºå£ã¸ã®æ‰‰ã‚’è¦‹ã¤ã‘ãŸã€‚ãŠã‚ã§ã¨ã†ã”ã–ã„ã¾ã™!!!");
 	}
 
 	return verdict;
@@ -1725,7 +1728,7 @@ int sirenOfTheMirrorWorld(struct gameTag *game, int charIdx, struct idolDungeonT
 				 	};
 
 	//printf("Final Battle: Siren of the Mirror World!\n");
-	// printf("最終決戦: 鏡の世界のセイレーン!\n");
+	// printf("æœ€çµ‚æ±ºæˆ¦: é¡ã®ä¸–ç•Œã®ã‚»ã‚¤ãƒ¬ãƒ¼ãƒ³!\n");
 	return yohaneBaseLogic(dungeon, game, charIdx, idolDungeon, dungeonIndex, inventory, achievement);
 }
 
