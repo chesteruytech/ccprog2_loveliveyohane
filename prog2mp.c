@@ -4,15 +4,9 @@ to do by priority:
 - largen b to B if bat hit player	
 - dungeon floors
 - final boss 
-- new game+ after clear
-	Carried over:
-	- idols rescued
-	- gold 
-	- achievements
-	- noppo bread and tears of fallen angel
-	not carried over:
-	- any other items bought from shop
-	- max hp (go back to 3 hp)
+regan will do this
+- shop upgrades
+- fix the files bc of adjustments
 
 Complete:
 - Main menu
@@ -86,14 +80,16 @@ struct gameTag{
 	int running;
 	int dungeonClears;
 	int goldSpent;
-	float dmgTaken;
+	float dmgTaken; 
 	int currentPlaythroughClear;
-	Name killed;
+	Name killed; // killed by
 	int handIndex[3];
-	int currentHandIndex;
-	int chocoMintUsageCount;
+	int currentHandIndex; 
+	int chocoMintUsageCount; // for that one ahievement
 	int totalPlaythroughClear; // for ng+
 	int flawless; // for step 0 to 1 achievement
+	int newGamePlus;
+	
 };
 
 struct achievementTag{
@@ -137,6 +133,8 @@ void initializeGame(struct gameTag *game){
 	game->chocoMintUsageCount = 0;
 	game->totalPlaythroughClear = 0;
 	game->flawless = 0;
+	game->newGamePlus = 0;
+		
 }
 
 void initializeIdolDungeon(struct idolDungeonTag idolDungeon[]){
@@ -444,11 +442,7 @@ void getCurrentDate(char *output){
 }
 
 void achievementUnlock(struct achievementTag achievement[], struct gameTag *game){
-				
-		// index 9 (missing) (beat final boss once)
-		// index 18 (missing) (beat final boss twice)
-	 
-			
+				 
 		int i;
 		int rescueCounter = 0;
 		
@@ -755,7 +749,7 @@ void showDungeonMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, 
 	if (game->currentPlaythroughClear < 3){
 	    for (i = 0; i < 3; i++){
 	        idx = game->hostages[i];
-	        if (game->clearStatusTemp[i] == 1 || game->rescuedCount[idx] > 0)
+	        if (game->clearStatusTemp[i] == 1)
 	        	printf("[X] Visit %s\n", idolDungeon[idx].dungeon);
 	        else
 	        	printf("[%d] Visit %s\n", i+1, idolDungeon[idx].dungeon);
@@ -819,7 +813,7 @@ void hanamaruStore(struct idolDungeonTag idolDungeon[], struct gameTag *game, st
 	int i;
 	char choice;
 	int index; // THIS IS ONLY FOR HANAMARU STORE. DO NOT TOUCH	
-
+ 
 	do{
 		
 		printf("Hanamaru: Yohane-chan, zura! What can I do for you today?\n\n");
@@ -860,6 +854,12 @@ void hanamaruStore(struct idolDungeonTag idolDungeon[], struct gameTag *game, st
 		            game->gold -= hanamaru[index].price;
 		            inventory[index].itemCount++;
 		            game->goldSpent = game->goldSpent + hanamaru[index].price;
+		            
+		            if (index >= 5 && index <= 7 && hanamaru[index].availability == 1){
+					    game->maxHP += 1;
+					    game->hp += 1;
+					}
+
 		            hanamaru[index].availability = 0;
 		            printf("One %s successfully purchased! You now have %d %s(s)\n", inventory[index].item, inventory[index].itemCount, inventory[index].item);
 		        } 
@@ -879,6 +879,7 @@ void hanamaruStore(struct idolDungeonTag idolDungeon[], struct gameTag *game, st
 		    showHostages(idolDungeon, game);
 		    showDungeonMenu(idolDungeon, game, inventory);
 		}
+		
 		
 		// Anything else
 		else{
@@ -1316,13 +1317,25 @@ void movement(grid dimension2D, struct gameTag *game, struct inventoryTag invent
 		else if (dimension2D[targetRow][targetCol] == 3){ // Spike (done)
 			dimension2D[targetRow][targetCol] = 1; // dig first  
 			dimension2D[currentRow][currentCol] = 9;  // stay still
-			game->hp -= 0.5; // take damage
-			game->dmgTaken += 0.5;
+			
+			if (inventory[2].itemCount == 0){ 
+				game->hp -= 0.5; // take damage
+				game->dmgTaken += 0.5;
+			}	
+				
 			if (game->hp <= 0)
 				strcpy(game->killed, "Spike");
 		}
 		else if (dimension2D[targetRow][targetCol] == 4){ // Water tile (almost done, just need bats to pass thry after bat movement)
-			dimension2D[currentRow][currentCol] = 9; 
+		
+			if (inventory[4].itemCount == 0) // if you don't have air shoes
+				dimension2D[currentRow][currentCol] = 9; 
+			else{  // walk through normally
+			*currentTile = 4;
+		    dimension2D[targetRow][targetCol] = 9;
+		    *yRow = targetRow;
+		    *yCol = targetCol;
+			}
 		}
 		else if (dimension2D[targetRow][targetCol] == 5){
 		    *currentTile = 5;
@@ -1394,9 +1407,6 @@ void cycleItemForward(struct inventoryTag inventory[], struct gameTag *game){
             invIdx = game->handIndex[nextIdx];
             if (inventory[invIdx].itemCount > 0 && found == 0){
                 game->currentHandIndex = nextIdx;
-               /* printf("DEBUG: Item on hand: %s x%d equipped.\n",
-                       inventory[invIdx].item,
-                       inventory[invIdx].itemCount);*/
                 found = 1;
             }
         }
@@ -1428,9 +1438,6 @@ void cycleItemBackward(struct inventoryTag inventory[], struct gameTag *game){
             invIdx = game->handIndex[nextIdx];
             if (inventory[invIdx].itemCount > 0 && found == 0){
                 game->currentHandIndex = nextIdx;
-                /* printf("DEBUG: Item on hand: %s x%d equipped.\n",
-	                   inventory[invIdx].item,
-	                   inventory[invIdx].itemCount);*/
                 found = 1;
             }
         }
@@ -1606,7 +1613,7 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 		
 		playerMoveCount++;
 		
-		if (currentTile == 5 && moved == 0){
+		if (currentTile == 5 && moved == 0 && inventory[4].itemCount == 0){
 			game->hp -= 1;
 			if (game->hp <= 0)
 				strcpy(game->killed, "Heat Tile");
@@ -1722,6 +1729,7 @@ int sirenOfTheMirrorWorld(struct gameTag *game, int charIdx, struct idolDungeonT
 	return yohaneBaseLogic(dungeon, game, charIdx, idolDungeon, dungeonIndex, inventory, achievement);
 }
 
+
 void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[], 
 			struct hanamaruTag hanamaru[], struct achievementTag achievement[]){
 	
@@ -1784,6 +1792,8 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 				
 				itemUnlock(charIdx, hanamaru);
 	        	achievementUnlock(achievement, game);
+	        	game->newGamePlus = 1;
+	        	newGamePlus(idolDungeon, game, inventory, hanamaru, achievement);
 			}
 				
 			system("pause");
@@ -1819,6 +1829,36 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 			printf("Invalid choice\n");
 			    	
 	} while (choice != 'S' && choice != 's');
+}
+
+void newGamePlus(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[], 
+			struct hanamaruTag hanamaru[], struct achievementTag achievement[]){
+	
+	int i;
+	
+	game->maxHP = 3;
+	game->hp = 3;
+	
+	for (i = 2; i < MAX_INVENTORY; i++){
+		inventory[i].itemCount = 0;
+	}
+	
+	for (i = 2; i < MAX_INVENTORY - 1; i++){
+		inventory[i].hidden = 1;
+	}
+	
+	game->currentPlaythroughClear = 0;
+	
+	for (i = 0; i < MAX_HOSTAGES; i++){
+		game->clearStatusTemp[i] = 0;
+	}
+	
+	selectHostages(game);
+    showHostages(idolDungeon, game);
+    showDungeonMenu(idolDungeon, game, inventory);
+	
+    gameMenu(idolDungeon, game, inventory, hanamaru, achievement);
+	
 }
 
 void continueGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[], 
@@ -1878,7 +1918,7 @@ int main(){
         printf("\t*       The Siren in the Mirror World!         *\n");
         printf("\t************************************************\n");
 		
-		if (!game.running)
+		if (!game.running || game.newGamePlus == 0)
         	printf("\t\t  [N]ew Game\n");
         else	
         	printf("\t\t  [C]ontinue\n");
