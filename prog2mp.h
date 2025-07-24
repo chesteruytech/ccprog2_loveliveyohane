@@ -88,7 +88,7 @@ int isNumber(char choice[]);
 int strToInt(char choice[]);
 void intToStr(int num, char* str, int digits);
 void getCurrentDate(char *output);
-void achievementUnlock(struct achievementTag achievement[], struct gameTag *game);
+void achievementUnlock(struct achievementTag achievement[], struct gameTag *game, int win);
 void viewAchievementDetails(char choice[], struct achievementTag achievement[], int achievementCount);
 void viewAchievements(struct achievementTag achievement[]);
 void selectHostages(struct gameTag *game);

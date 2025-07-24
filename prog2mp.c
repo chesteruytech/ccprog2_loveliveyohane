@@ -373,7 +373,7 @@ void getCurrentDate(char *output){
     strcat(output, min);
 }
 
-void achievementUnlock(struct achievementTag achievement[], struct gameTag *game){
+void achievementUnlock(struct achievementTag achievement[], struct gameTag *game, int win){
 				 
 		int i;
 		int rescueCounter = 0;
@@ -467,7 +467,7 @@ void achievementUnlock(struct achievementTag achievement[], struct gameTag *game
 		}
 		
 		// no damage taken (index 24)
-		if (game->dmgTaken == 0 && achievement[24].earned == 0){
+		if (game->dmgTaken == 0 && achievement[24].earned == 0 && win == 1){
 			achievement[24].earned = 1;
 			getCurrentDate(achievement[24].dateEarned);
 			printf("Achievement unlocked: %s\n", achievement[24].achievement);
@@ -842,7 +842,7 @@ void hanamaruStore(struct idolDungeonTag idolDungeon[], struct gameTag *game, st
 		    system("cls");
 		}	
 		
-		achievementUnlock(achievement, game);
+		achievementUnlock(achievement, game, 0);
 			
 	} while (choice != 'R' && choice != 'r');
 		
@@ -1403,7 +1403,7 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 	siren(dimension2D,row,col,&sirenRow,&sirenCol);
 	lailaps(dimension2D,row,col,&lRow,&lCol);
 
-	
+	game->dmgTaken = 0;
 	int floorCount = dungeonIndex;
 	
 	if (game->currentPlaythroughClear < game->hostagesSelected){
@@ -1503,9 +1503,10 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 		    moved = 0;
 		
 		playerMoveCount++;
-		achievementUnlock(achievement, game);
+		achievementUnlock(achievement, game, 0);
 		if (currentTile == 5 && moved == 0 && inventory[4].itemCount == 0){
 			game->hp -= 1;
+			game->dmgTaken += 1;
 			if (game->hp <= 0)
 				strcpy(game->killed, "Heat Tile");
 		}
@@ -1522,7 +1523,7 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 			system("pause");
 			
 			gameOver(game, inventory);
-	        achievementUnlock(achievement, game);
+	        achievementUnlock(achievement, game, 0);
 			quit = 1;
 		}
 		
@@ -1666,10 +1667,9 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 	        	game->dungeonClears++; 
 	        	
 	        	itemUnlock(charIdx, hanamaru);
-	        	achievementUnlock(achievement, game);
+	        	achievementUnlock(achievement, game, 1);
 			}
         	}
-        	system("pause");
             system("cls");
             showHostages(idolDungeon, game);
 			showDungeonMenu(idolDungeon, game, inventory);
@@ -1686,9 +1686,8 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 					game->flawless = 1;
 				
 				itemUnlock(charIdx, hanamaru);
-	        	achievementUnlock(achievement, game);
+	        	achievementUnlock(achievement, game, 1);
 	        	game->newGamePlus = 1;
-	        	system("pause");
             	system("cls");
 	        	newGamePlusSetup(idolDungeon, game, inventory, hanamaru, achievement);
 	        	titleScreen(idolDungeon,game,inventory,hanamaru,achievement);
