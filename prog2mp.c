@@ -1,5 +1,5 @@
 /* 
-mp is 80% complete
+mp is 85% complete
 
 to do by priority: 
 - bat movements and attack
@@ -15,7 +15,6 @@ to do by priority:
 regan will do this
 - shop upgrades (bat tamer specifically) (once bat behavior is implemented i'll do this)
 	- if you have bat tamer (inventory[2] ), bat should deal 0.5 dmg taken regardless of level
-- fix the files bc of adjustments (last priority, do this once done with dungeons completetly)
 
 Complete:
 - Main menu
@@ -852,105 +851,40 @@ void itemUnlock(int charIdx, struct hanamaruTag hanamaru[]){
 void saveGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[], 
 			struct hanamaruTag hanamaru[], struct achievementTag achievement[]){
 	
-	int i;
 	FILE *ptr;
 	
-	ptr = fopen("gameData.txt", "w");
+	ptr = fopen("yohane.bin", "wb");
 	
-	fprintf(ptr, "Max HP: %d\n", game->maxHP);
-	fprintf(ptr, "Current HP: %.1f\n", game->hp);
-	fprintf(ptr, "Gold: %d\n", game->gold);
-	fprintf(ptr, "Total Dungeon Clears: %d\n", game->dungeonClears);
-	fprintf(ptr, "Total Gold Spent: %d\n", game->goldSpent);
-	fprintf(ptr, "Total Damage Taken: %.1f\n", game->dmgTaken);
-	fprintf(ptr, "Running Status: %d\n", game->running);
-	fprintf(ptr, "Dungeon Clears in Current Playthrough: %d\n", game->currentPlaythroughClear);
-	
-	for (i = 0; i < MAX_HOSTAGES; i++)
-        fprintf(ptr, "Hostage: %s\n", idolDungeon[game->hostages[i]].idol);
 
-    for (i = 0; i < MAX_IDOLS; i++)
-        fprintf(ptr, "Dungeon %s: %d\n", idolDungeon[i].dungeon, game->clearStatus[i]);
-        
-    for (i = 0; i < MAX_HOSTAGES; i++)
-        fprintf(ptr, "Dungeon Cleared this Playthrough: %d\n", game->clearStatusTemp[i]);    
-	
-    for (i = 0; i < MAX_IDOLS; i++)
-        fprintf(ptr, "%s rescues: %d\n", idolDungeon[i].idol, game->rescuedCount[i]);
-        
-    for (i = 0; i < MAX_INVENTORY; i++)
-        fprintf(ptr, "%s: %d\n", inventory[i].item, inventory[i].itemCount);
-        
-    for (i = 0; i < MAX_ACHIEVEMENTS; i++)
-    	if (achievement[i].earned == 1)
-        	fprintf(ptr, "%s: %d %s\n", achievement[i].achievement, achievement[i].earned, achievement[i].dateEarned);
-        else
-        	fprintf(ptr, "%s: %d %s\n", achievement[i].achievement, 0, "-");
+    fwrite(game, sizeof(struct gameTag), 1, ptr);
+    fwrite(idolDungeon, sizeof(struct idolDungeonTag), MAX_IDOLS, ptr);
+    fwrite(inventory, sizeof(struct inventoryTag), MAX_INVENTORY, ptr);
+    fwrite(hanamaru, sizeof(struct hanamaruTag), MAX_HANAMARU, ptr);
+    fwrite(achievement, sizeof(struct achievementTag), MAX_ACHIEVEMENTS, ptr);
 
-	for (i = 0; i < MAX_HANAMARU; i++)
-		fprintf(ptr, "%s stock: %d\n", hanamaru[i].item, hanamaru[i].availability);
-
-	
-	fclose(ptr);
+    fclose(ptr);
 	
 }
 
 void loadGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[], 
 			struct hanamaruTag hanamaru[], struct achievementTag achievement[]){
 
-	int i, j;
-	char tempName[30];
+
 	FILE *ptr;
 	
-	ptr = fopen("gameData.txt", "r");
+	ptr = fopen("yohane.bin", "rb");
 	
-	if (ptr == NULL)
+	if (ptr == NULL || game->running == 0)
 		game->running = 0;
 	else{
-		fscanf(ptr, "Max HP: %d\n", &game->maxHP);
-		fscanf(ptr, "Current HP: %f\n", &game->hp);
-		fscanf(ptr, "Gold: %d\n", &game->gold);
-		fscanf(ptr, "Total Dungeon Clears: %d\n", &game->dungeonClears);
-		fscanf(ptr, "Total Gold Spent: %d\n", &game->goldSpent);
-		fscanf(ptr, "Total Damage Taken: %f\n", &game->dmgTaken);
-		fscanf(ptr, "Running Status: %d\n", &game->running);
-		fscanf(ptr, "Dungeon Clears in Current Playthrough: %d\n", &game->currentPlaythroughClear);
-		
-		for (i = 0; i < MAX_HOSTAGES; i++){
-	      	fscanf(ptr, "Hostage: %s\n", tempName);
-	      	for (j = 0; j < MAX_IDOLS; j++){
-	       		if (strcmp(tempName, idolDungeon[j].idol) == 0)
-	       			game->hostages[i] = j;
-	       		}
-	    }
-	    	 
-		for (i = 0; i < MAX_IDOLS; i++)
-		    fscanf(ptr, "%*[^:]: %d\n", &game->clearStatus[i]);
-		
-		for (i = 0; i < MAX_HOSTAGES; i++)
-    		fscanf(ptr, "%*[^:]: %d\n", &game->clearStatusTemp[i]);
-		
-		for (i = 0; i < MAX_IDOLS; i++)
-		    fscanf(ptr, "%*[^:]: %d\n", &game->rescuedCount[i]);
-
-		for (i = 0; i < MAX_INVENTORY; i++)
-		    fscanf(ptr, "%*[^:]: %d\n", &inventory[i].itemCount);
-
-		for (i = 0; i < MAX_ACHIEVEMENTS; i++){
-		    fscanf(ptr, "%*[^:]: %d", &achievement[i].earned);
-		    if (achievement[i].earned == 1)
-		        fscanf(ptr, " %[^\n]\n", achievement[i].dateEarned);
-		    else
-		        fscanf(ptr, " %*s\n"); 
-		}
-
-		for (i = 0; i < MAX_HANAMARU; i++)
-		    fscanf(ptr, "%*[^:]: %d\n", &hanamaru[i].availability);
-			}
-			
-		fclose(ptr);
+	fread(game, sizeof(struct gameTag), 1, ptr);
+    fread(idolDungeon, sizeof(struct idolDungeonTag), MAX_IDOLS, ptr);
+    fread(inventory, sizeof(struct inventoryTag), MAX_INVENTORY, ptr);
+    fread(hanamaru, sizeof(struct hanamaruTag), MAX_HANAMARU, ptr);
+    fread(achievement, sizeof(struct achievementTag), MAX_ACHIEVEMENTS, ptr);
+}
+	fclose(ptr);		
 	
-			
 }
 
 void dungeonIdentifier(grid dimension2D, int nRow, int nCol){
@@ -1930,8 +1864,8 @@ int main(){
 	initializeHanamaru(hanamaru);
 	initializeAchievements(achievement);
 	
+	//game.running = 0; // comment this out if you want to test the continue game
 	loadGame(idolDungeon, &game, inventory, hanamaru, achievement);	
-	game.running = 0; // comment this out if you want to test the continue game
 	
     titleScreen(idolDungeon, &game, inventory, hanamaru, achievement);
     
