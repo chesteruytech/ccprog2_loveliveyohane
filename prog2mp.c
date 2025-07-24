@@ -132,7 +132,7 @@ void initializeInventory(struct inventoryTag inventory[]){
 	inventory[7].hidden = 1;
 	
 	strcpy(inventory[8].item, "Choco-Mint Ice Cream");
-	inventory[8].itemCount = 1;
+	inventory[8].itemCount = 0;
 	inventory[8].hidden = 0;
 	
 }
