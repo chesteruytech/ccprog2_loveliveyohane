@@ -856,9 +856,7 @@ void saveGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 	
 	ptr = fopen("yohane.bin", "wb");
 	
-
     fwrite(game, sizeof(struct gameTag), 1, ptr);
-    fwrite(idolDungeon, sizeof(struct idolDungeonTag), MAX_IDOLS, ptr);
     fwrite(inventory, sizeof(struct inventoryTag), MAX_INVENTORY, ptr);
     fwrite(hanamaru, sizeof(struct hanamaruTag), MAX_HANAMARU, ptr);
     fwrite(achievement, sizeof(struct achievementTag), MAX_ACHIEVEMENTS, ptr);
@@ -879,7 +877,6 @@ void loadGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 		game->running = 0;
 	else{
 	fread(game, sizeof(struct gameTag), 1, ptr);
-    fread(idolDungeon, sizeof(struct idolDungeonTag), MAX_IDOLS, ptr);
     fread(inventory, sizeof(struct inventoryTag), MAX_INVENTORY, ptr);
     fread(hanamaru, sizeof(struct hanamaruTag), MAX_HANAMARU, ptr);
     fread(achievement, sizeof(struct achievementTag), MAX_ACHIEVEMENTS, ptr);
@@ -1349,9 +1346,6 @@ void gameOver(struct gameTag *game, struct inventoryTag inventory[]){
 
 	game->maxHP = 3;
     game->hp = 3.0;	
-
-    for (i = 0; i < 3; i++)
-        game->clearStatusTemp[i] = 0;
 
     for (i = 2; i < MAX_INVENTORY - 1; i++)
     	inventory[i].hidden = 1;
@@ -1871,7 +1865,7 @@ int main(){
 	initializeHanamaru(hanamaru);
 	initializeAchievements(achievement);
 	
-	game.running = 0; // comment this out if you want to test the continue game
+	//game.running = 0; // comment this out if you want to test the continue game
 	loadGame(idolDungeon, &game, inventory, hanamaru, achievement);	
 	
     titleScreen(idolDungeon, &game, inventory, hanamaru, achievement);
