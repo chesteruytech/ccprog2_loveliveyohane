@@ -22,8 +22,6 @@
 
 #define MAX_ROW 12
 #define MAX_COL 55
-#define SIREN_ROW 100
-#define SIREN_COL 100
 
 typedef int grid[MAX_ROW][MAX_COL]; //Global declaration for the grid
 
