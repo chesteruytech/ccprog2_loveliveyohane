@@ -132,7 +132,7 @@ void initializeInventory(struct inventoryTag inventory[]){
 	inventory[7].hidden = 1;
 	
 	strcpy(inventory[8].item, "Choco-Mint Ice Cream");
-	inventory[8].itemCount = 0;
+	inventory[8].itemCount = 1;
 	inventory[8].hidden = 0;
 	
 }
@@ -389,6 +389,7 @@ void achievementUnlock(struct achievementTag achievement[], struct gameTag *game
 			achievement[0].earned = 1;
 			getCurrentDate(achievement[0].dateEarned);
 			printf("Achievement unlocked: %s\n", achievement[0].achievement);
+			system("pause");
 		}
 		
 		// achievement rescue for first time, index 1 to 8 
@@ -397,6 +398,7 @@ void achievementUnlock(struct achievementTag achievement[], struct gameTag *game
 			achievement[i+1].earned = 1;
 			getCurrentDate(achievement[i+1].dateEarned);
 			printf("Achievement unlocked: %s\n", achievement[i+1].achievement);	
+			system("pause");
 		}
 		
 		// beat final boss once (index 9)
@@ -404,6 +406,7 @@ void achievementUnlock(struct achievementTag achievement[], struct gameTag *game
 			achievement[9].earned = 1;
 			getCurrentDate(achievement[9].dateEarned);
 			printf("Achievement unlocked: %s\n", achievement[9].achievement);
+			system("pause");
 		}
 		
 		// achievement rescue twice, index 10 to 17 
@@ -411,7 +414,8 @@ void achievementUnlock(struct achievementTag achievement[], struct gameTag *game
 			if (game->rescuedCount[i] > 1 && achievement[i+10].earned == 0){
 			achievement[i+10].earned = 1;
 			getCurrentDate(achievement[i+10].dateEarned);
-			printf("Achievement unlocked: %s\n", achievement[i+10].achievement);	
+			printf("Achievement unlocked: %s\n", achievement[i+10].achievement);
+			system("pause");	
 		}
 		
 		// beat final boss twice (index 18)
@@ -419,6 +423,7 @@ void achievementUnlock(struct achievementTag achievement[], struct gameTag *game
 			achievement[18].earned = 1;
 			getCurrentDate(achievement[18].dateEarned);
 			printf("Achievement unlocked: %s\n", achievement[18].achievement);
+			system("pause");
 		}
 		
 		// clear 10 dungeons (index 19)
@@ -426,6 +431,7 @@ void achievementUnlock(struct achievementTag achievement[], struct gameTag *game
 			achievement[19].earned = 1;
 			getCurrentDate(achievement[19].dateEarned);
 			printf("Achievement unlocked: %s\n", achievement[19].achievement);
+			system("pause");
 		}
 		
 		// rescue chika, you, ruby (index 20)
@@ -433,6 +439,7 @@ void achievementUnlock(struct achievementTag achievement[], struct gameTag *game
 			achievement[20].earned = 1;
 			getCurrentDate(achievement[20].dateEarned);
 			printf("Achievement unlocked: %s\n", achievement[20].achievement);
+			system("pause");
 		}
 		
 		// rescue hanamaru, dia, kanan (index 21)
@@ -440,6 +447,7 @@ void achievementUnlock(struct achievementTag achievement[], struct gameTag *game
 			achievement[21].earned = 1;
 			getCurrentDate(achievement[21].dateEarned);
 			printf("Achievement unlocked: %s\n", achievement[21].achievement);
+			system("pause");
 		}
 		
 		// rescue riko, mari (index 22)
@@ -447,6 +455,7 @@ void achievementUnlock(struct achievementTag achievement[], struct gameTag *game
 			achievement[22].earned = 1;
 			getCurrentDate(achievement[22].dateEarned);
 			printf("Achievement unlocked: %s\n", achievement[22].achievement);
+			system("pause");
 		}
 		
 		// Have Yohane rescue all Aqours members for the first time (index 23)
@@ -454,6 +463,7 @@ void achievementUnlock(struct achievementTag achievement[], struct gameTag *game
 			achievement[23].earned = 1;
 			getCurrentDate(achievement[23].dateEarned);
 			printf("Achievement unlocked: %s\n", achievement[23].achievement);
+			system("pause");
 		}
 		
 		// no damage taken (index 24)
@@ -461,6 +471,7 @@ void achievementUnlock(struct achievementTag achievement[], struct gameTag *game
 			achievement[24].earned = 1;
 			getCurrentDate(achievement[24].dateEarned);
 			printf("Achievement unlocked: %s\n", achievement[24].achievement);
+			system("pause");
 		}
 		
 		// 5000g spent across all playthroughs (index 25)
@@ -468,6 +479,7 @@ void achievementUnlock(struct achievementTag achievement[], struct gameTag *game
 			achievement[25].earned = 1;
 			getCurrentDate(achievement[25].dateEarned);
 			printf("Achievement unlocked: %s\n", achievement[25].achievement);
+			system("pause");
 		}
 		
 		// get saved by ruby ice cream
@@ -475,6 +487,7 @@ void achievementUnlock(struct achievementTag achievement[], struct gameTag *game
 			achievement[26].earned = 1;
 			getCurrentDate(achievement[26].dateEarned);
 			printf("Achievement unlocked: %s\n", achievement[26].achievement);
+			system("pause");
 		}
 		
 		// finish game with no gold on-hand (index 27)
@@ -482,7 +495,10 @@ void achievementUnlock(struct achievementTag achievement[], struct gameTag *game
 			achievement[27].earned = 1;
 			getCurrentDate(achievement[27].dateEarned);
 			printf("Achievement unlocked: %s\n", achievement[27].achievement);
+			system("pause");
 		}
+		
+		
 }
 
 void viewAchievementDetails(char choice[], struct achievementTag achievement[], int achievementCount){
@@ -746,7 +762,7 @@ void showInventory(struct idolDungeonTag idolDungeon[], struct gameTag *game, st
 }
 
 
-void hanamaruStore(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[], struct hanamaruTag hanamaru[]){
+void hanamaruStore(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[], struct hanamaruTag hanamaru[], struct achievementTag achievement[]){
 	
 	int i;
 	char choice;
@@ -825,6 +841,8 @@ void hanamaruStore(struct idolDungeonTag idolDungeon[], struct gameTag *game, st
 		    system("pause");
 		    system("cls");
 		}	
+		
+		achievementUnlock(achievement, game);
 			
 	} while (choice != 'R' && choice != 'r');
 		
@@ -1485,7 +1503,7 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 		    moved = 0;
 		
 		playerMoveCount++;
-		
+		achievementUnlock(achievement, game);
 		if (currentTile == 5 && moved == 0 && inventory[4].itemCount == 0){
 			game->hp -= 1;
 			if (game->hp <= 0)
@@ -1703,7 +1721,7 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 		else if (choice == 'H' || choice == 'h'){
         	if (game->rescuedCount[3] > 0){
         	system("cls");
-            hanamaruStore(idolDungeon, game, inventory, hanamaru);
+            hanamaruStore(idolDungeon, game, inventory, hanamaru, achievement);
         }
         	else
         		printf("Totally nothing to see here!\n");
@@ -1868,8 +1886,8 @@ int main(){
 	//game.running = 0; // comment this out if you want to test the continue game
 	loadGame(idolDungeon, &game, inventory, hanamaru, achievement);	
 	
-    titleScreen(idolDungeon, &game, inventory, hanamaru, achievement);
-    
+	
+	titleScreen(idolDungeon, &game, inventory, hanamaru, achievement);
+
     return 0; 
 }
-

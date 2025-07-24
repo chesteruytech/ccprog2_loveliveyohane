@@ -22,6 +22,8 @@
 
 #define MAX_ROW 12
 #define MAX_COL 55
+#define SIREN_ROW 100
+#define SIREN_COL 100
 
 typedef int grid[MAX_ROW][MAX_COL]; //Global declaration for the grid
 
@@ -66,6 +68,7 @@ struct gameTag{
 	int flawless; // for step 0 to 1 achievement
 	int newGamePlus;
 	int hostagesSelected;
+	int newGamePlusStatus; 
 };
 
 struct achievementTag{
@@ -94,7 +97,7 @@ void showDungeonMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, 
 void showInventory(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[]);
 
 void hanamaruStore(struct idolDungeonTag idolDungeon[], struct gameTag *game, 
-				struct inventoryTag inventory[], struct hanamaruTag hanamaru[]);
+				struct inventoryTag inventory[], struct hanamaruTag hanamaru[], struct achievementTag achievement[]);
 				
 void itemUnlock(int charIdx, struct hanamaruTag hanamaru[]);
 
