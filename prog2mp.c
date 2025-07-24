@@ -470,13 +470,14 @@ void achievementUnlock(struct achievementTag achievement[], struct gameTag *game
 			printf("Achievement unlocked: %s\n", achievement[25].achievement);
 		}
 		
+		// get saved by ruby ice cream
 		if (game->chocoMintUsageCount == 1 && achievement[26].earned == 0){
 			achievement[26].earned = 1;
 			getCurrentDate(achievement[26].dateEarned);
 			printf("Achievement unlocked: %s\n", achievement[26].achievement);
 		}
 		
-		// finish game with no gold (index 27)
+		// finish game with no gold on-hand (index 27)
 		if (game->gold == 0 && achievement[27].earned == 0 && game->flawless == 1){
 			achievement[27].earned = 1;
 			getCurrentDate(achievement[27].dateEarned);
@@ -648,7 +649,7 @@ void showHostages(struct idolDungeonTag idolDungeon[], struct gameTag *game){
 	}
 	
 	if (rescued == 8)
-		printf("None\n");
+		printf("No more hostages!!!\n");
     
     printf("\n\n");
 }
@@ -1625,7 +1626,7 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 	    scanf(" %c", &choice);
 		
 		// I put "index = choice - '1'" inside bc the index is only needed for numerical inputs	
-		if (choice >= '1' && choice <= '3' && game->currentPlaythroughClear < game->hostagesSelected){ 
+		if (choice >= '1' && choice < '1' + game->hostagesSelected && game->currentPlaythroughClear < game->hostagesSelected){ 
 			index = choice - '1'; // char to number
 			charIdx = game->hostages[index]; 
 			system("cls");
@@ -1696,7 +1697,11 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 		// Save and quit 
 		else if (choice == 'S' || choice == 's'){
 			saveGame(idolDungeon, game, inventory, hanamaru, achievement);
-			printf("Game Saved!\n\n"); 
+			printf("Game Saved!\n\n");
+			
+			if (game->newGamePlus == 1)
+	    			game->newGamePlus = 0;
+			 
 	        system("cls");
 		}
 		
@@ -1776,6 +1781,8 @@ void newGamePlus(struct idolDungeonTag idolDungeon[], struct gameTag *game, stru
 			struct hanamaruTag hanamaru[], struct achievementTag achievement[]){
 	
 	system("cls");
+	
+	game->newGamePlus = 0;
 	selectHostages(game);
     showHostages(idolDungeon, game);
     showDungeonMenu(idolDungeon, game, inventory);
@@ -1864,7 +1871,7 @@ int main(){
 	initializeHanamaru(hanamaru);
 	initializeAchievements(achievement);
 	
-	//game.running = 0; // comment this out if you want to test the continue game
+	game.running = 0; // comment this out if you want to test the continue game
 	loadGame(idolDungeon, &game, inventory, hanamaru, achievement);	
 	
     titleScreen(idolDungeon, &game, inventory, hanamaru, achievement);
