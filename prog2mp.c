@@ -427,7 +427,7 @@ void achievementUnlock(struct achievementTag achievement[], struct gameTag *game
 		}
 		
 		// clear 10 dungeons (index 19)
-		if (game->dungeonClears >= 10 && achievement[19].earned == 0){
+		if ((game->dungeonClears + game->totalPlaythroughClear) >= 10 && achievement[19].earned == 0){
 			achievement[19].earned = 1;
 			getCurrentDate(achievement[19].dateEarned);
 			printf("Achievement unlocked: %s\n", achievement[19].achievement);
