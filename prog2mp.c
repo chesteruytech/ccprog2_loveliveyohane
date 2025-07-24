@@ -4,13 +4,18 @@ mp is 80% complete
 to do by priority: 
 - bat movements and attack
 	- largen b to B if bat hit player	
+	- level one: 0.5 dmg, move every 2 turns, up down left right
+	- level two: 1 dmg, move every turn, up down left right
+	- level three: 1.5 dmg, move every turn, up down left right, can move diagonally as well
+	if you have bat tamer (inventory[2]), it should become 0.5 dmg taken regardless of level
+	
 - dungeon floors
 - final boss 
 
 regan will do this
-- shop upgrades (once bat behavior is implemented i'll do this)
+- shop upgrades (bat tamer specifically) (once bat behavior is implemented i'll do this)
+	- if you have bat tamer (inventory[2] ), bat should deal 0.5 dmg taken regardless of level
 - fix the files bc of adjustments (last priority, do this once done with dungeons completetly)
-- fix hostage selection
 
 Complete:
 - Main menu
@@ -62,7 +67,7 @@ void initializeGame(struct gameTag *game){
 	game->totalPlaythroughClear = 0;
 	game->flawless = 0;
 	game->newGamePlus = 0;
-	
+	game->hostagesSelected = 0;
 }
 
 void initializeIdolDungeon(struct idolDungeonTag idolDungeon[]){
@@ -605,6 +610,7 @@ void selectHostages(struct gameTag *game){
     int used[MAX_IDOLS] = {0};
     int attempts = 0;
     int i;
+    game->hostagesSelected = 0;
     
     while (selected < MAX_HOSTAGES && attempts < 100){
         index = rand() % MAX_IDOLS;
@@ -613,6 +619,7 @@ void selectHostages(struct gameTag *game){
             used[index] = 1;
             game->hostages[selected] = index;	// randomly selected indexes go to hostage array
             selected++;
+            game->hostagesSelected++;
         }
     }
     
@@ -674,15 +681,18 @@ void showDungeonMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, 
 		    
     printf("\n");
     
-	if (game->currentPlaythroughClear < 3){
-	    for (i = 0; i < 3; i++){
-	        idx = game->hostages[i];
-	        if (game->clearStatusTemp[i] == 1)
-	        	printf("[X] Visit %s\n", idolDungeon[idx].dungeon);
-	        else
-	        	printf("[%d] Visit %s\n", i+1, idolDungeon[idx].dungeon);
-		}
-	}
+	if (game->currentPlaythroughClear < game->hostagesSelected){
+    for (i = 0; i < 3; i++){
+        idx = game->hostages[i];
+        if (idx != -1){  
+            if (game->clearStatusTemp[i] == 1)
+                printf("[X] Visit %s\n", idolDungeon[idx].dungeon);
+            else
+                printf("[%d] Visit %s\n", i+1, idolDungeon[idx].dungeon);
+        }
+    }
+}
+
 	else
 	    printf("[1] Face the Siren of Numazu\n");
 			
@@ -1214,12 +1224,14 @@ void obtainTreasure(struct inventoryTag inventory[], struct gameTag game[]){
 
 void obtainGoldBat(struct gameTag *game){
 	
+	if (game->currentPlaythroughClear < game->hostagesSelected){
 	if (game->currentPlaythroughClear == 0)
 		game->gold += 5;
 	if (game->currentPlaythroughClear == 1)
 		game->gold += 10;
 	if (game->currentPlaythroughClear == 2)
 		game->gold += 15;
+	}
 }
 
 void movement(grid dimension2D, struct gameTag *game, struct inventoryTag inventory[], 
@@ -1447,6 +1459,7 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 	
 	int floorCount = dungeonIndex;
 	
+	if (game->currentPlaythroughClear < game->hostagesSelected){
 	if (game->currentPlaythroughClear == 0){
 		floorCount = 1;
 	}
@@ -1456,12 +1469,13 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 	else if (game->currentPlaythroughClear == 2){
 		floorCount = (rand() % 2) + 3;
 	}
+}
 			
 
 	do{
 		system("cls");
 		
-		if (game->currentPlaythroughClear < 3){
+		if (game->currentPlaythroughClear < game->hostagesSelected){
 			printf("Dungeon #%d: %s\n", dungeonIndex+1, idolDungeon[charIdx].dungeon);
 			printf("Floor 1 of %d\n", floorCount);
 		}
@@ -1677,7 +1691,7 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 	    scanf(" %c", &choice);
 		
 		// I put "index = choice - '1'" inside bc the index is only needed for numerical inputs	
-		if (choice >= '1' && choice <= '3' && game->currentPlaythroughClear < 3){ 
+		if (choice >= '1' && choice <= '3' && game->currentPlaythroughClear < game->hostagesSelected){ 
 			index = choice - '1'; // char to number
 			charIdx = game->hostages[index]; 
 			system("cls");
@@ -1714,7 +1728,7 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 			showDungeonMenu(idolDungeon, game, inventory);
 		}
 		
-		else if (choice == '1' && game->currentPlaythroughClear == 3){
+		else if (choice == '1' && game->currentPlaythroughClear == game->hostagesSelected){
 			system("cls");
 			win = sirenOfTheMirrorWorld(game, charIdx, idolDungeon, index, inventory, achievement);
 			if (win == 1){

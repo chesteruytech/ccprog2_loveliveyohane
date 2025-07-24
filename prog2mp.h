@@ -67,7 +67,7 @@ struct gameTag{
 	int totalPlaythroughClear; // for ng+
 	int flawless; // for step 0 to 1 achievement
 	int newGamePlus;
-	
+	int hostagesSelected;
 };
 
 struct achievementTag{
