@@ -25,7 +25,7 @@ Description: Yohane the Parhelion! Siren in the Mirror World Machine Project CCP
 Programmed by: Jon Regan Choa, Chester Aldrin Uy, S14
 Last modified: July 29, 2025
 Version: v10.0
-[Acknowledgements: time.h, conio.h, older machine projects that were done by Regan]
+[Acknowledgements: time.h, conio.h, an older CCPROG2 machine project that was done by Regan]
 */
 #include "prog2mp.h"
 
@@ -361,6 +361,7 @@ int strToInt(char choice[]){
     return num;
 }
 /* This function converts an integer to a string
+Referenced one of Regan's previous CCPROG2 machine project for this function
 Precondition: Program is running
 @param num: the time now 
 @param str: the current month/day/year in the form of a string
@@ -381,7 +382,8 @@ void intToStr(int num, char* str, int digits) {
     }
 }
 
-/* This function gets the current date basd on function named intToStr
+/* This function gets the current date basd on function named intToStr.
+Referenced one of Regan's previous CCPROG2 machine project for this function
 Precondition: Get an achievement in game
 @param output: the string containing the current date and time
 */
@@ -391,11 +393,11 @@ void getCurrentDate(char *output){
 
     char mm[3], dd[3], yyyy[5], hh[3], min[3];
 
-    intToStr(t->tm_mon + 1, mm, 2);       // month
-    intToStr(t->tm_mday, dd, 2);          // day
+    intToStr(t->tm_mon + 1, mm, 2); // month
+    intToStr(t->tm_mday, dd, 2); // day
     intToStr(t->tm_year + 1900, yyyy, 4); // year
-    intToStr(t->tm_hour, hh, 2);          // hour
-    intToStr(t->tm_min, min, 2);          // minutes
+    intToStr(t->tm_hour, hh, 2); // hour
+    intToStr(t->tm_min, min, 2); // minutes
 
  
     output[0] = '\0'; 
