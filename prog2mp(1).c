@@ -5,7 +5,6 @@ to do by priority:
 - dungeon floors
 - final boss 
 
-
 Complete:
 - Main menu
 - achievements
@@ -21,8 +20,19 @@ Complete:
 - bat movements
 */
 
+/*
+Description: Yohane the Parhelion! Siren in the Mirror World Machine Project CCPROG2
+Programmed by: Jon Regan Choa, Chester Aldrin Uy, S14
+Last modified: July 29, 2025
+Version: v10.0
+[Acknowledgements: time.h, conio.h, older machine projects that were done by Regan]
+*/
 #include "prog2mp.h"
 
+/* This function initalizes the game structure
+Precondition: Program is running
+@param struct gameTag *game: the structure containing the game statistics of the player
+*/
 void initializeGame(struct gameTag *game){
 	
 	int i;
@@ -61,6 +71,10 @@ void initializeGame(struct gameTag *game){
 	game->maxLailapsHP = 4;
 }
 
+/* This function initalizes the idol and dungeon pair structure
+Precondition: Program is running
+@param struct idolDungeonTag idolDungeon[]: the structure containing the pair of idols and dungeons associated
+*/
 void initializeIdolDungeon(struct idolDungeonTag idolDungeon[]){
 	
     strcpy(idolDungeon[0].idol, "Chika");
@@ -89,6 +103,10 @@ void initializeIdolDungeon(struct idolDungeonTag idolDungeon[]){
     
 }
 
+/* This function initalizes the player's inventory
+Precondition: Program is running
+@param struct inventoryTag inventory[]: the structure containing the player's inventory
+*/
 void initializeInventory(struct inventoryTag inventory[]){
 	
 	strcpy(inventory[0].item, "Tears of a fallen angel");
@@ -129,6 +147,10 @@ void initializeInventory(struct inventoryTag inventory[]){
 	
 }
 
+/* This function initalizes the hanamaru shop
+Precondition: Program is running
+@param struct hanamaruTag hanamaru[]: the structure containing the contents of the hanamaru shop
+*/
 void initializeHanamaru(struct hanamaruTag hanamaru[]){
 	
 	strcpy(hanamaru[0].item, "Tears of a fallen angel");
@@ -169,6 +191,10 @@ void initializeHanamaru(struct hanamaruTag hanamaru[]){
 	
 }
 
+/* This function initalizes the game's achievements
+Precondition: Program is running
+@param struct achievementTag achievement[]: the structure containing the contents of the achievements
+*/
 void initializeAchievements(struct achievementTag achievement[]){
 	
 	strcpy(achievement[0].achievement, "Yohane Descends!");
@@ -284,7 +310,11 @@ void initializeAchievements(struct achievementTag achievement[]){
 	strcpy(achievement[27].description, "Complete a playthrough with 0G on-hand at the end");
 }
 
-
+/* This function views the amount of achievments obtained
+Precondition: Program is running
+@param struct achievementTag achievement[]: the structure containing the achievements
+@param achievementCount: the amount of achievements obtained by the player
+*/
 void viewAchievementsCount(struct achievementTag achievement[], int achievementCount){
 	
 	system("cls");
@@ -294,7 +324,11 @@ void viewAchievementsCount(struct achievementTag achievement[], int achievementC
     printf("************************************************************\n");
 }
 
-// confirms that a char inputted is a number
+/* This function confirms that the input of the player is an integer
+Precondition: Program is running
+@param char choice[]: The string containing the input of the player 
+@return 1 if input is a number, 0 if no input or not an integer
+*/
 int isNumber(char choice[]){
     int count = 0;
 
@@ -310,7 +344,11 @@ int isNumber(char choice[]){
 
     return 1; 
 }
-
+/* This function converts the input of the player (char type) to an integer
+Precondition: Program is running
+@param char choice[]: The string containing the input of the player 
+@return the integer that was converted by the function
+*/
 int strToInt(char choice[]){
     int count = 0;
     int num = 0;
@@ -322,7 +360,12 @@ int strToInt(char choice[]){
 
     return num;
 }
-
+/* This function converts an integer to a string
+Precondition: Program is running
+@param num: the time now 
+@param str: the current month/day/year in the form of a string
+@param digits: string length of date format
+*/
 void intToStr(int num, char* str, int digits) {
     int i, pos = digits - 1;
 
@@ -338,7 +381,10 @@ void intToStr(int num, char* str, int digits) {
     }
 }
 
-// copied my old MP from previous take for this
+/* This function gets the current date basd on function named intToStr
+Precondition: Get an achievement in game
+@param output: the string containing the current date and time
+*/
 void getCurrentDate(char *output){
     time_t now = time(NULL);
     struct tm *t = localtime(&now);
@@ -364,7 +410,12 @@ void getCurrentDate(char *output){
     strcat(output, ":");
     strcat(output, min);
 }
-
+/* This function checks whether an achievements should be unlocked based on certain in game conditions
+Precondition: Get an achievement in game
+@param struct achievementTag achievement[]: the structure containing the achievments in game
+@param struct gameTag *game: the structure containing the in game player's statistics
+@param win: confirms whether a dungeon was cleared, 1 if yes, 0 if no
+*/
 void achievementUnlock(struct achievementTag achievement[], struct gameTag *game, int win){
 				 
 		int i;
@@ -492,7 +543,12 @@ void achievementUnlock(struct achievementTag achievement[], struct gameTag *game
 		
 		
 }
-
+/* This function allows the player to view achievement details for each achievement in the achievements menu
+Precondition: Open the achievements menu in game
+@param choice[]: the input of the player in the form of a string
+@param struct achievementTag achievement[]: the structure containing the details of the achievements in game
+@param achievementCount: the amount of achievements obtained in game
+*/
 void viewAchievementDetails(char choice[], struct achievementTag achievement[], int achievementCount){
 	int index;
 
@@ -527,7 +583,10 @@ void viewAchievementDetails(char choice[], struct achievementTag achievement[], 
 	
 	choice[0] = '\0';
 }
-
+/* This function allows the player to view list of achievements with a navigatable menu
+Precondition: Open the achievements menu in game
+@param struct achievementTag achievement[]: the structure containing the details of the achievements in game
+*/
 void viewAchievements(struct achievementTag achievement[]){
     int currentPage = 0;
     int totalPages = 4;
@@ -603,30 +662,35 @@ void viewAchievements(struct achievementTag achievement[]){
 
     } while (!((choice[0] == 'R' || choice[0] == 'r') && choice[1] == '\0'));
 }
-
+/* This function selects the hostages that must be rescued by the player
+Precondition: Start a playthrough in game
+@param struct gameTag *game: the structure containing the game statistics of the player
+*/
 void selectHostages(struct gameTag *game){
 	int index;
-    int selected = 0;
     int used[MAX_IDOLS] = {0};
     int attempts = 0;
     int i;
     game->hostagesSelected = 0;
     
-    while (selected < MAX_HOSTAGES && attempts < 100){
+    while (game->hostagesSelected < MAX_HOSTAGES && attempts < 9999){
         index = rand() % MAX_IDOLS;
         attempts++;
         if (used[index] == 0 && game->rescuedCount[index] == 0){
             used[index] = 1;
-            game->hostages[selected] = index;	// randomly selected indexes go to hostage array
-            selected++;
+            game->hostages[game->hostagesSelected] = index;	// randomly selected indexes go to hostage array
             game->hostagesSelected++;
         }
     }
     
-    for (i = selected; i < MAX_HOSTAGES; i++)  // if there are less than three hostages left
+    for (i = game->hostagesSelected; i < MAX_HOSTAGES; i++)  // if there are less than three hostages left
     	game->hostages[i] = -1;
 }
-
+/* This function shows the list of hostages that must be rescued by the player
+Precondition: Start a playthrough in game
+@param struct idolDungeonTag idolDungeon[]: the structure containing the pair of idols and dungeons associated
+@param struct gameTag *game: the structure containing the game statistics of the player
+*/
 void showHostages(struct idolDungeonTag idolDungeon[], struct gameTag *game){
 	int i, idx;
 	int rescued = 0;
@@ -651,11 +715,16 @@ void showHostages(struct idolDungeonTag idolDungeon[], struct gameTag *game){
     system("pause");
     system("cls");
 }
-
+/* This function shows the in-game menu containing the dungeons that must be traversed, and player statistics
+Precondition: Start a playthrough in game
+@param struct idolDungeonTag idolDungeon[]: the structure containing the pair of idols and dungeons associated
+@param struct gameTag *game: the structure containing the game statistics of the player
+@param struct inventoryTag inventory[]: the structure containing the player's inventory
+*/
 void showDungeonMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[]){
 	int i, idx, invIdx;
 	
-	if (game->currentPlaythroughClear < 3)
+	if (game->currentPlaythroughClear < game->hostagesSelected)
     	printf("Lailaps: Yohane! Where should we go to now?\n\n");
     else
 		printf("Lailaps: Yohane! It's time to face the Siren!\n\n");
@@ -703,7 +772,12 @@ void showDungeonMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, 
 		
 	printf("\n\n");
 }
-
+/* This function shows the in-game inventory of the player
+Precondition: Open inventory in game by pressing I
+@param struct idolDungeonTag idolDungeon[]: the structure containing the pair of idols and dungeons associated
+@param struct gameTag *game: the structure containing the game statistics of the player
+@param struct inventoryTag inventory[]: the structure containing the player's inventory
+*/
 void showInventory(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[]){
 	char choice;
 	int i;
@@ -740,6 +814,13 @@ void showInventory(struct idolDungeonTag idolDungeon[], struct gameTag *game, st
 	} while (choice != 'R' && choice != 'r');
 }
 
+/* This function shows the contents of the hanamaru store
+Precondition: Rescue Hanamaru, then press H in dungeon menu
+@param struct idolDungeonTag idolDungeon[]: the structure containing the pair of idols and dungeons associated
+@param struct gameTag *game: the structure containing the game statistics of the player
+@param struct inventoryTag inventory[]: the structure containing the player's inventory
+@param struct hanamaruTag hanamaru[]: the structure containing the contents of the hanamaru shop
+*/
 void hanamaruStore(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[], struct hanamaruTag hanamaru[], struct achievementTag achievement[]){
 	int i;
 	char choice;
@@ -821,6 +902,11 @@ void hanamaruStore(struct idolDungeonTag idolDungeon[], struct gameTag *game, st
 	} while (choice != 'R' && choice != 'r');	
 }
 
+/* This function unlocks items in hanamaru store depending on which idol was rescued
+Precondition: Rescue an idol 
+@param charIdx: The index of the character from the idolDungeon structure
+@param struct hanamaruTag hanamaru[]: the structure containing the contents of the hanamaru shop
+*/
 void itemUnlock(int charIdx, struct hanamaruTag hanamaru[]){
 		// Unlock item after clearing dungeon
 		if (charIdx == 0) // Chika
@@ -839,6 +925,14 @@ void itemUnlock(int charIdx, struct hanamaruTag hanamaru[]){
 			hanamaru[STEWSHINE].availability = 1;	
 }
 
+/* This function saves the game's contents into a binary file named "yohane.bin"
+Precondition: Press "S" in dungeon menu (Save and Quit) 
+@param struct idolDungeonTag idolDungeon[]: the structure containing the pair of idols and dungeons associated
+@param struct gameTag *game: the structure containing the game statistics of the player
+@param struct inventoryTag inventory[]: the structure containing the player's inventory
+@param struct hanamaruTag hanamaru[]: the structure containing the contents of the hanamaru shop
+@param struct achievementTag achievement[]: the structure containing the details of the achievements in game
+*/
 void saveGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[], 
 			struct hanamaruTag hanamaru[], struct achievementTag achievement[]){
 	FILE *ptr;
@@ -853,6 +947,14 @@ void saveGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
     fclose(ptr);
 }
 
+/* This function loads the game's contents from a binary file named "yohane.bin"
+Precondition: Press "C" in the title screen (Continue) or "N" in title screen during new game plus
+@param struct idolDungeonTag idolDungeon[]: the structure containing the pair of idols and dungeons associated
+@param struct gameTag *game: the structure containing the game statistics of the player
+@param struct inventoryTag inventory[]: the structure containing the player's inventory
+@param struct hanamaruTag hanamaru[]: the structure containing the contents of the hanamaru shop
+@param struct achievementTag achievement[]: the structure containing the details of the achievements in game
+*/
 void loadGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[], 
 			struct hanamaruTag hanamaru[], struct achievementTag achievement[]){
 	FILE *ptr;
@@ -870,7 +972,12 @@ void loadGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 
 	fclose(ptr);
 }
-
+/* This function converts the integers in the dungeon functions into its respective symbols for the dungeon layout
+Precondition: Enter a dungeon in game 
+@param dimension2D: the size of the dungeon in rows and columns
+@param nRow: the number of columns in the layout
+@param nCol: the number of columns in the layout
+*/
 void dungeonIdentifier(grid dimension2D, int nRow, int nCol){
 	for(int i = 0; i < MAX_ROW; i++){
 		for(int j = 0; j < MAX_COL; j++){
@@ -932,7 +1039,14 @@ void dungeonIdentifier(grid dimension2D, int nRow, int nCol){
 		printf("\n");
 	}
 }
-
+/* This function identifies the walls in the dungeon
+Precondition: Enter a dungeon in game 
+@param dimension2D: the size of the dungeon in rows and columns
+@param nRow: the number of columns in the layout
+@param nCol: the number of columns in the layout
+@param tRow: the pointer to mark the row of the obstacle
+@param tCol: the pointer to mark the column of the obstacle
+*/
 void wall(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol){
 	*tRow = -1;
 	*tCol = -1;
@@ -946,7 +1060,14 @@ void wall(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol){
 		}
 	}
 }
-
+/* This function identifies the spikes in the dungeon
+Precondition: Enter a dungeon in game 
+@param dimension2D: the size of the dungeon in rows and columns
+@param nRow: the number of columns in the layout
+@param nCol: the number of columns in the layout
+@param tRow: the pointer to mark the row of the obstacle
+@param tCol: the pointer to mark the column of the obstacle
+*/
 void spike(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol){
 	*tRow = -1;
 	*tCol = -1;
@@ -960,7 +1081,14 @@ void spike(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol){
 		}
 	}
 }
-
+/* This function identifies the water tiles in the dungeon
+Precondition: Enter a dungeon in game 
+@param dimension2D: the size of the dungeon in rows and columns
+@param nRow: the number of columns in the layout
+@param nCol: the number of columns in the layout
+@param tRow: the pointer to mark the row of the obstacle
+@param tCol: the pointer to mark the column of the obstacle
+*/
 void water(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol){
 	*tRow = -1;
 	*tCol = -1;
@@ -974,7 +1102,14 @@ void water(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol){
 		}
 	}
 }
-
+/* This function identifies the heat tiles in the dungeon
+Precondition: Enter a dungeon in game 
+@param dimension2D: the size of the dungeon in rows and columns
+@param nRow: the number of columns in the layout
+@param nCol: the number of columns in the layout
+@param tRow: the pointer to mark the row of the obstacle
+@param tCol: the pointer to mark the column of the obstacle
+*/
 void heat(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol){
 	*tRow = -1;
 	*tCol = -1;
@@ -988,7 +1123,14 @@ void heat(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol){
 		}
 	}
 }
-
+/* This function identifies the treasure tile in the dungeon
+Precondition: Enter a dungeon in game 
+@param dimension2D: the size of the dungeon in rows and columns
+@param nRow: the number of columns in the layout
+@param nCol: the number of columns in the layout
+@param tRow: the pointer to mark the row of the obstacle
+@param tCol: the pointer to mark the column of the obstacle
+*/
 void treasure(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol){
 	*tRow = -1;
 	*tCol = -1;
@@ -1002,7 +1144,14 @@ void treasure(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol){
 		}
 	}
 }
-
+/* This function identifies the exit tile in the dungeon
+Precondition: Enter a dungeon in game 
+@param dimension2D: the size of the dungeon in rows and columns
+@param nRow: the number of columns in the layout
+@param nCol: the number of columns in the layout
+@param tRow: the pointer to mark the row of the obstacle
+@param tCol: the pointer to mark the column of the obstacle
+*/
 void freedom(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol){
 	*tRow = -1;
 	*tCol = -1;
@@ -1016,7 +1165,14 @@ void freedom(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol){
 		}
 	}
 }
-
+/* This function identifies the bat tiles in the dungeon
+Precondition: Enter a dungeon in game 
+@param dimension2D: the size of the dungeon in rows and columns
+@param nRow: the number of columns in the layout
+@param nCol: the number of columns in the layout
+@param tRow: the pointer to mark the row of the obstacle
+@param tCol: the pointer to mark the column of the obstacle
+*/
 void bats(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol){
 	*tRow = -1;
 	*tCol = -1;
@@ -1030,7 +1186,14 @@ void bats(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol){
 		}
 	}
 }
-
+/* This function identifies the abilities of the bats in game and updates their 
+position in the map, including their behavior depending on dungeon level
+Precondition: Press any key while in a dungeon 
+@param dimension2D: the size of the dungeon in rows and columns
+@param playerMove: the amount of times the player has moved
+@param struct gameTag *game: the structure containing the game statistics of the player
+@param struct inventoryTag inventory[]: the structure containing the player's inventory
+*/
 void batAbilities(grid dimension2D, int playerMove, struct gameTag *game, struct inventoryTag inventory[]){
 	
     int i, j;
@@ -1130,7 +1293,14 @@ void batAbilities(grid dimension2D, int playerMove, struct gameTag *game, struct
     }
     
 }
-
+/* This function identifies the player in the dungeon
+Precondition: Enter a dungeon in game 
+@param dimension2D: the size of the dungeon in rows and columns
+@param nRow: the number of columns in the layout
+@param nCol: the number of columns in the layout
+@param tRow: the pointer to mark the row of the obstacle
+@param tCol: the pointer to mark the column of the obstacle
+*/
 void yohane(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol){
 	*tRow = -1;
 	*tCol = -1;
@@ -1144,7 +1314,14 @@ void yohane(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol){
 		}
 	}
 }
-
+/* This function identifies the gold tiles in the dungeon
+Precondition: Enter a dungeon in game 
+@param dimension2D: the size of the dungeon in rows and columns
+@param nRow: the number of columns in the layout
+@param nCol: the number of columns in the layout
+@param tRow: the pointer to mark the row of the obstacle
+@param tCol: the pointer to mark the column of the obstacle
+*/
 void gold(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol){
 	*tRow = -1;
 	*tCol = -1;
@@ -1158,7 +1335,15 @@ void gold(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol){
 		}
 	}
 }
-
+/* This function identifies the bat tiles in the dungeon, if the player gets hit
+It converts a small b (bat) into a B (bat attacked player)
+Precondition: Enter a dungeon in game 
+@param dimension2D: the size of the dungeon in rows and columns
+@param nRow: the number of columns in the layout
+@param nCol: the number of columns in the layout
+@param tRow: the pointer to mark the row of the obstacle
+@param tCol: the pointer to mark the column of the obstacle
+*/
 void hit(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol){
 	*tRow = -1;
 	*tCol = -1;
@@ -1172,7 +1357,14 @@ void hit(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol){
 		}
 	}
 }
-
+/* This function identifies the siren (final boss) in the dungeon
+Precondition: Enter a dungeon in game 
+@param dimension2D: the size of the dungeon in rows and columns
+@param nRow: the number of columns in the layout
+@param nCol: the number of columns in the layout
+@param tRow: the pointer to mark the row of the obstacle
+@param tCol: the pointer to mark the column of the obstacle
+*/
 void siren(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol){
 	*tRow = -1;
 	*tCol = -1;
@@ -1186,7 +1378,14 @@ void siren(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol){
 		}
 	}
 }
-
+/* This function identifies the lailaps in the dungeon
+Precondition: Enter a dungeon in game 
+@param dimension2D: the size of the dungeon in rows and columns
+@param nRow: the number of columns in the layout
+@param nCol: the number of columns in the layout
+@param tRow: the pointer to mark the row of the obstacle
+@param tCol: the pointer to mark the column of the obstacle
+*/
 void lailaps(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol){
 	*tRow = -1;
 	*tCol = -1;
@@ -1200,7 +1399,16 @@ void lailaps(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol){
 		}
 	}
 }
-
+/* This function verifies if the tile traversed to is a valid tile, by not going out of bounds
+Precondition: Enter a dungeon in game 
+@param dimension2D: the size of the dungeon in rows and columns
+@param nRow: the number of columns in the layout
+@param nCol: the number of columns in the layout
+@param cRow: coordinates where the player is going to (row)
+@param cCol: coordinates where the player is going to (column)
+@param nDir: the direction that the player is headed to (ranges from 1 to 8)
+@return the value of valid. 1 if valid, 0 if not 
+*/
 int tileValidation(grid dimension2D, int nRow, int nCol, int cRow, int cCol, int nDir){
 	int valid = 0;
 
@@ -1243,7 +1451,11 @@ int tileValidation(grid dimension2D, int nRow, int nCol, int cRow, int cCol, int
 	}
 	return valid;
 }
-
+/* This function allows the player to obtain treasure in game based on the treasure tile
+Precondition: Obtain a treasure in game depending where the dungeon tile is 
+@param struct inventoryTag inventory[]: the structure containing the player's inventory
+@param struct gameTag *game: the structure containing the game statistics of the player
+*/
 void obtainTreasure(struct inventoryTag inventory[], struct gameTag game[]){
 	
 	srand(time(NULL));
@@ -1260,7 +1472,11 @@ void obtainTreasure(struct inventoryTag inventory[], struct gameTag game[]){
 	
 	system("pause");
 }
-
+/* This function allows the player to obtain gold from 
+defeating bats depending on the level of the dungeon
+Precondition: Defeat a bat and claim the gold dropped by it 
+@param struct gameTag *game: the structure containing the game statistics of the player
+*/
 void obtainGoldBat(struct gameTag *game){
 	if (game->currentPlaythroughClear < game->hostagesSelected){
 	if (game->currentPlaythroughClear == 0)
@@ -1271,7 +1487,18 @@ void obtainGoldBat(struct gameTag *game){
 		game->gold += 15;
 	}
 }
-
+/* This function moves the player around in a dungeon depending on users input 
+Precondition: Enter a dungeon in game and press W, A, S, or D
+@param dimension2D: the size of the dungeon in rows and columns
+@param struct gameTag *game: the structure containing the game statistics of the player
+@param struct inventoryTag inventory[]: the structure containing the player's inventory
+@param yRow: the current row of the player 
+@param yCol: the current column of the player
+@param targetRow: the target row that the player wants to go to, dependent on what key the user pressed
+@param targetCol: the target column that the player wants to go to, dependent on what key the user pressed
+@param verdict: the verdict that confirms if the player has won the dungeon yet or not 
+@param currentTile: the current tile identifer that the player is currently standing on
+*/
 void movement(grid dimension2D, struct gameTag *game, struct inventoryTag inventory[], 
 				int *yRow, int *yCol, int targetRow, int targetCol, int *verdict, int *currentTile){
 	int currentRow = *yRow;
@@ -1360,7 +1587,11 @@ void movement(grid dimension2D, struct gameTag *game, struct inventoryTag invent
 		else 
 			dimension2D[currentRow][currentCol] = 9; 
 }
-
+/* This function allows the player to cycle their items to the right 
+Precondition: Enter a dungeon in game and input "]", if the user has an item on hand from their inventory
+@param struct inventoryTag inventory[]: the structure containing the player's inventory
+@param struct gameTag *game: the structure containing the game statistics of the player
+*/
 void cycleItemForward(struct inventoryTag inventory[], struct gameTag *game){
     int i;
     int currentPos = game->currentHandIndex;
@@ -1384,10 +1615,15 @@ void cycleItemForward(struct inventoryTag inventory[], struct gameTag *game){
                 found = 1;
             }
         }
-    }else
+    }
+	else
     	game->currentHandIndex = -1;
 }
-
+/* This function allows the player to cycle their items to the left
+Precondition: Enter a dungeon in game and input "[", if the user has an item on hand from their inventory
+@param struct inventoryTag inventory[]: the structure containing the player's inventory
+@param struct gameTag *game: the structure containing the game statistics of the player
+*/
 void cycleItemBackward(struct inventoryTag inventory[], struct gameTag *game){
     int i;
     int currentPos = game->currentHandIndex;
@@ -1411,10 +1647,15 @@ void cycleItemBackward(struct inventoryTag inventory[], struct gameTag *game){
                 found = 1;
             }
         }
-    }else
+    }
+	else
     	game->currentHandIndex = -1;
 }
-
+/* This function allows the player to consume an item in their inventory
+Precondition: Enter a dungeon in game and input a SPACE BAR, if the user has an item in hand
+@param struct inventoryTag inventory[]: the structure containing the player's inventory
+@param struct gameTag *game: the structure containing the game statistics of the player
+*/
 void useItem(struct inventoryTag inventory[], struct gameTag *game){
 	int invIdx = game->handIndex[game->currentHandIndex];
 	
@@ -1430,7 +1671,11 @@ void useItem(struct inventoryTag inventory[], struct gameTag *game){
 		}	
 	}
 }
-
+/* This function resets certain statistics of the player when they get a game over
+Precondition: Player's HP reaches 0, or Lailaps HP reaches 0 in the final boss
+@param struct gameTag *game: the structure containing the game statistics of the player
+@param struct inventoryTag inventory[]: the structure containing the player's inventory
+*/
 void gameOver(struct gameTag *game, struct inventoryTag inventory[]){
     int i;
 
@@ -1444,8 +1689,17 @@ void gameOver(struct gameTag *game, struct inventoryTag inventory[]){
 		inventory[i].itemCount = 0;
 }
 
-
-//Base Logic Package (e.g., character moving, tile finding and validation, winning, quitting)
+/* Base Logic Package (e.g., character moving, tile finding and validation, winning, quitting)
+Precondition: Player enters a dungeon or enters the final boss
+@param dimension2D: the size of the dungeon in rows and columns
+@param struct gameTag *game: the structure containing the game statistics of the player
+@param charIdx: the index of a character in idolDungeon structure
+@param struct idolDungeonTag idolDungeon[]: the structure containing the pair of idols and dungeons associated
+@param dungeonIndex: the index of the dungeon entered by the player (0, 1, 2)
+@param struct inventoryTag inventory[]: the structure containing the player's inventory
+@param struct achievementTag achievement[]: the structure containing the details of the achievements in game
+@return the verdict depending on whether the player clears a dungeon or not (1 if win, 0 if lose)
+*/
 int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct idolDungeonTag idolDungeon[], 
 					int dungeonIndex, struct inventoryTag inventory[], struct achievementTag achievement[])
 {
@@ -1621,7 +1875,16 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 	return verdict;
 }
 
-// Dungeon Level One: Awashima Marine Park 1/2/3/4/5/7/8/9
+/* This function sets up the dungeon layout of dungeon index 0
+Precondition: Player enters a dungeon
+@param struct gameTag *game: the structure containing the game statistics of the player
+@param charIdx: the index of a character in idolDungeon structure
+@param struct idolDungeonTag idolDungeon[]: the structure containing the pair of idols and dungeons associated
+@param dungeonIndex: the index of the dungeon entered by the player (0, 1, 2)
+@param struct inventoryTag inventory[]: the structure containing the player's inventory
+@param struct achievementTag achievement[]: the structure containing the details of the achievements in game
+@return the verdict from yohaneBaseLogic
+*/
 int awashimaMarinePark(struct gameTag *game, int charIdx, struct idolDungeonTag idolDungeon[], 
 					int dungeonIndex, struct inventoryTag inventory[], struct achievementTag achievement[]){
 				
@@ -1643,7 +1906,16 @@ int awashimaMarinePark(struct gameTag *game, int charIdx, struct idolDungeonTag 
 }
 
 
-// Dungeon Level Two: Izu-mito Sea Paradise
+/* This function sets up the dungeon layout of dungeon index 1
+Precondition: Player enters a dungeon
+@param struct gameTag *game: the structure containing the game statistics of the player
+@param charIdx: the index of a character in idolDungeon structure
+@param struct idolDungeonTag idolDungeon[]: the structure containing the pair of idols and dungeons associated
+@param dungeonIndex: the index of the dungeon entered by the player (0, 1, 2)
+@param struct inventoryTag inventory[]: the structure containing the player's inventory
+@param struct achievementTag achievement[]: the structure containing the details of the achievements in game
+@return the verdict from yohaneBaseLogic
+*/
 int izumitoSeaParadise(struct gameTag *game, int charIdx, struct idolDungeonTag idolDungeon[], 
 					int dungeonIndex, struct inventoryTag inventory[], struct achievementTag achievement[]){
 	
@@ -1664,7 +1936,16 @@ int izumitoSeaParadise(struct gameTag *game, int charIdx, struct idolDungeonTag 
 	return yohaneBaseLogic(dungeon, game, charIdx, idolDungeon, dungeonIndex, inventory, achievement);
 }
 
-// Dungeon Level Three: Shougetsu Confectionary
+/* This function sets up the dungeon layout of dungeon index 2 
+Precondition: Player enters a dungeon
+@param struct gameTag *game: the structure containing the game statistics of the player
+@param charIdx: the index of a character in idolDungeon structure
+@param struct idolDungeonTag idolDungeon[]: the structure containing the pair of idols and dungeons associated
+@param dungeonIndex: the index of the dungeon entered by the player (0, 1, 2)
+@param struct inventoryTag inventory[]: the structure containing the player's inventory
+@param struct achievementTag achievement[]: the structure containing the details of the achievements in game
+@return the verdict from yohaneBaseLogic
+*/
 int shougetsuConfectionary(struct gameTag *game, int charIdx, struct idolDungeonTag idolDungeon[], 
 					int dungeonIndex, struct inventoryTag inventory[], struct achievementTag achievement[]){
 	grid dungeon = {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, 
@@ -1684,7 +1965,16 @@ int shougetsuConfectionary(struct gameTag *game, int charIdx, struct idolDungeon
 	return yohaneBaseLogic(dungeon, game, charIdx, idolDungeon, dungeonIndex, inventory, achievement);
 }
 
-// Dungeon Level Boss: Siren in the Mirror World! Later for Lailaps
+/* Final Boss: Siren of the Mirror World!
+Precondition: Player clears three dungeons in a single playthrough
+@param struct gameTag *game: the structure containing the game statistics of the player
+@param charIdx: the index of a character in idolDungeon structure
+@param struct idolDungeonTag idolDungeon[]: the structure containing the pair of idols and dungeons associated
+@param dungeonIndex: the index of the dungeon entered by the player (0, 1, 2)
+@param struct inventoryTag inventory[]: the structure containing the player's inventory
+@param struct achievementTag achievement[]: the structure containing the details of the achievements in game
+@return the verdict from yohaneBaseLogic
+*/
 int sirenOfTheMirrorWorld(struct gameTag *game, int charIdx, struct idolDungeonTag idolDungeon[], 
 					int dungeonIndex, struct inventoryTag inventory[], struct achievementTag achievement[]){
 	grid dungeon = {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, 
@@ -1706,7 +1996,15 @@ int sirenOfTheMirrorWorld(struct gameTag *game, int charIdx, struct idolDungeonT
 	return yohaneBaseLogic(dungeon, game, charIdx, idolDungeon, dungeonIndex, inventory, achievement);
 }
 
-
+/* In game menu that allows the user to enter dungeons depending on input (1,2,3). If three dungeons are cleared
+in a single playthrough, replace the three options with the singular option to face the final boss
+Precondition: Player inputs "N" or "C" in the title screen (new game or continue)
+@param struct idolDungeonTag idolDungeon[]: the structure containing the pair of idols and dungeons associated
+@param struct gameTag *game: the structure containing the game statistics of the player
+@param struct inventoryTag inventory[]: the structure containing the player's inventory
+@param struct hanamaruTag hanamaru[]: the structure containing the contents of the hanamaru shop
+@param struct achievementTag achievement[]: the structure containing the details of the achievements in game
+*/
 void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[], 
 			struct hanamaruTag hanamaru[], struct achievementTag achievement[]){
 	char choice;
@@ -1808,6 +2106,16 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 	} while (choice != 'S' && choice != 's');
 }
 
+/* Sets up new game plus in the event that the player manages to defeat
+the final boss. Resets HP and maximum HP, as well as resets inventory count except for noppo bread
+and Tears of a Fallen Angel. Selects three new hostages that have yet to be rescued
+Precondition: Player defeats the final boss in a playthrough
+@param struct idolDungeonTag idolDungeon[]: the structure containing the pair of idols and dungeons associated
+@param struct gameTag *game: the structure containing the game statistics of the player
+@param struct inventoryTag inventory[]: the structure containing the player's inventory
+@param struct hanamaruTag hanamaru[]: the structure containing the contents of the hanamaru shop
+@param struct achievementTag achievement[]: the structure containing the details of the achievements in game
+*/
 void newGamePlusSetup(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[], 
 			struct hanamaruTag hanamaru[], struct achievementTag achievement[]){
 	int i;
@@ -1830,6 +2138,14 @@ void newGamePlusSetup(struct idolDungeonTag idolDungeon[], struct gameTag *game,
 	}
 }
 
+/* Allows the player to continue their game based on the save file, if they have one 
+Precondition: Player has an existing save file from pressing "Save and Quit"
+@param struct idolDungeonTag idolDungeon[]: the structure containing the pair of idols and dungeons associated
+@param struct gameTag *game: the structure containing the game statistics of the player
+@param struct inventoryTag inventory[]: the structure containing the player's inventory
+@param struct hanamaruTag hanamaru[]: the structure containing the contents of the hanamaru shop
+@param struct achievementTag achievement[]: the structure containing the details of the achievements in game
+*/
 void continueGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[], 
 			struct hanamaruTag hanamaru[], struct achievementTag achievement[]){
 	system("cls");
@@ -1840,6 +2156,14 @@ void continueGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, str
     gameMenu(idolDungeon, game, inventory, hanamaru, achievement);
 }
 
+/* Starts a new game if the player does not have an existing save file 
+Precondition: Program is running 
+@param struct idolDungeonTag idolDungeon[]: the structure containing the pair of idols and dungeons associated
+@param struct gameTag *game: the structure containing the game statistics of the player
+@param struct inventoryTag inventory[]: the structure containing the player's inventory
+@param struct hanamaruTag hanamaru[]: the structure containing the contents of the hanamaru shop
+@param struct achievementTag achievement[]: the structure containing the details of the achievements in game
+*/
 void newGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[], 
 			struct hanamaruTag hanamaru[], struct achievementTag achievement[]){
 	system("cls");
@@ -1857,6 +2181,14 @@ void newGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct i
     gameMenu(idolDungeon, game, inventory, hanamaru, achievement);
 }
 
+/* Starts a new game plus after the player has successfully defeated the final boss 
+Precondition: Defeat the final boss 
+@param struct idolDungeonTag idolDungeon[]: the structure containing the pair of idols and dungeons associated
+@param struct gameTag *game: the structure containing the game statistics of the player
+@param struct inventoryTag inventory[]: the structure containing the player's inventory
+@param struct hanamaruTag hanamaru[]: the structure containing the contents of the hanamaru shop
+@param struct achievementTag achievement[]: the structure containing the details of the achievements in game
+*/
 void newGamePlus(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[], 
 			struct hanamaruTag hanamaru[], struct achievementTag achievement[]){
 	system("cls");
@@ -1869,6 +2201,14 @@ void newGamePlus(struct idolDungeonTag idolDungeon[], struct gameTag *game, stru
     gameMenu(idolDungeon, game, inventory, hanamaru, achievement);
 }
 
+/* Shows the title screen of the program 
+Precondition: Program is running 
+@param struct idolDungeonTag idolDungeon[]: the structure containing the pair of idols and dungeons associated
+@param struct gameTag *game: the structure containing the game statistics of the player
+@param struct inventoryTag inventory[]: the structure containing the player's inventory
+@param struct hanamaruTag hanamaru[]: the structure containing the contents of the hanamaru shop
+@param struct achievementTag achievement[]: the structure containing the details of the achievements in game
+*/
 void titleScreen(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[], 
 			struct hanamaruTag hanamaru[], struct achievementTag achievement[]){
 		char choice;
