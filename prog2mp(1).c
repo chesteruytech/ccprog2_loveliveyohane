@@ -25,7 +25,6 @@ Complete:
 
 void initializeGame(struct gameTag *game){
 	
-	// feel free to change these around if you want to test something, but make sure to revert it back when done testing
 	int i;
 	game->hp = 3;
     game->maxHP = 3;
@@ -58,6 +57,8 @@ void initializeGame(struct gameTag *game){
 	game->flawless = 0;
 	game->newGamePlus = 0;
 	game->hostagesSelected = 0;
+	game->lailapsHP = 4;
+	game->maxLailapsHP = 4;
 }
 
 void initializeIdolDungeon(struct idolDungeonTag idolDungeon[]){
@@ -647,14 +648,18 @@ void showHostages(struct idolDungeonTag idolDungeon[], struct gameTag *game){
 	if (rescued == 8)
 		printf("No more hostages!!!\n");
     
-    printf("\n\n");
+    system("pause");
+    system("cls");
 }
 
 void showDungeonMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[]){
 	int i, idx, invIdx;
 	
-    printf("Lailaps: Yohane! Where should we go to now?\n\n");
-    
+	if (game->currentPlaythroughClear < 3)
+    	printf("Lailaps: Yohane! Where should we go to now?\n\n");
+    else
+		printf("Lailaps: Yohane! It's time to face the Siren!\n\n");
+		
     printf("HP: %.1f / %d", game->hp, game->maxHP);
     printf("\t\t\t\t");
     printf("Total Gold: %d GP\n", game->gold);
@@ -726,7 +731,7 @@ void showInventory(struct idolDungeonTag idolDungeon[], struct gameTag *game, st
 		switch(choice){
 			case 'R': case 'r':
 				system("cls");
-			    showHostages(idolDungeon, game);
+			    //showHostages(idolDungeon, game);
 		    	showDungeonMenu(idolDungeon, game, inventory);
 		    	break;
 		    default:
@@ -801,7 +806,7 @@ void hanamaruStore(struct idolDungeonTag idolDungeon[], struct gameTag *game, st
 		// Return
 		else if (choice == 'R' || choice == 'r'){
 		    system("cls");
-		    showHostages(idolDungeon, game);
+		    //showHostages(idolDungeon, game);
 		    showDungeonMenu(idolDungeon, game, inventory);
 		}
 		
@@ -918,9 +923,11 @@ void dungeonIdentifier(grid dimension2D, int nRow, int nCol){
 				printf("\e[0m"); //Resets the color to default
 			}else if(dimension2D[i][j] == 13){ //Lailaps
 				printf("\e[0;38m"); //Grey color
-				printf("S");
+				printf("L");
 				printf("\e[0m"); //Resets the color to default
-			}
+			}else if(dimension2D[i][j] == 14) //Switches
+				printf("0");	
+			
 		}
 		printf("\n");
 	}
@@ -1454,6 +1461,7 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 	int moved;
 	int invIdx;
 	srand(time(NULL));
+	
 	// Tile location/s
 	wall(dimension2D,row,col,&wlRow,&wlCol);
 	spike(dimension2D,row,col,&spikeRow,&spikeCol);
@@ -1495,7 +1503,14 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 			
 		printf("\n");
 		printf("HP: %.1f / %d", game->hp, game->maxHP);
-	    printf("\t\t\t\t");
+		
+		if (game->currentPlaythroughClear == 3){
+			printf("    Lailaps HP: %.1f / %d", game->lailapsHP, game->maxLailapsHP);
+			printf("\t\t");
+		}
+		else
+	    	printf("\t\t\t\t");
+	    	
 	    printf("Total Gold: %d GP\n", game->gold);
 	    
 	    if (game->currentHandIndex != -1){
@@ -1733,7 +1748,7 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 			}
         	}
             system("cls");
-            showHostages(idolDungeon, game);
+            //showHostages(idolDungeon, game);
 			showDungeonMenu(idolDungeon, game, inventory);
 		}
 		
@@ -1930,7 +1945,6 @@ int main(){
 	initializeHanamaru(hanamaru);
 	initializeAchievements(achievement);
 	
-	//game.running = 0; // comment this out if you want to test the continue game
 	loadGame(idolDungeon, &game, inventory, hanamaru, achievement);	
 	
 	titleScreen(idolDungeon, &game, inventory, hanamaru, achievement);
