@@ -4,6 +4,7 @@ mp is 90% complete
 to do by priority: 
 - dungeon floors
 - final boss 
+- test cases
 
 Complete:
 - Main menu
@@ -790,7 +791,6 @@ void showInventory(struct idolDungeonTag idolDungeon[], struct gameTag *game, st
     printf("Total Gold: %d GP\n", game->gold);
 	printf("Items available\n\n");
 	
-	// Show only non-hidden items
 	for (i = 0; i < MAX_INVENTORY; i++)
 		if (!inventory[i].hidden){
 			printf("%d. %-30s \t x \t %d\n", count, inventory[i].item, inventory[i].itemCount);
@@ -807,7 +807,6 @@ void showInventory(struct idolDungeonTag idolDungeon[], struct gameTag *game, st
 		switch(choice){
 			case 'R': case 'r':
 				system("cls");
-			    //showHostages(idolDungeon, game);
 		    	showDungeonMenu(idolDungeon, game, inventory);
 		    	break;
 		    default:
@@ -842,7 +841,7 @@ void hanamaruStore(struct idolDungeonTag idolDungeon[], struct gameTag *game, st
 		
 		// For buying the items	
 		if (choice >= '1' && choice <= '9'){ 
-			index = choice - '1'; // char to number
+			index = choice - '1'; 
 			
 			// Noppo Bread bc unlimited
 		    if (index == 1){  
@@ -889,7 +888,6 @@ void hanamaruStore(struct idolDungeonTag idolDungeon[], struct gameTag *game, st
 		// Return
 		else if (choice == 'R' || choice == 'r'){
 		    system("cls");
-		    //showHostages(idolDungeon, game);
 		    showDungeonMenu(idolDungeon, game, inventory);
 		}
 		
@@ -1506,7 +1504,7 @@ void movement(grid dimension2D, struct gameTag *game, struct inventoryTag invent
 	int currentRow = *yRow;
 	int currentCol = *yCol;
 	
-	// THIS IS FOR PRESERVING TILES THAT HAVE BEEN PASSED THORUGH, THE OLD ONE OVERWROTE 
+	// THIS IS FOR PRESERVING TILES THAT HAVE BEEN PASSED THORUGH
 	dimension2D[currentRow][currentCol] = *currentTile;
 	
 		if (dimension2D[currentRow][currentCol] == 9 && *currentTile == 5){
@@ -1516,42 +1514,41 @@ void movement(grid dimension2D, struct gameTag *game, struct inventoryTag invent
 		    dimension2D[currentRow][currentCol] = 1;
 		}
 
-		// Checks if there is wall (the old one moved forward into a tile just dug
-		if (dimension2D[targetRow][targetCol] == 2){ // Wall digging (done)
+		if (dimension2D[targetRow][targetCol] == 2){ // Wall digging 
 			dimension2D[targetRow][targetCol] = 1; // dig first  
 			dimension2D[currentRow][currentCol] = 9;  // stay still     
 		}
-		else if (dimension2D[targetRow][targetCol] == 3){ // Spike (done)
-			dimension2D[targetRow][targetCol] = 1; // dig first  
-			dimension2D[currentRow][currentCol] = 9;  // stay still
+		else if (dimension2D[targetRow][targetCol] == 3){ // Spike 
+			dimension2D[targetRow][targetCol] = 1; 
+			dimension2D[currentRow][currentCol] = 9;  
 			
 			if (inventory[2].itemCount == 0){ 
-				game->hp -= 0.5; // take damage
+				game->hp -= 0.5; 
 				game->dmgTaken += 0.5;
 			}	
 				
 			if (game->hp <= 0)
 				strcpy(game->killed, "Spike");
 		}
-		else if (dimension2D[targetRow][targetCol] == 4){ // Water tile (almost done, just need bats to pass thry after bat movement)
+		else if (dimension2D[targetRow][targetCol] == 4){ // Water tile
 		
-			if (inventory[4].itemCount == 0) // if you don't have air shoes
+			if (inventory[4].itemCount == 0) 
 				dimension2D[currentRow][currentCol] = 9; 
-			else{  // walk through normally
+			else{  
 			*currentTile = 4;
 		    dimension2D[targetRow][targetCol] = 9;
 		    *yRow = targetRow;
 		    *yCol = targetCol;
 			}
 		}
-		else if (dimension2D[targetRow][targetCol] == 5){
+		else if (dimension2D[targetRow][targetCol] == 5){ // heat tile 
 		    *currentTile = 5;
 		    dimension2D[targetRow][targetCol] = 9;
 		    *yRow = targetRow;
 		    *yCol = targetCol;
 		}
 
-		else if (dimension2D[targetRow][targetCol] == 6){ // treasure (done)
+		else if (dimension2D[targetRow][targetCol] == 6){ // treasure 
 		    *currentTile = 1; 
 			dimension2D[targetRow][targetCol] = 9;
 			*yRow = targetRow; 
@@ -1559,7 +1556,7 @@ void movement(grid dimension2D, struct gameTag *game, struct inventoryTag invent
 			
 			obtainTreasure(inventory, game);
 		}
-		else if (dimension2D[targetRow][targetCol] == 1){ // FREE SPACE (done)
+		else if (dimension2D[targetRow][targetCol] == 1){ // FREE SPACE 
 			*currentTile = 1; 
 			dimension2D[targetRow][targetCol] = 9;
 			*yRow = targetRow; 
@@ -2016,10 +2013,9 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 	do{
 	    printf("Choice: ");
 	    scanf(" %c", &choice);
-		
-		// I put "index = choice - '1'" inside bc the index is only needed for numerical inputs	
+			
 		if (choice >= '1' && choice < '1' + game->hostagesSelected && game->currentPlaythroughClear < game->hostagesSelected){ 
-			index = choice - '1'; // char to number
+			index = choice - '1'; 
 			charIdx = game->hostages[index]; 
 			system("cls");
         	if (game->clearStatusTemp[index] == 1 || game->rescuedCount[charIdx] > 0)
@@ -2040,7 +2036,7 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 	        	game->rescuedCount[charIdx]++;
 	        	game->clearStatus[charIdx] = 1;
 	        	game->clearStatusTemp[index] = 1;
-				game->currentPlaythroughClear++;	// when this goes to 3, final boss time
+				game->currentPlaythroughClear++;	
 	        	game->dungeonClears++; 
 	        	
 	        	itemUnlock(charIdx, hanamaru);
@@ -2048,7 +2044,6 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 			}
         	}
             system("cls");
-            //showHostages(idolDungeon, game);
 			showDungeonMenu(idolDungeon, game, inventory);
 		}
 		
