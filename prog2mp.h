@@ -115,6 +115,7 @@ void heat(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol);
 void treasure(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol);
 void freedom(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol);
 void bats(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol);
+void batAbilities(grid dimension2D, int playerMove, struct gameTag *health, int r, int c);
 void yohane(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol);
 void gold(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol);
 void hit(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol);

@@ -227,7 +227,7 @@ void initializeAchievements(struct achievementTag achievement[]){
 	achievement[11].earned = 0;
 	strcpy(achievement[11].description, "Rescued Riko twice");
 	
-	strcpy(achievement[12].achievement, "Beginner�s Sailing!");
+	strcpy(achievement[12].achievement, "Beginner�s Sailing!");
 	achievement[12].earned = 0;
 	strcpy(achievement[12].description, "Rescued You twice");
 	
@@ -281,11 +281,11 @@ void initializeAchievements(struct achievementTag achievement[]){
 	
 	strcpy(achievement[25].achievement, "Mitaiken Horizon!");
 	achievement[25].earned = 0;
-	strcpy(achievement[25].description, "Accumulate a total of 5000G spent on Hanamaru�s stores across multiple playthroughs");
+	strcpy(achievement[25].description, "Accumulate a total of 5000G spent on Hanamaru�s stores across multiple playthroughs");
 	
 	strcpy(achievement[26].achievement, "Ruby-chan! Hai? Nani ga suki?");
 	achievement[26].earned = 0;
-	strcpy(achievement[26].description, "Get saved by a fatal blow from Ruby�s choco-mint ice cream item.");
+	strcpy(achievement[26].description, "Get saved by a fatal blow from Ruby�s choco-mint ice cream item.");
 	
 	strcpy(achievement[27].achievement, "Step! ZERO to ONE!");
 	achievement[27].earned = 0;
@@ -502,47 +502,41 @@ void achievementUnlock(struct achievementTag achievement[], struct gameTag *game
 }
 
 void viewAchievementDetails(char choice[], struct achievementTag achievement[], int achievementCount){
-	
 	int index;
-    	
-		do{
-			
-			index = strToInt(choice) - 1;
-		    system("cls");
-		    viewAchievementsCount(achievement, achievementCount);
-		    
-		    if (index >= 0 && index < 28 && isNumber(choice) == 1){
-			    printf("Achievement Name: %s\n", achievement[index].achievement);
-				printf("\n");
-				printf("Status: ");
-				
-				if (achievement[index].earned == 1){
-					printf("EARNED!\n\n");
-					printf("Date Earned: %s\n\n", achievement[index].dateEarned);
-				}
-				else
-					printf("NOT EARNED!\n\n");	
-					
+
+	do{
+		index = strToInt(choice) - 1;
+		system("cls");
+		viewAchievementsCount(achievement, achievementCount);
+
+		if (index >= 0 && index < 28 && isNumber(choice) == 1){
+			printf("Achievement Name: %s\n", achievement[index].achievement);
+			printf("\n");
+			printf("Status: ");
+	
+			if (achievement[index].earned == 1){
+				printf("EARNED!\n\n");
+				printf("Date Earned: %s\n\n", achievement[index].dateEarned);
+			}
+			else{
+				printf("NOT EARNED!\n\n");			
 				printf("Description: \n");
 				printf("%s\n\n", achievement[index].description);
 			}
-			
-			else
-				printf("Invalid choice!\n\n");
+		}
+
+		else
+			printf("Invalid choice!\n\n");
 							
-			printf("[R]eturn to Achievements Module\n\n");
-		    printf("Choice: ");
-		    scanf("%s", choice);
-			
-			
+		printf("[R]eturn to Achievements Module\n\n");
+		printf("Choice: ");
+		scanf("%s", choice);		
 	} while (!(choice[0] == 'R' || choice[0] == 'r') && choice[1] == '\0');
 	
 	choice[0] = '\0';
-	
 }
 
 void viewAchievements(struct achievementTag achievement[]){
-	
     int currentPage = 0;
     int totalPages = 4;
 	int achievementCount = 0; 
@@ -555,7 +549,6 @@ void viewAchievements(struct achievementTag achievement[]){
             achievementCount++;
 
     do {
-    	
         viewAchievementsCount(achievement, achievementCount);
 
         startIdx = currentPage * achievementsPerPage;  
@@ -584,7 +577,6 @@ void viewAchievements(struct achievementTag achievement[]){
 		
         printf("Choice: ");
         scanf("%s", choice);
-		
 		
 		if ((choice[0] == 'N' || choice[0] == 'n') && choice[1] == '\0'){
 			if (currentPage < totalPages - 1)
@@ -641,12 +633,9 @@ void selectHostages(struct gameTag *game){
     
     for (i = selected; i < MAX_HOSTAGES; i++)  // if there are less than three hostages left
     	game->hostages[i] = -1;
-
-		
 }
 
 void showHostages(struct idolDungeonTag idolDungeon[], struct gameTag *game){
-
 	int i, idx;
 	int rescued = 0;
 
@@ -671,7 +660,6 @@ void showHostages(struct idolDungeonTag idolDungeon[], struct gameTag *game){
 }
 
 void showDungeonMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[]){
-	
 	int i, idx, invIdx;
 	
     printf("Lailaps: Yohane! Where should we go to now?\n\n");
@@ -683,35 +671,32 @@ void showDungeonMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, 
     if (game->currentHandIndex != -1){
 	    invIdx = game->handIndex[game->currentHandIndex];
 	    
-		    if (inventory[invIdx].itemCount > 0){
-		    	if (inventory[invIdx].itemCount == 1)
-			    	printf("Item on hand: %s\n", inventory[invIdx].item);
-			    else
-			        printf("Item on hand: %s (%d)\n", inventory[invIdx].item, inventory[invIdx].itemCount);
-			}
+		if (inventory[invIdx].itemCount > 0){
+		    if (inventory[invIdx].itemCount == 1)
+				printf("Item on hand: %s\n", inventory[invIdx].item);
 			else
-				printf("Item on hand: N/A\n");
-	} 
-	else
+			     printf("Item on hand: %s (%d)\n", inventory[invIdx].item, inventory[invIdx].itemCount);
+		}
+		else
+			printf("Item on hand: N/A\n");
+	}else
 	    printf("Item on hand: N/A\n");
 		    
     printf("\n");
     
 	if (game->currentPlaythroughClear < game->hostagesSelected){
-    for (i = 0; i < 3; i++){
-        idx = game->hostages[i];
-        if (idx != -1){  
-            if (game->clearStatusTemp[i] == 1)
-                printf("[X] Visit %s\n", idolDungeon[idx].dungeon);
-            else
-                printf("[%d] Visit %s\n", i+1, idolDungeon[idx].dungeon);
-        }
-    }
-}
-
-	else
+		for (i = 0; i < 3; i++){
+        	idx = game->hostages[i];
+        	if (idx != -1){  
+            	if (game->clearStatusTemp[i] == 1)
+                	printf("[X] Visit %s\n", idolDungeon[idx].dungeon);
+            	else
+                	printf("[%d] Visit %s\n", i+1, idolDungeon[idx].dungeon);
+        	}
+    	}
+	}else
 	    printf("[1] Face the Siren of Numazu\n");
-			
+	
     printf("\n[I]nventory");
     printf("\t\t");
 	printf("[S]ave and Quit");
@@ -721,11 +706,9 @@ void showDungeonMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, 
 		printf("[H]anamaru Store");
 		
 	printf("\n\n");
-   
 }
 
 void showInventory(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[]){
-	
 	char choice;
 	int i;
 	int count = 1;
@@ -741,10 +724,10 @@ void showInventory(struct idolDungeonTag idolDungeon[], struct gameTag *game, st
 			printf("%d. %-30s \t x \t %d\n", count, inventory[i].item, inventory[i].itemCount);
 			count++;
 		}
-		
+
 	printf("\n");
 	printf("[R]eturn\n\n");
-		
+
 	do{
 		printf("Choice: ");
 		scanf(" %c", &choice);
@@ -761,15 +744,12 @@ void showInventory(struct idolDungeonTag idolDungeon[], struct gameTag *game, st
 	} while (choice != 'R' && choice != 'r');
 }
 
-
 void hanamaruStore(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[], struct hanamaruTag hanamaru[], struct achievementTag achievement[]){
-	
 	int i;
 	char choice;
 	int index; // THIS IS ONLY FOR HANAMARU STORE. DO NOT TOUCH	
- 
+
 	do{
-		
 		printf("Hanamaru: Yohane-chan, zura! What can I do for you today?\n\n");
 		printf("Total Gold: %d GP\n\n", game->gold);
 		
@@ -834,7 +814,6 @@ void hanamaruStore(struct idolDungeonTag idolDungeon[], struct gameTag *game, st
 		    showDungeonMenu(idolDungeon, game, inventory);
 		}
 		
-		
 		// Anything else
 		else{
 		    printf("Invalid choice!\n");
@@ -843,13 +822,10 @@ void hanamaruStore(struct idolDungeonTag idolDungeon[], struct gameTag *game, st
 		}	
 		
 		achievementUnlock(achievement, game, 0);
-			
-	} while (choice != 'R' && choice != 'r');
-		
+	} while (choice != 'R' && choice != 'r');	
 }
 
 void itemUnlock(int charIdx, struct hanamaruTag hanamaru[]){
-	
 		// Unlock item after clearing dungeon
 		if (charIdx == 0) // Chika
 			hanamaru[MIKAN_MOCHI].availability = 1;	
@@ -869,7 +845,6 @@ void itemUnlock(int charIdx, struct hanamaruTag hanamaru[]){
 
 void saveGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[], 
 			struct hanamaruTag hanamaru[], struct achievementTag achievement[]){
-	
 	FILE *ptr;
 	
 	ptr = fopen("yohane.bin", "wb");
@@ -880,13 +855,10 @@ void saveGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
     fwrite(achievement, sizeof(struct achievementTag), MAX_ACHIEVEMENTS, ptr);
 
     fclose(ptr);
-	
 }
 
 void loadGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[], 
 			struct hanamaruTag hanamaru[], struct achievementTag achievement[]){
-
-
 	FILE *ptr;
 	
 	ptr = fopen("yohane.bin", "rb");
@@ -898,9 +870,9 @@ void loadGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
     fread(inventory, sizeof(struct inventoryTag), MAX_INVENTORY, ptr);
     fread(hanamaru, sizeof(struct hanamaruTag), MAX_HANAMARU, ptr);
     fread(achievement, sizeof(struct achievementTag), MAX_ACHIEVEMENTS, ptr);
-}
-	fclose(ptr);		
-	
+	}
+
+	fclose(ptr);
 }
 
 void dungeonIdentifier(grid dimension2D, int nRow, int nCol){
@@ -1061,6 +1033,29 @@ void bats(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol){
 	}
 }
 
+void batAbilities(grid dimension2D, int playerMove, struct gameTag *health, int r, int c){
+	srand(time(NULL));
+
+	do{
+		if(playerMove % 2 == 0){
+			dimension2D[r][c] == 8;
+			dimension2D[r-1][c] == 8;
+			dimension2D[r][c-1] == 8;
+			dimension2D[r+1][c] == 8;
+			dimension2D[r][c+1] == 8;
+
+			if(dimension2D[r-1][c] == 9 || dimension2D[r][c-1] == 9 || dimension2D[r+1][c] == 9 || dimension2D[r][c+1] == 9){
+				dimension2D[r][c] == 11;
+				health->hp -= 0.5;
+				health->dmgTaken += 0.5;
+		}
+	}
+	}while (!health->hp <= 0);
+
+	if(health->hp <= 0)
+		strcpy(health->killed, "YOU DIED. Got attacked by bats.");
+}
+
 void yohane(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol){
 	*tRow = -1;
 	*tCol = -1;
@@ -1173,7 +1168,6 @@ void obtainTreasure(struct inventoryTag inventory[], struct gameTag game[]){
 }
 
 void obtainGoldBat(struct gameTag *game){
-	
 	if (game->currentPlaythroughClear < game->hostagesSelected){
 	if (game->currentPlaythroughClear == 0)
 		game->gold += 5;
@@ -1186,7 +1180,6 @@ void obtainGoldBat(struct gameTag *game){
 
 void movement(grid dimension2D, struct gameTag *game, struct inventoryTag inventory[], 
 				int *yRow, int *yCol, int targetRow, int targetCol, int *verdict, int *currentTile){
-
 	int currentRow = *yRow;
 	int currentCol = *yCol;
 	
@@ -1269,16 +1262,12 @@ void movement(grid dimension2D, struct gameTag *game, struct inventoryTag invent
 			*yCol = targetCol;
 			*verdict = 1;
 		}
-			
+		
 		else 
 			dimension2D[currentRow][currentCol] = 9; 
-	
-		
 }
 
-
 void cycleItemForward(struct inventoryTag inventory[], struct gameTag *game){
-	
     int i;
     int currentPos = game->currentHandIndex;
     int found = 0;
@@ -1301,12 +1290,8 @@ void cycleItemForward(struct inventoryTag inventory[], struct gameTag *game){
                 found = 1;
             }
         }
-    }
-    
-    else{
+    }else
     	game->currentHandIndex = -1;
-	}
-    
 }
 
 void cycleItemBackward(struct inventoryTag inventory[], struct gameTag *game){
@@ -1340,23 +1325,19 @@ void cycleItemBackward(struct inventoryTag inventory[], struct gameTag *game){
 }
 
 void useItem(struct inventoryTag inventory[], struct gameTag *game){
-	
-		
 	int invIdx = game->handIndex[game->currentHandIndex];
 	
-		if (inventory[invIdx].itemCount > 0 && invIdx != 8)
-			inventory[invIdx].itemCount--;
+	if (inventory[invIdx].itemCount > 0 && invIdx != 8)
+		inventory[invIdx].itemCount--;
 		
-		if (invIdx == 0 || invIdx == 1){ // Tears and Noppo
-			if (game->hp < game->maxHP){
-				game->hp += 0.5;
-			}
-			if (game->hp >= game->maxHP){
-				game->hp = game->maxHP;
-			}
-			
+	if (invIdx == 0 || invIdx == 1){ // Tears and Noppo
+		if (game->hp < game->maxHP){
+			game->hp += 0.5;
 		}
-	
+		if (game->hp >= game->maxHP){
+			game->hp = game->maxHP;
+		}	
+	}
 }
 
 void gameOver(struct gameTag *game, struct inventoryTag inventory[]){
@@ -1370,7 +1351,6 @@ void gameOver(struct gameTag *game, struct inventoryTag inventory[]){
 	
 	for (i = 2; i < MAX_INVENTORY; i++)
 		inventory[i].itemCount = 0;
-		
 }
 
 
@@ -1417,7 +1397,6 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 		floorCount = (rand() % 2) + 3;
 	}
 }
-			
 
 	do{
 		system("cls");
@@ -1616,11 +1595,11 @@ int sirenOfTheMirrorWorld(struct gameTag *game, int charIdx, struct idolDungeonT
 				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
-				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,7,9,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
+				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,7,9,13,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 					{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0} 
 				 	};
 
-	//printf("Final Battle: Siren of the Mirror World!\n");
+	// printf("Final Battle: Siren of the Mirror World!\n");
 	// printf("最終決戦: 鏡の世界のセイレーン!\n");
 	return yohaneBaseLogic(dungeon, game, charIdx, idolDungeon, dungeonIndex, inventory, achievement);
 }
@@ -1628,13 +1607,11 @@ int sirenOfTheMirrorWorld(struct gameTag *game, int charIdx, struct idolDungeonT
 
 void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[], 
 			struct hanamaruTag hanamaru[], struct achievementTag achievement[]){
-	
 	char choice;
 	int index;
 	int charIdx;
 	int win = 0;
 	do{
-    	
 	    printf("Choice: ");
 	    scanf(" %c", &choice);
 		
@@ -1648,7 +1625,6 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
         	else{
 	        	printf("Entering dungeon %d\n\n", index+1);
 	        	
- 
 	        	win = 0;
 	        	if (index == 0)
 	        		win = awashimaMarinePark(game, charIdx, idolDungeon, index, inventory, achievement);
@@ -1656,7 +1632,6 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 	        		win = izumitoSeaParadise(game, charIdx, idolDungeon, index, inventory, achievement);
 	        	if (index == 2)
 	        		win = shougetsuConfectionary(game, charIdx, idolDungeon, index, inventory, achievement);
-	        	
 	        	
 	        	if (win == 1){
 	        	printf("\n%s has been successfully rescued!\n", idolDungeon[charIdx].idol);
@@ -1692,7 +1667,7 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 	        	newGamePlusSetup(idolDungeon, game, inventory, hanamaru, achievement);
 	        	titleScreen(idolDungeon,game,inventory,hanamaru,achievement);
 			}
-				
+			
 			system("pause");
 			system("cls");
 			showHostages(idolDungeon, game);
@@ -1727,14 +1702,12 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 		}
 		
 		else
-			printf("Invalid choice\n");
-			    	
+			printf("Invalid choice\n");    	
 	} while (choice != 'S' && choice != 's');
 }
 
 void newGamePlusSetup(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[], 
 			struct hanamaruTag hanamaru[], struct achievementTag achievement[]){
-	
 	int i;
 	
 	game->maxHP = 3;
@@ -1753,25 +1726,20 @@ void newGamePlusSetup(struct idolDungeonTag idolDungeon[], struct gameTag *game,
 	for (i = 0; i < MAX_HOSTAGES; i++){
 		game->clearStatusTemp[i] = 0;
 	}
-	
-	
 }
 
 void continueGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[], 
 			struct hanamaruTag hanamaru[], struct achievementTag achievement[]){
-		
 	system("cls");
 	
 	loadGame(idolDungeon, game, inventory, hanamaru, achievement);	
     showHostages(idolDungeon, game);
     showDungeonMenu(idolDungeon, game, inventory);
     gameMenu(idolDungeon, game, inventory, hanamaru, achievement);
-				
 }
 
 void newGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[], 
 			struct hanamaruTag hanamaru[], struct achievementTag achievement[]){
-	
 	system("cls");
 	
 	initializeGame(game);
@@ -1785,12 +1753,10 @@ void newGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct i
     showDungeonMenu(idolDungeon, game, inventory);
 	
     gameMenu(idolDungeon, game, inventory, hanamaru, achievement);
-
 }
 
 void newGamePlus(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[], 
 			struct hanamaruTag hanamaru[], struct achievementTag achievement[]){
-	
 	system("cls");
 	
 	game->newGamePlus = 0;
@@ -1803,7 +1769,6 @@ void newGamePlus(struct idolDungeonTag idolDungeon[], struct gameTag *game, stru
 
 void titleScreen(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[], 
 			struct hanamaruTag hanamaru[], struct achievementTag achievement[]){
-		
 		char choice;
 			
 		do {
@@ -1826,9 +1791,8 @@ void titleScreen(struct idolDungeonTag idolDungeon[], struct gameTag *game, stru
             case 'N': case 'n':
             	if (!game->running)
                 	newGame(idolDungeon, game, inventory, hanamaru, achievement);
-                else if (game->newGamePlus == 1){
+                else if (game->newGamePlus == 1)
                 	newGamePlus(idolDungeon, game, inventory, hanamaru, achievement);
-				}
                 else{
                 	printf("Invalid choice!\n");
                 	system("pause");
@@ -1854,7 +1818,6 @@ void titleScreen(struct idolDungeonTag idolDungeon[], struct gameTag *game, stru
                 break;
             case 'Q': case 'q':
                 printf("See you next time!\n");
-                
                 break;
             default:
                 printf("Invalid choice!\n");
@@ -1863,11 +1826,9 @@ void titleScreen(struct idolDungeonTag idolDungeon[], struct gameTag *game, stru
         }
         	
     } while (choice != 'Q' && choice != 'q');	
-		
 }
 
 int main(){
-	
 	srand(time(NULL));
     
 	struct idolDungeonTag idolDungeon[MAX_IDOLS];
@@ -1884,7 +1845,6 @@ int main(){
 	
 	//game.running = 0; // comment this out if you want to test the continue game
 	loadGame(idolDungeon, &game, inventory, hanamaru, achievement);	
-	
 	
 	titleScreen(idolDungeon, &game, inventory, hanamaru, achievement);
 
