@@ -227,7 +227,7 @@ void initializeAchievements(struct achievementTag achievement[]){
 	achievement[11].earned = 0;
 	strcpy(achievement[11].description, "Rescued Riko twice");
 	
-	strcpy(achievement[12].achievement, "Beginner�s Sailing!");
+	strcpy(achievement[12].achievement, "Beginner's Sailing!");
 	achievement[12].earned = 0;
 	strcpy(achievement[12].description, "Rescued You twice");
 	
@@ -281,7 +281,7 @@ void initializeAchievements(struct achievementTag achievement[]){
 	
 	strcpy(achievement[25].achievement, "Mitaiken Horizon!");
 	achievement[25].earned = 0;
-	strcpy(achievement[25].description, "Accumulate a total of 5000G spent on Hanamaru�s stores across multiple playthroughs");
+	strcpy(achievement[25].description, "Accumulate a total of 5000G spent on Hanamaru's stores across multiple playthroughs");
 	
 	strcpy(achievement[26].achievement, "Ruby-chan! Hai? Nani ga suki?");
 	achievement[26].earned = 0;
@@ -1317,11 +1317,8 @@ void cycleItemBackward(struct inventoryTag inventory[], struct gameTag *game){
                 found = 1;
             }
         }
-    }
-    
-    else{
+    }else
     	game->currentHandIndex = -1;
-	}
 }
 
 void useItem(struct inventoryTag inventory[], struct gameTag *game){
