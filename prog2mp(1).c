@@ -5,6 +5,8 @@ to do by priority:
 - final boss 
 - test cases
 
+reminder to regan:
+depedning on sir response uncomment the stuff out on hanamaru store, game over, and newGamePlusSetup
 
 Complete:
 - Main menu
@@ -164,7 +166,7 @@ void initializeHanamaru(struct hanamaruTag hanamaru[]){
 	
 	strcpy(hanamaru[1].item, "Noppo Bread");
 	hanamaru[1].price = 100;
-	hanamaru[1].availability = 33550336;
+	hanamaru[1].availability = 9999999;
 	
 	strcpy(hanamaru[2].item, "Shovel Upgrade");
 	hanamaru[2].price = 300;
@@ -862,13 +864,24 @@ void hanamaruStore(struct idolDungeonTag idolDungeon[], struct gameTag *game, st
 		            inventory[index].itemCount++;
 		            game->goldSpent = game->goldSpent + hanamaru[index].price;
 		            
-		            if (index >= 5 && index <= 7 && hanamaru[index].availability == 1){
+		            if (index >= 5 && index <= 7 && hanamaru[index].availability == 1 /*&& game->hp <= 6*/){
 					    game->maxHP += 1;
 					    game->hp += 1;
 					}
 
 		            hanamaru[index].availability = 0;
-		            printf("One %s successfully purchased! You now have %d %s(s)\n", inventory[index].item, inventory[index].itemCount, inventory[index].item);
+		            if (index == 0)
+		            	printf("One %s successfully purchased! You now have %d %s(s)\n", inventory[index].item, inventory[index].itemCount, inventory[index].item);
+		            if (index == 2)
+						printf("Yohane can now dig spike walls without damage for this playthrough!\n");
+					if (index == 3)
+						printf("Yohane now takes 0.5 damage from all bats for this playthrough!\n");
+					if (index == 4)
+						printf("Yohane can now walk over water tiles and no longer takes damage from heat tiles for this playthrough!\n");
+					if (index >= 5 && index <=7)
+						printf("Yohane's HP is now permanently increased by 1!'\n");	
+					if (index == 8)
+						printf("Saves Yohane from a fatal hit when on hand. Heals Yohane to full health afterwards\n");
 		        } 
 				else if (game->gold < hanamaru[index].price) 
 		            printf("Not enough GP\n");
@@ -1899,7 +1912,7 @@ int awashimaMarinePark(struct gameTag *game, int charIdx, struct idolDungeonTag 
 					int dungeonIndex, struct inventoryTag inventory[], struct achievementTag achievement[], struct hanamaruTag hanamaru[]){
 				
 	grid dungeon = {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, 
-				 	{0,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,9,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
+				 	{0,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,7,9,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 				 	{0,1,1,6,1,1,3,1,1,1,1,5,1,1,1,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,8,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 				 	{0,1,1,1,1,1,3,1,1,1,1,5,5,1,1,1,1,1,1,1,3,1,1,1,1,1,1,1,4,4,1,1,1,1,1,1,1,1,3,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 				 	{0,1,1,1,1,1,3,1,1,1,1,1,1,1,1,8,1,1,1,3,3,1,1,1,1,1,1,1,4,4,1,1,1,1,1,1,1,1,3,3,1,1,1,1,3,1,1,1,8,1,1,1,1,1,0},
@@ -1930,7 +1943,7 @@ int izumitoSeaParadise(struct gameTag *game, int charIdx, struct idolDungeonTag 
 					int dungeonIndex, struct inventoryTag inventory[], struct achievementTag achievement[], struct hanamaruTag hanamaru[]){
 	
 	grid dungeon = {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, 
-				 	{0,1,1,1,1,1,3,1,1,1,1,1,1,1,9,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
+				 	{0,1,1,1,1,1,3,1,1,1,1,1,1,7,9,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 				 	{0,1,1,6,1,1,3,1,1,1,1,5,1,1,1,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,8,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 				 	{0,1,1,1,1,1,3,1,1,1,1,5,5,1,1,1,1,1,1,1,3,1,1,1,1,1,1,1,4,4,1,1,1,1,1,1,1,1,3,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 				 	{0,1,1,1,1,1,3,1,1,1,1,1,1,1,1,8,1,1,1,3,3,1,1,1,1,1,1,1,4,4,1,1,1,1,1,1,1,1,3,3,1,1,1,1,3,1,1,1,8,1,1,1,1,1,0},
@@ -1959,7 +1972,7 @@ Precondition: Player enters a dungeon
 int shougetsuConfectionary(struct gameTag *game, int charIdx, struct idolDungeonTag idolDungeon[], 
 					int dungeonIndex, struct inventoryTag inventory[], struct achievementTag achievement[], struct hanamaruTag hanamaru[]){
 	grid dungeon = {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, 
-				 	{0,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,9,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
+				 	{0,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,7,9,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 				 	{0,1,1,6,1,1,3,1,1,1,1,5,1,1,1,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,8,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 				 	{0,1,1,1,1,1,3,1,1,1,1,5,5,1,1,1,1,1,1,1,3,1,1,1,1,1,1,1,4,4,1,1,1,1,1,1,1,1,3,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 				 	{0,1,1,1,1,1,3,1,1,1,1,1,1,1,1,8,1,1,1,3,3,1,1,1,1,1,1,1,4,4,1,1,1,1,1,1,1,1,3,3,1,1,1,1,3,1,1,1,8,1,1,1,1,1,0},
@@ -2150,7 +2163,8 @@ void newGamePlusSetup(struct idolDungeonTag idolDungeon[], struct gameTag *game,
 	game->hp = 3;
 	
 	for (i = 2; i < MAX_INVENTORY; i++){
-		inventory[i].itemCount = 0;
+		//if (i < 5 && i > 7)
+			inventory[i].itemCount = 0;
 	}
 	
 	for (i = 2; i < MAX_INVENTORY - 1; i++){
@@ -2162,6 +2176,21 @@ void newGamePlusSetup(struct idolDungeonTag idolDungeon[], struct gameTag *game,
 	for (i = 0; i < MAX_HOSTAGES; i++){
 		game->clearStatusTemp[i] = 0;
 	}
+	
+	hanamaru[0].availability = 1;
+	
+	for (i = 0; i < MAX_IDOLS; i++){
+		if (game->rescuedCount[i] > 0)
+			itemUnlock(i, hanamaru);
+	}
+	
+/*
+	// unsure	
+	for (i = 5; i <= 7; i++){
+		if (inventory[i].itemCount != 0)
+			game->hp += 1;
+	}
+	*/
 	
 	for (i = 0; i < MAX_IDOLS; i++){
 	if (game->totalPlaythroughClear % 3 == 0 && game->totalPlaythroughClear > 0)
