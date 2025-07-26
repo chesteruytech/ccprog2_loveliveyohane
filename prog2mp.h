@@ -133,22 +133,23 @@ void movement(grid dimension2D, struct gameTag *game, struct inventoryTag invent
 void cycleItemForward(struct inventoryTag inventory[], struct gameTag *game);
 void cycleItemBackward(struct inventoryTag inventory[], struct gameTag *game);
 void useItem(struct inventoryTag inventory[], struct gameTag *game);
-void gameOver(struct gameTag *game, struct inventoryTag inventory[]);
+void gameOver(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[],
+			struct hanamaruTag hanamaru[], struct achievementTag achievement[]);
 
 int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct idolDungeonTag idolDungeon[], 
-					int dungeonIndex, struct inventoryTag inventory[], struct achievementTag achievement[]);
+					int dungeonIndex, struct inventoryTag inventory[], struct achievementTag achievement[], struct hanamaruTag hanamaru[]);
 					
 int awashimaMarinePark(struct gameTag *game, int charIdx, struct idolDungeonTag idolDungeon[], 
-					int dungeonIndex, struct inventoryTag inventory[], struct achievementTag achievement[]);
+					int dungeonIndex, struct inventoryTag inventory[], struct achievementTag achievement[], struct hanamaruTag hanamaru[]);
 					
 int izumitoSeaParadise(struct gameTag *game, int charIdx, struct idolDungeonTag idolDungeon[], 
-					int dungeonIndex, struct inventoryTag inventory[], struct achievementTag achievement[]);
+					int dungeonIndex, struct inventoryTag inventory[], struct achievementTag achievement[], struct hanamaruTag hanamaru[]);
 					
 int shougetsuConfectionary(struct gameTag *game, int charIdx, struct idolDungeonTag idolDungeon[], 
-					int dungeonIndex, struct inventoryTag inventory[], struct achievementTag achievement[]);
+					int dungeonIndex, struct inventoryTag inventory[], struct achievementTag achievement[], struct hanamaruTag hanamaru[]);
 					
 int sirenOfTheMirrorWorld(struct gameTag *game, int charIdx, struct idolDungeonTag idolDungeon[], 
-					int dungeonIndex, struct inventoryTag inventory[], struct achievementTag achievement[]);
+					int dungeonIndex, struct inventoryTag inventory[], struct achievementTag achievement[], struct hanamaruTag hanamaru[]);
 					
 void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[], 
 			struct hanamaruTag hanamaru[], struct achievementTag achievement[]);

@@ -1682,7 +1682,8 @@ Precondition: Player's HP reaches 0, or Lailaps HP reaches 0 in the final boss
 @param struct gameTag *game: the structure containing the game statistics of the player
 @param struct inventoryTag inventory[]: the structure containing the player's inventory
 */
-void gameOver(struct gameTag *game, struct inventoryTag inventory[]){
+void gameOver(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct inventoryTag inventory[],
+			struct hanamaruTag hanamaru[], struct achievementTag achievement[]){
     int i;
 
 	game->maxHP = 3;
@@ -1695,6 +1696,8 @@ void gameOver(struct gameTag *game, struct inventoryTag inventory[]){
 		inventory[i].itemCount = 0;
 		
 	game->currentFloorIndex = 0;
+	
+	saveGame(idolDungeon, game, inventory, hanamaru, achievement);
 }
 
 /* Base Logic Package (e.g., character moving, tile finding and validation, winning, quitting)
@@ -1709,7 +1712,7 @@ Precondition: Player enters a dungeon or enters the final boss
 @return the verdict depending on whether the player clears a dungeon or not (1 if win, 0 if lose)
 */
 int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct idolDungeonTag idolDungeon[], 
-					int dungeonIndex, struct inventoryTag inventory[], struct achievementTag achievement[])
+					int dungeonIndex, struct inventoryTag inventory[], struct achievementTag achievement[], struct hanamaruTag hanamaru[])
 {
 	int row = MAX_ROW;
 	int col = MAX_COL;
@@ -1864,7 +1867,7 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 			printf("\t\t\t\tKilled by: %s\n", game->killed);
 			system("pause");
 			
-			gameOver(game, inventory);
+			gameOver(idolDungeon, game, inventory, hanamaru, achievement);
 	        achievementUnlock(achievement, game, 0);
 			quit = 1;
 		}
@@ -1894,7 +1897,7 @@ Precondition: Player enters a dungeon
 @return the verdict from yohaneBaseLogic
 */
 int awashimaMarinePark(struct gameTag *game, int charIdx, struct idolDungeonTag idolDungeon[], 
-					int dungeonIndex, struct inventoryTag inventory[], struct achievementTag achievement[]){
+					int dungeonIndex, struct inventoryTag inventory[], struct achievementTag achievement[], struct hanamaruTag hanamaru[]){
 				
 	grid dungeon = {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, 
 				 	{0,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
@@ -1903,14 +1906,14 @@ int awashimaMarinePark(struct gameTag *game, int charIdx, struct idolDungeonTag 
 				 	{0,1,1,1,1,1,3,1,1,1,1,1,1,1,1,8,1,1,1,3,3,1,1,1,1,1,1,1,4,4,1,1,1,1,1,1,1,1,3,3,1,1,1,1,3,1,1,1,8,1,1,1,1,1,0},
 				 	{0,1,1,1,1,1,3,1,1,1,1,2,1,1,1,1,1,1,1,3,3,1,1,3,1,1,1,1,4,4,1,1,1,1,1,1,1,1,3,3,1,8,1,1,3,1,1,1,1,1,1,1,1,1,0},
 				 	{0,1,3,1,1,1,3,1,1,1,1,3,1,1,1,1,1,1,1,2,3,1,1,3,1,1,1,1,4,4,1,1,1,1,1,1,1,1,3,3,1,1,1,1,3,1,1,1,1,1,1,1,1,1,0},
-				 	{0,1,3,1,1,9,3,1,1,1,1,3,1,1,1,1,1,1,1,2,3,1,1,1,1,1,1,1,4,4,1,1,1,1,1,1,1,1,3,3,1,1,2,2,2,1,1,1,3,3,3,8,3,3,0},
+				 	{0,1,3,1,7,9,3,1,1,1,1,3,1,1,1,1,1,1,1,2,3,1,1,1,1,1,1,1,4,4,1,1,1,1,1,1,1,1,3,3,1,1,2,2,2,1,1,1,3,3,3,8,3,3,0},
 				 	{0,1,1,3,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,2,2,2,2,2,4,4,1,1,1,1,1,1,1,1,3,3,1,5,1,1,1,1,1,2,2,1,1,1,1,1,0}, 
 					{0,1,1,3,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,5,1,1,1,1,1,2,2,1,1,1,1,1,0},
 					{0,1,1,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,8,1,1,1,1,1,5,1,1,1,1,1,2,2,1,8,1,1,7,0},
 					{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
 				};
 	
-	return yohaneBaseLogic(dungeon, game, charIdx, idolDungeon, dungeonIndex, inventory, achievement);
+	return yohaneBaseLogic(dungeon, game, charIdx, idolDungeon, dungeonIndex, inventory, achievement, hanamaru);
 }
 
 
@@ -1925,7 +1928,7 @@ Precondition: Player enters a dungeon
 @return the verdict from yohaneBaseLogic
 */
 int izumitoSeaParadise(struct gameTag *game, int charIdx, struct idolDungeonTag idolDungeon[], 
-					int dungeonIndex, struct inventoryTag inventory[], struct achievementTag achievement[]){
+					int dungeonIndex, struct inventoryTag inventory[], struct achievementTag achievement[], struct hanamaruTag hanamaru[]){
 	
 	grid dungeon = {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, 
 				 	{0,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
@@ -1934,14 +1937,14 @@ int izumitoSeaParadise(struct gameTag *game, int charIdx, struct idolDungeonTag 
 				 	{0,1,1,1,1,1,3,1,1,1,1,1,1,1,1,8,1,1,1,3,3,1,1,1,1,1,1,1,4,4,1,1,1,1,1,1,1,1,3,3,1,1,1,1,3,1,1,1,8,1,1,1,1,1,0},
 				 	{0,1,1,1,1,1,3,1,1,1,1,2,1,1,1,1,1,1,1,3,3,1,1,3,1,1,1,1,4,4,1,1,1,1,1,1,1,1,3,3,1,8,1,1,3,1,1,1,1,1,1,1,1,1,0},
 				 	{0,1,3,1,1,1,3,1,1,1,1,3,1,1,1,1,1,1,1,2,3,1,1,3,1,1,1,1,4,4,1,1,1,1,1,1,1,1,3,3,1,1,1,1,3,1,1,1,1,1,1,1,1,1,0},
-				 	{0,1,3,1,1,9,3,1,1,1,1,3,1,1,1,1,1,1,1,2,3,1,1,1,1,1,1,1,4,4,1,1,1,1,1,1,1,1,3,3,1,1,2,2,2,1,1,1,3,3,3,8,3,3,0},
+				 	{0,1,3,1,7,9,3,1,1,1,1,3,1,1,1,1,1,1,1,2,3,1,1,1,1,1,1,1,4,4,1,1,1,1,1,1,1,1,3,3,1,1,2,2,2,1,1,1,3,3,3,8,3,3,0},
 				 	{0,1,1,3,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,2,2,2,2,2,4,4,1,1,1,1,1,1,1,1,3,3,1,5,1,1,1,1,1,2,2,1,1,1,1,1,0}, 
 					{0,1,1,3,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,5,1,1,1,1,1,2,2,1,1,1,1,1,0},
 					{0,1,1,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,8,1,1,1,1,1,5,1,1,1,1,1,2,2,1,8,1,1,7,0},
 					{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
 				};
 
-	return yohaneBaseLogic(dungeon, game, charIdx, idolDungeon, dungeonIndex, inventory, achievement);
+	return yohaneBaseLogic(dungeon, game, charIdx, idolDungeon, dungeonIndex, inventory, achievement, hanamaru);
 }
 
 /* This function sets up the dungeon layout of dungeon index 2 
@@ -1955,7 +1958,7 @@ Precondition: Player enters a dungeon
 @return the verdict from yohaneBaseLogic
 */
 int shougetsuConfectionary(struct gameTag *game, int charIdx, struct idolDungeonTag idolDungeon[], 
-					int dungeonIndex, struct inventoryTag inventory[], struct achievementTag achievement[]){
+					int dungeonIndex, struct inventoryTag inventory[], struct achievementTag achievement[], struct hanamaruTag hanamaru[]){
 	grid dungeon = {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, 
 				 	{0,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 				 	{0,1,1,6,1,1,3,1,1,1,1,5,1,1,1,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,8,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
@@ -1963,14 +1966,14 @@ int shougetsuConfectionary(struct gameTag *game, int charIdx, struct idolDungeon
 				 	{0,1,1,1,1,1,3,1,1,1,1,1,1,1,1,8,1,1,1,3,3,1,1,1,1,1,1,1,4,4,1,1,1,1,1,1,1,1,3,3,1,1,1,1,3,1,1,1,8,1,1,1,1,1,0},
 				 	{0,1,1,1,1,1,3,1,1,1,1,2,1,1,1,1,1,1,1,3,3,1,1,3,1,1,1,1,4,4,1,1,1,1,1,1,1,1,3,3,1,8,1,1,3,1,1,1,1,1,1,1,1,1,0},
 				 	{0,1,3,1,1,1,3,1,1,1,1,3,1,1,1,1,1,1,1,2,3,1,1,3,1,1,1,1,4,4,1,1,1,1,1,1,1,1,3,3,1,1,1,1,3,1,1,1,1,1,1,1,1,1,0},
-				 	{0,1,3,1,1,9,3,1,1,1,1,3,1,1,1,1,1,1,1,2,3,1,1,1,1,1,1,1,4,4,1,1,1,1,1,1,1,1,3,3,1,1,2,2,2,1,1,1,3,3,3,8,3,3,0},
+				 	{0,1,3,1,7,9,3,1,1,1,1,3,1,1,1,1,1,1,1,2,3,1,1,1,1,1,1,1,4,4,1,1,1,1,1,1,1,1,3,3,1,1,2,2,2,1,1,1,3,3,3,8,3,3,0},
 				 	{0,1,1,3,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,2,2,2,2,2,4,4,1,1,1,1,1,1,1,1,3,3,1,5,1,1,1,1,1,2,2,1,1,1,1,1,0}, 
 					{0,1,1,3,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,5,1,1,1,1,1,2,2,1,1,1,1,1,0},
 					{0,1,1,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,8,1,1,1,1,1,5,1,1,1,1,1,2,2,1,8,1,1,7,0},
 					{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
 				};
 
-	return yohaneBaseLogic(dungeon, game, charIdx, idolDungeon, dungeonIndex, inventory, achievement);
+	return yohaneBaseLogic(dungeon, game, charIdx, idolDungeon, dungeonIndex, inventory, achievement, hanamaru);
 }
 
 /* Final Boss: Siren of the Mirror World!
@@ -1984,7 +1987,7 @@ Precondition: Player clears three dungeons in a single playthrough
 @return the verdict from yohaneBaseLogic
 */
 int sirenOfTheMirrorWorld(struct gameTag *game, int charIdx, struct idolDungeonTag idolDungeon[], 
-					int dungeonIndex, struct inventoryTag inventory[], struct achievementTag achievement[]){
+					int dungeonIndex, struct inventoryTag inventory[], struct achievementTag achievement[], struct hanamaruTag hanamaru[]){
 	grid dungeon = {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, 
 				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,12,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
@@ -2001,7 +2004,7 @@ int sirenOfTheMirrorWorld(struct gameTag *game, int charIdx, struct idolDungeonT
 
 	// printf("Final Battle: Siren of the Mirror World!\n");
 	// printf("最終決戦: 鏡の世界のセイレーン!\n");
-	return yohaneBaseLogic(dungeon, game, charIdx, idolDungeon, dungeonIndex, inventory, achievement);
+	return yohaneBaseLogic(dungeon, game, charIdx, idolDungeon, dungeonIndex, inventory, achievement, hanamaru);
 }
 
 /* In game menu that allows the user to enter dungeons depending on input (1,2,3). If three dungeons are cleared
@@ -2019,7 +2022,7 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 	int index;
 	int charIdx;
 	int win = 0;
-	
+	int terminated = 0;
 	do{
 	    printf("Choice: ");
 	    scanf(" %c", &choice);
@@ -2044,27 +2047,15 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 						game->floorCount = (rand() % 2) + 3;
 					}
 				}
-				
-				/*
-				for (game->currentFloorIndex = 0; game->currentFloorIndex < game->floorCount; game->currentFloorIndex++){
-	        	win = 0;
-	        	if (index == 0)
-	        		win = awashimaMarinePark(game, charIdx, idolDungeon, index, inventory, achievement);
-	        	if (index == 1)
-	        		win = izumitoSeaParadise(game, charIdx, idolDungeon, index, inventory, achievement);
-	        	if (index == 2)
-	        		win = shougetsuConfectionary(game, charIdx, idolDungeon, index, inventory, achievement);
-	        	}*/
-	        	
-	        	
+				    	
 				while (game->currentFloorIndex < game->floorCount && !(game->hp <= 0)){
 	        	win = 0;
 	        	if (index == 0)
-	        		win = awashimaMarinePark(game, charIdx, idolDungeon, index, inventory, achievement);
+	        		win = awashimaMarinePark(game, charIdx, idolDungeon, index, inventory, achievement, hanamaru);
 	        	if (index == 1)
-	        		win = izumitoSeaParadise(game, charIdx, idolDungeon, index, inventory, achievement);
+	        		win = izumitoSeaParadise(game, charIdx, idolDungeon, index, inventory, achievement, hanamaru);
 	        	if (index == 2)
-	        		win = shougetsuConfectionary(game, charIdx, idolDungeon, index, inventory, achievement);
+	        		win = shougetsuConfectionary(game, charIdx, idolDungeon, index, inventory, achievement, hanamaru);
 	        	if (win == 1)
 					game->currentFloorIndex++;
 	        	}
@@ -2087,7 +2078,7 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 		
 		else if (choice == '1' && game->currentPlaythroughClear == game->hostagesSelected){
 			system("cls");
-			win = sirenOfTheMirrorWorld(game, charIdx, idolDungeon, index, inventory, achievement);
+			win = sirenOfTheMirrorWorld(game, charIdx, idolDungeon, index, inventory, achievement, hanamaru);
 			if (win == 1){
 				printf("Win!\n");
 				game->totalPlaythroughClear++;
@@ -2100,13 +2091,12 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 	        	game->newGamePlus = 1;
             	system("cls");
 	        	newGamePlusSetup(idolDungeon, game, inventory, hanamaru, achievement);
-	        	titleScreen(idolDungeon,game,inventory,hanamaru,achievement);
+	        	saveGame(idolDungeon,game,inventory,hanamaru,achievement);
+	        	terminated = 1;
 			}
 			
 			system("pause");
 			system("cls");
-			showHostages(idolDungeon, game);
-			showDungeonMenu(idolDungeon, game, inventory);
 		}
 		
 		// Inventory
@@ -2118,6 +2108,7 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 		// Save and quit 
 		else if (choice == 'S' || choice == 's'){
 			saveGame(idolDungeon, game, inventory, hanamaru, achievement);
+			terminated = 1;
 			printf("Game Saved!\n\n");
 			
 			if (game->newGamePlus == 1)
@@ -2138,7 +2129,7 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 		
 		else
 			printf("Invalid choice\n");    	
-	} while (choice != 'S' && choice != 's');
+	} while ((choice != 'S' && choice != 's') && terminated == 0);
 }
 
 /* Sets up new game plus in the event that the player manages to defeat
