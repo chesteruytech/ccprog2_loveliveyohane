@@ -430,7 +430,7 @@ void achievementUnlock(struct achievementTag achievement[], struct gameTag *game
 		
 		// rescue counter for achievement index 23 (24) this has to meet 8
 		for (i = 0; i < MAX_IDOLS; i++){
-			if (game->rescuedCount[i] > 0 && game->clearStatus[i] == 0)
+			if (game->rescuedCount[i] > 0 && game->clearStatus[i] == 1)
 				rescueCounter++;
 		}
 		
