@@ -1879,6 +1879,7 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 			
 			gameOver(idolDungeon, game, inventory, hanamaru, achievement);
 	        achievementUnlock(achievement, game, 0);
+	        saveGame(idolDungeon,game,inventory,hanamaru,achievement);
 			quit = 1;
 		}
 				
@@ -2085,6 +2086,8 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 	        	itemUnlock(charIdx, hanamaru);
 	        	achievementUnlock(achievement, game, 1);
 			}
+				else
+					terminated = 1;
         	}
             system("cls");
 			showDungeonMenu(idolDungeon, game, inventory);
