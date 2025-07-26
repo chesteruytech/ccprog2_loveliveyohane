@@ -5,8 +5,6 @@ to do by priority:
 - final boss 
 - test cases
 
-reminder to regan:
-depedning on sir response uncomment the stuff out on hanamaru store, game over, and newGamePlusSetup
 
 Complete:
 - Main menu
@@ -1712,16 +1710,16 @@ void gameOver(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 
 	game->maxHP = 3;
     game->hp = 3.0;	
-
-    for (i = 2; i < MAX_INVENTORY - 1; i++)
-    	inventory[i].hidden = 1;
 	
 	for (i = 2; i < MAX_INVENTORY; i++)
 		inventory[i].itemCount = 0;
 		
 	game->currentFloorIndex = 0;
+	game->currentPlaythroughClear = 0;
 	
-	saveGame(idolDungeon, game, inventory, hanamaru, achievement);
+	for (i = 0; i < game->hostagesSelected; i++)
+		game->clearStatusTemp[i] = 0;
+	
 }
 
 /* Base Logic Package (e.g., character moving, tile finding and validation, winning, quitting)
@@ -1781,7 +1779,7 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 		printf("\n");
 		printf("HP: %.1f / %d", game->hp, game->maxHP);
 		
-		if (game->currentPlaythroughClear == 3){
+		if (game->currentPlaythroughClear == game->hostagesSelected){
 			printf("    Lailaps HP: %.1f / %d", game->lailapsHP, game->maxLailapsHP);
 			printf("\t\t");
 		}
@@ -2009,7 +2007,7 @@ int sirenOfTheMirrorWorld(struct gameTag *game, int charIdx, struct idolDungeonT
 				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
-				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
+				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,5,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,7,9,13,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 					{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0} 
 				 	};
@@ -2035,6 +2033,7 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 	int charIdx;
 	int win = 0;
 	int terminated = 0;
+	
 	do{
 	    printf("Choice: ");
 	    scanf(" %c", &choice);
@@ -2043,7 +2042,7 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 			index = choice - '1'; 
 			charIdx = game->hostages[index]; 
 			system("cls");
-        	if (game->clearStatusTemp[index] == 1 || game->clearStatus[charIdx] == 1)
+        	if (game->clearStatusTemp[index] == 1 /*|| game->clearStatus[charIdx] == 1*/)
         		printf("Dungeon is cleared. You can no longer enter\n");
         	else{
 	        	printf("Entering dungeon %d\n\n", index+1);
@@ -2060,7 +2059,7 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 					}
 				}
 				    	
-				while (game->currentFloorIndex < game->floorCount && !(game->hp <= 0)){
+				while (game->currentFloorIndex < game->floorCount && game->hp > 0 && terminated == 0){
 	        	win = 0;
 	        	if (index == 0)
 	        		win = awashimaMarinePark(game, charIdx, idolDungeon, index, inventory, achievement, hanamaru);
@@ -2070,6 +2069,8 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 	        		win = shougetsuConfectionary(game, charIdx, idolDungeon, index, inventory, achievement, hanamaru);
 	        	if (win == 1)
 					game->currentFloorIndex++;
+				else
+					terminated = 1;
 	        	}
 	        	
 	        	if (win == 1){
@@ -2093,7 +2094,6 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 			system("cls");
 			win = sirenOfTheMirrorWorld(game, charIdx, idolDungeon, index, inventory, achievement, hanamaru);
 			if (win == 1){
-				printf("Win!\n");
 				game->totalPlaythroughClear++;
 				
 				if (game->gold == 0)
@@ -2105,8 +2105,8 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
             	system("cls");
 	        	newGamePlusSetup(idolDungeon, game, inventory, hanamaru, achievement);
 	        	saveGame(idolDungeon,game,inventory,hanamaru,achievement);
-	        	terminated = 1;
 			}
+			terminated = 1;
 			
 			system("pause");
 			system("cls");
@@ -2121,9 +2121,7 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 		// Save and quit 
 		else if (choice == 'S' || choice == 's'){
 			saveGame(idolDungeon, game, inventory, hanamaru, achievement);
-			terminated = 1;
-			printf("Game Saved!\n\n");
-			
+			terminated = 1;			
 			if (game->newGamePlus == 1)
 	    			game->newGamePlus = 0;
 			 
@@ -2142,7 +2140,7 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 		
 		else
 			printf("Invalid choice\n");    	
-	} while ((choice != 'S' && choice != 's') && terminated == 0);
+	} while (terminated == 0);
 }
 
 /* Sets up new game plus in the event that the player manages to defeat
@@ -2163,12 +2161,7 @@ void newGamePlusSetup(struct idolDungeonTag idolDungeon[], struct gameTag *game,
 	game->hp = 3;
 	
 	for (i = 2; i < MAX_INVENTORY; i++){
-		//if (i < 5 && i > 7)
-			inventory[i].itemCount = 0;
-	}
-	
-	for (i = 2; i < MAX_INVENTORY - 1; i++){
-		inventory[i].hidden = 1;
+		inventory[i].itemCount = 0;
 	}
 	
 	game->currentPlaythroughClear = 0;
@@ -2182,15 +2175,7 @@ void newGamePlusSetup(struct idolDungeonTag idolDungeon[], struct gameTag *game,
 	for (i = 0; i < MAX_IDOLS; i++){
 		if (game->rescuedCount[i] > 0)
 			itemUnlock(i, hanamaru);
-	}
-	
-/*
-	// unsure	
-	for (i = 5; i <= 7; i++){
-		if (inventory[i].itemCount != 0)
-			game->hp += 1;
-	}
-	*/
+	}	
 	
 	for (i = 0; i < MAX_IDOLS; i++){
 	if (game->totalPlaythroughClear % 3 == 0 && game->totalPlaythroughClear > 0)
