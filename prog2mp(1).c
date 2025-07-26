@@ -1,8 +1,7 @@
 /* 
-mp is 90% complete
+mp is 95% complete
 
 to do by priority: 
-- dungeon floors
 - final boss 
 - test cases
 
@@ -18,7 +17,9 @@ Complete:
 - game over
 - use and cycle items
 - new game + 
+- player movements
 - bat movements
+- dungeon floors
 */
 
 /*
@@ -70,6 +71,8 @@ void initializeGame(struct gameTag *game){
 	game->hostagesSelected = 0;
 	game->lailapsHP = 4;
 	game->maxLailapsHP = 4;
+	game->floorCount = 1;
+	game->currentFloorIndex = 0;
 }
 
 /* This function initalizes the idol and dungeon pair structure
@@ -1686,6 +1689,8 @@ void gameOver(struct gameTag *game, struct inventoryTag inventory[]){
 	
 	for (i = 2; i < MAX_INVENTORY; i++)
 		inventory[i].itemCount = 0;
+		
+	game->currentFloorIndex = 0;
 }
 
 /* Base Logic Package (e.g., character moving, tile finding and validation, winning, quitting)
@@ -1730,26 +1735,26 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 	lailaps(dimension2D,row,col,&lRow,&lCol);
 
 	game->dmgTaken = 0;
-	int floorCount = dungeonIndex;
-	
+/*	
+	this is moved to gameMenu
 	if (game->currentPlaythroughClear < game->hostagesSelected){
 	if (game->currentPlaythroughClear == 0){
-		floorCount = 1;
+		game->floorCount = 1;
 	}
 	else if (game->currentPlaythroughClear == 1){
-		floorCount = (rand() % 2) + 2;
+		game->floorCount = (rand() % 2) + 2;
 	}
 	else if (game->currentPlaythroughClear == 2){
-		floorCount = (rand() % 2) + 3;
+		game->floorCount = (rand() % 2) + 3;
 	}
 }
-
+*/
 	do{
 		system("cls");
 		
 		if (game->currentPlaythroughClear < game->hostagesSelected){
 			printf("Dungeon #%d: %s\n", dungeonIndex+1, idolDungeon[charIdx].dungeon);
-			printf("Floor 1 of %d\n", floorCount);
+			printf("Floor %d of %d\n", game->currentFloorIndex+1, game->floorCount);
 		}
 		else
 			printf("Final Battle: Siren of the Mirror World!\n");
@@ -2010,6 +2015,8 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 	int index;
 	int charIdx;
 	int win = 0;
+	int i;
+	
 	do{
 	    printf("Choice: ");
 	    scanf(" %c", &choice);
@@ -2023,6 +2030,20 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
         	else{
 	        	printf("Entering dungeon %d\n\n", index+1);
 	        	
+	        	if (game->currentPlaythroughClear < game->hostagesSelected){
+					if (game->currentPlaythroughClear == 0){
+						game->floorCount = 1;
+					}
+					else if (game->currentPlaythroughClear == 1){
+						game->floorCount = (rand() % 2) + 2;
+					}
+					else if (game->currentPlaythroughClear == 2){
+						game->floorCount = (rand() % 2) + 3;
+					}
+				}
+				
+				/*
+				for (game->currentFloorIndex = 0; game->currentFloorIndex < game->floorCount; game->currentFloorIndex++){
 	        	win = 0;
 	        	if (index == 0)
 	        		win = awashimaMarinePark(game, charIdx, idolDungeon, index, inventory, achievement);
@@ -2030,6 +2051,20 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 	        		win = izumitoSeaParadise(game, charIdx, idolDungeon, index, inventory, achievement);
 	        	if (index == 2)
 	        		win = shougetsuConfectionary(game, charIdx, idolDungeon, index, inventory, achievement);
+	        	}*/
+	        	
+	        	
+				while (game->currentFloorIndex < game->floorCount && !(game->hp <= 0)){
+	        	win = 0;
+	        	if (index == 0)
+	        		win = awashimaMarinePark(game, charIdx, idolDungeon, index, inventory, achievement);
+	        	if (index == 1)
+	        		win = izumitoSeaParadise(game, charIdx, idolDungeon, index, inventory, achievement);
+	        	if (index == 2)
+	        		win = shougetsuConfectionary(game, charIdx, idolDungeon, index, inventory, achievement);
+	        	if (win == 1)
+					game->currentFloorIndex++;
+	        	}
 	        	
 	        	if (win == 1){
 	        	printf("\n%s has been successfully rescued!\n", idolDungeon[charIdx].idol);
@@ -2038,7 +2073,7 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 	        	game->clearStatusTemp[index] = 1;
 				game->currentPlaythroughClear++;	
 	        	game->dungeonClears++; 
-	        	
+	        	game->currentFloorIndex = 0;
 	        	itemUnlock(charIdx, hanamaru);
 	        	achievementUnlock(achievement, game, 1);
 			}

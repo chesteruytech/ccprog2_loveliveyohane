@@ -68,7 +68,11 @@ struct gameTag{
 	int flawless; // for step 0 to 1 achievement
 	int newGamePlus;
 	int hostagesSelected;
-	int newGamePlusStatus; 
+	int newGamePlusStatus;
+	float lailapsHP;
+	int maxLailapsHP; 
+	int floorCount;
+	int currentFloorIndex;
 };
 
 struct achievementTag{
