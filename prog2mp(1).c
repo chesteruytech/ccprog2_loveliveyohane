@@ -1,13 +1,10 @@
 /* 
 mp is 95% complete
 
-dungeon floors done!!!
-- check gameMenu to see how i did it 
-	- imoved the floor calculations there and then put the "enter dungeon stuff" into a while loop
-
 to do by priority: 
 - final boss 
 - test cases
+
 
 Complete:
 - Main menu
@@ -433,7 +430,7 @@ void achievementUnlock(struct achievementTag achievement[], struct gameTag *game
 		
 		// rescue counter for achievement index 23 (24) this has to meet 8
 		for (i = 0; i < MAX_IDOLS; i++){
-			if (game->rescuedCount[i] > 0)
+			if (game->rescuedCount[i] > 0 && game->clearStatus[i] == 0)
 				rescueCounter++;
 		}
 		
@@ -480,7 +477,7 @@ void achievementUnlock(struct achievementTag achievement[], struct gameTag *game
 		}
 		
 		// clear 10 dungeons (index 19)
-		if ((game->dungeonClears + game->totalPlaythroughClear) >= 10 && achievement[19].earned == 0){
+		if (game->dungeonClears >= 10 && achievement[19].earned == 0){
 			achievement[19].earned = 1;
 			getCurrentDate(achievement[19].dateEarned);
 			printf("Achievement unlocked: %s\n", achievement[19].achievement);
@@ -686,7 +683,7 @@ void selectHostages(struct gameTag *game){
     while (game->hostagesSelected < MAX_HOSTAGES && attempts < 9999){
         index = rand() % MAX_IDOLS;
         attempts++;
-        if (used[index] == 0 && game->rescuedCount[index] == 0){
+        if (used[index] == 0 && game->clearStatus[index] == 0){
             used[index] = 1;
             game->hostages[game->hostagesSelected] = index;	// randomly selected indexes go to hostage array
             game->hostagesSelected++;
@@ -703,7 +700,6 @@ Precondition: Start a playthrough in game
 */
 void showHostages(struct idolDungeonTag idolDungeon[], struct gameTag *game){
 	int i, idx;
-	int rescued = 0;
 
 	printf("Hostages: \n");
     for (i = 0; i < MAX_HOSTAGES; i++){
@@ -713,14 +709,6 @@ void showHostages(struct idolDungeonTag idolDungeon[], struct gameTag *game){
         	printf("- %s in %s\n", idolDungeon[idx].idol, idolDungeon[idx].dungeon);
         	
     }
-    
-    for (i = 0; i < MAX_IDOLS; i++){
-		if (game->rescuedCount[i] > 0)
-			rescued++;
-	}
-	
-	if (rescued == 8)
-		printf("No more hostages!!!\n");
     
     system("pause");
     system("cls");
@@ -1742,20 +1730,7 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 	lailaps(dimension2D,row,col,&lRow,&lCol);
 
 	game->dmgTaken = 0;
-/*	
-	this is moved to gameMenu
-	if (game->currentPlaythroughClear < game->hostagesSelected){
-	if (game->currentPlaythroughClear == 0){
-		game->floorCount = 1;
-	}
-	else if (game->currentPlaythroughClear == 1){
-		game->floorCount = (rand() % 2) + 2;
-	}
-	else if (game->currentPlaythroughClear == 2){
-		game->floorCount = (rand() % 2) + 3;
-	}
-}
-*/
+
 	do{
 		system("cls");
 		
@@ -2031,7 +2006,7 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 			index = choice - '1'; 
 			charIdx = game->hostages[index]; 
 			system("cls");
-        	if (game->clearStatusTemp[index] == 1 || game->rescuedCount[charIdx] > 0)
+        	if (game->clearStatusTemp[index] == 1 || game->clearStatus[charIdx] == 1)
         		printf("Dungeon is cleared. You can no longer enter\n");
         	else{
 	        	printf("Entering dungeon %d\n\n", index+1);
@@ -2063,7 +2038,8 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 	        	if (win == 1){
 	        	printf("\n%s has been successfully rescued!\n", idolDungeon[charIdx].idol);
 	        	game->rescuedCount[charIdx]++;
-	        	game->clearStatus[charIdx] = 1;
+
+	        	game->clearStatus[charIdx] = 1; // rescued in THAT playthrough
 	        	game->clearStatusTemp[index] = 1;
 				game->currentPlaythroughClear++;	
 	        	game->dungeonClears++; 
@@ -2162,6 +2138,12 @@ void newGamePlusSetup(struct idolDungeonTag idolDungeon[], struct gameTag *game,
 	for (i = 0; i < MAX_HOSTAGES; i++){
 		game->clearStatusTemp[i] = 0;
 	}
+	
+	for (i = 0; i < MAX_IDOLS; i++){
+	if (game->totalPlaythroughClear % 3 == 0 && game->totalPlaythroughClear > 0)
+		game->clearStatus[i] = 0;
+	}
+	
 }
 
 /* Allows the player to continue their game based on the save file, if they have one 

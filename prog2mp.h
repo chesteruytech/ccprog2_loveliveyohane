@@ -31,48 +31,48 @@ typedef char Name[MAX_NAME_LEN];
 typedef char Description[MAX_DESCRIPTION];
 
 struct idolDungeonTag{
-    Name idol;
-    Name dungeon;
+    Name idol; // idol name
+    Name dungeon; // dungeon name
 };
 
 struct inventoryTag{
-	Name item;
-	int itemCount;
-	int hidden;
+	Name item; // item name
+	int itemCount; // item quantity
+	int hidden; // hidden (not visible in inventory)
 };
 
 struct hanamaruTag{
-	Name item;
-	int price;
-	int availability;
+	Name item; // item name
+	int price; // item price
+	int availability; // available or not? 
 };
 
 struct gameTag{
 	int maxHP;
 	float hp;
 	int gold;
-	int hostages[MAX_HOSTAGES];
-	int rescuedCount[MAX_IDOLS];
-	int clearStatus[MAX_IDOLS];
-	int clearStatusTemp[MAX_HOSTAGES];
+	int hostages[MAX_HOSTAGES]; // hostages array containing indexes from idolDungeon
+	int rescuedCount[MAX_IDOLS]; // rescue counter for each idol from idolDungeon
+	int clearStatus[MAX_IDOLS]; // 1 if they have been rescued in that playthrough, 0 if not
+	int clearStatusTemp[MAX_HOSTAGES]; // dungeon (1-3) cleared in that playthrough
 	int running;
-	int dungeonClears;
-	int goldSpent;
+	int dungeonClears; // dungeon clears
+	int goldSpent; 
 	float dmgTaken; 
-	int currentPlaythroughClear;
-	Name killed; // killed by
-	int handIndex[3];
-	int currentHandIndex; 
+	int currentPlaythroughClear; // number dungeons cleared in that playthrough, also determines the dungeon level
+	Name killed; // killed by who
+	int handIndex[3]; // item on hand
+	int currentHandIndex;  // item on hand index
 	int chocoMintUsageCount; // for that one ahievement
 	int totalPlaythroughClear; // for ng+
-	int flawless; // for step 0 to 1 achievement
-	int newGamePlus;
-	int hostagesSelected;
-	int newGamePlusStatus;
-	float lailapsHP;
+	int flawless; // for step 0 to 1 achievement (no gold in hand)
+	int newGamePlus; 
+	int hostagesSelected; // number of hsotages selected
+	int newGamePlusStatus; // ng+ status
+	float lailapsHP; 
 	int maxLailapsHP; 
-	int floorCount;
-	int currentFloorIndex;
+	int floorCount; // total floor count in that dungeon
+	int currentFloorIndex; // current floor player is in
 };
 
 struct achievementTag{
