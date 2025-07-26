@@ -1,6 +1,10 @@
 /* 
 mp is 95% complete
 
+dungeon floors done!!!
+- check gameMenu to see how i did it 
+	- imoved the floor calculations there and then put the "enter dungeon stuff" into a while loop
+
 to do by priority: 
 - final boss 
 - test cases
@@ -2015,7 +2019,6 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 	int index;
 	int charIdx;
 	int win = 0;
-	int i;
 	
 	do{
 	    printf("Choice: ");
