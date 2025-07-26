@@ -2200,7 +2200,7 @@ void continueGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, str
 	system("cls");
 	
 	loadGame(idolDungeon, game, inventory, hanamaru, achievement);	
-    showHostages(idolDungeon, game);
+    //showHostages(idolDungeon, game);
     showDungeonMenu(idolDungeon, game, inventory);
     gameMenu(idolDungeon, game, inventory, hanamaru, achievement);
 }
