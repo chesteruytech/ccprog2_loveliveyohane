@@ -5,7 +5,6 @@ to do by priority:
 - final boss 
 - test cases
 
-
 Complete:
 - Main menu
 - achievements
@@ -1489,7 +1488,7 @@ void obtainTreasure(struct inventoryTag inventory[], struct gameTag game[]){
 	
 	srand(time(NULL));
 	int random = rand() % 2;
-	int goldRandom = (rand() % 90) + 10 + 1;
+	int goldRandom = (rand() % 91) + 10;
 	if (random == 0){
 		printf("Obtained: Noppo Bread (1)!\n");
 		inventory[1].itemCount += 1;
