@@ -673,25 +673,39 @@ Precondition: Start a playthrough in game
 @param struct gameTag *game: the structure containing the game statistics of the player
 */
 void selectHostages(struct gameTag *game){
-	int index;
-    int used[MAX_IDOLS] = {0};
-    int attempts = 0;
-    int i;
+	
+    int used[MAX_IDOLS];
+    int count = 0;
+    int i, j, temp;
+
     game->hostagesSelected = 0;
-    
-    while (game->hostagesSelected < MAX_HOSTAGES && attempts < 9999){
-        index = rand() % MAX_IDOLS;
-        attempts++;
-        if (used[index] == 0 && game->clearStatus[index] == 0){
-            used[index] = 1;
-            game->hostages[game->hostagesSelected] = index;	// randomly selected indexes go to hostage array
-            game->hostagesSelected++;
+
+    for (i = 0; i < MAX_IDOLS; i++){
+        if (game->clearStatus[i] == 0){
+            used[count] = i;
+            count++;
         }
     }
+
+    for (i = count - 1; i > 0; i--){
+        j = rand() % (i + 1);
+        temp = used[i];
+        used[i] = used[j];
+        used[j] = temp;
+    }
+
+  
+    for (i = 0; i < MAX_HOSTAGES; i++){
+        if (i < count){
+            game->hostages[i] = used[i];
+            game->hostagesSelected++;
+        } 
+		else 
+            game->hostages[i] = -1; 
+    }
     
-    for (i = game->hostagesSelected; i < MAX_HOSTAGES; i++)  // if there are less than three hostages left
-    	game->hostages[i] = -1;
 }
+
 /* This function shows the list of hostages that must be rescued by the player
 Precondition: Start a playthrough in game
 @param struct idolDungeonTag idolDungeon[]: the structure containing the pair of idols and dungeons associated
@@ -1525,30 +1539,28 @@ Precondition: Enter a dungeon in game and press W, A, S, or D
 @param targetRow: the target row that the player wants to go to, dependent on what key the user pressed
 @param targetCol: the target column that the player wants to go to, dependent on what key the user pressed
 @param verdict: the verdict that confirms if the player has won the dungeon yet or not 
-@param currentTile: the current tile identifer that the player is currently standing on
+@param yTile: the current tile identifer that the player is currently standing on
 */
 void movement(grid dimension2D, struct gameTag *game, struct inventoryTag inventory[], 
-				int *yRow, int *yCol, int targetRow, int targetCol, int *verdict, int *currentTile){
-	int currentRow = *yRow;
-	int currentCol = *yCol;
+				int *yRow, int *yCol, int targetRow, int targetCol, int *verdict, int *yTile){
 	
 	// THIS IS FOR PRESERVING TILES THAT HAVE BEEN PASSED THORUGH
-	dimension2D[currentRow][currentCol] = *currentTile;
+	dimension2D[*yRow][*yCol] = *yTile;
 	
-		if (dimension2D[currentRow][currentCol] == 9 && *currentTile == 5){
-		    dimension2D[currentRow][currentCol] = 5;
+		if (dimension2D[*yRow][*yCol] == 9 && *yTile == 5){
+		    dimension2D[*yRow][*yCol] = 5;
 		} 
-		else if (dimension2D[currentRow][currentCol] == 9){
-		    dimension2D[currentRow][currentCol] = 1;
+		else if (dimension2D[*yRow][*yCol] == 9){
+		    dimension2D[*yRow][*yCol] = 1;
 		}
 
 		if (dimension2D[targetRow][targetCol] == 2){ // Wall digging 
 			dimension2D[targetRow][targetCol] = 1; // dig first  
-			dimension2D[currentRow][currentCol] = 9;  // stay still     
+			dimension2D[*yRow][*yCol] = 9;  // stay still     
 		}
 		else if (dimension2D[targetRow][targetCol] == 3){ // Spike 
 			dimension2D[targetRow][targetCol] = 1; 
-			dimension2D[currentRow][currentCol] = 9;  
+			dimension2D[*yRow][*yCol] = 9;  
 			
 			if (inventory[2].itemCount == 0){ 
 				game->hp -= 0.5; 
@@ -1561,23 +1573,23 @@ void movement(grid dimension2D, struct gameTag *game, struct inventoryTag invent
 		else if (dimension2D[targetRow][targetCol] == 4){ // Water tile
 		
 			if (inventory[4].itemCount == 0) 
-				dimension2D[currentRow][currentCol] = 9; 
+				dimension2D[*yRow][*yCol] = 9; 
 			else{  
-			*currentTile = 4;
+			*yTile = 4;
 		    dimension2D[targetRow][targetCol] = 9;
 		    *yRow = targetRow;
 		    *yCol = targetCol;
 			}
 		}
 		else if (dimension2D[targetRow][targetCol] == 5){ // heat tile 
-		    *currentTile = 5;
+		    *yTile = 5;
 		    dimension2D[targetRow][targetCol] = 9;
 		    *yRow = targetRow;
 		    *yCol = targetCol;
 		}
 
 		else if (dimension2D[targetRow][targetCol] == 6){ // treasure 
-		    *currentTile = 1; 
+		    *yTile = 1; 
 			dimension2D[targetRow][targetCol] = 9;
 			*yRow = targetRow; 
 			*yCol = targetCol; 
@@ -1585,7 +1597,7 @@ void movement(grid dimension2D, struct gameTag *game, struct inventoryTag invent
 			obtainTreasure(inventory, game);
 		}
 		else if (dimension2D[targetRow][targetCol] == 1){ // FREE SPACE 
-			*currentTile = 1; 
+			*yTile = 1; 
 			dimension2D[targetRow][targetCol] = 9;
 			*yRow = targetRow; 
 			*yCol = targetCol; 
@@ -1593,10 +1605,10 @@ void movement(grid dimension2D, struct gameTag *game, struct inventoryTag invent
 		
 		else if (dimension2D[targetRow][targetCol] == 8 || dimension2D[targetRow][targetCol] == 11){ // Yohane attacks bat
 			dimension2D[targetRow][targetCol] = 10;  // Gold spotted!       
-			dimension2D[currentRow][currentCol] = 9; // stay still
+			dimension2D[*yRow][*yCol] = 9; // stay still
 		}
 		else if (dimension2D[targetRow][targetCol] == 10){ // gold tile	
-			dimension2D[currentRow][currentCol] = 1; 
+			dimension2D[*yRow][*yCol] = 1; 
 			dimension2D[targetRow][targetCol] = 9;
 			*yRow = targetRow; 
 			*yCol = targetCol; 
@@ -1604,7 +1616,7 @@ void movement(grid dimension2D, struct gameTag *game, struct inventoryTag invent
 			obtainGoldBat(game);	
 		}
 		else if (dimension2D[targetRow][targetCol] == 7){ // Exit
-			dimension2D[currentRow][currentCol] = 1; 
+			dimension2D[*yRow][*yCol] = 1; 
 			dimension2D[targetRow][targetCol] = 9;
 			*yRow = targetRow; 
 			*yCol = targetCol;
@@ -1612,7 +1624,7 @@ void movement(grid dimension2D, struct gameTag *game, struct inventoryTag invent
 		}
 		
 		else 
-			dimension2D[currentRow][currentCol] = 9; 
+			dimension2D[*yRow][*yCol] = 9; 
 }
 /* This function allows the player to cycle their items to the right 
 Precondition: Enter a dungeon in game and input "]", if the user has an item on hand from their inventory
@@ -1738,11 +1750,11 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 	int row = MAX_ROW;
 	int col = MAX_COL;
 	int quit = 0, verdict = 0;
-	int wlRow, wlCol, spikeRow, spikeCol, wtRow, wtCol, heatRow, heatCol, tRow, tCol, eRow, eCol, bRow, bCol, yRow, yCol, gRow, gCol, hitRow, hitCol, sirenRow, sirenCol, lRow, lCol;
+	int wlRow, wlCol, spikeRow, spikeCol, wtRow, wtCol, heatRow, heatCol, tRow, tCol, eRow, eCol, bRow, bCol, yRow, yCol, gRow, gCol, hitRow, hitCol, sirenRow, sirenCol, lRow, lCol, swRow, swCol;
 	char move;
 	
 	int playerMoveCount = 0;
-	int currentTile = 1;
+	int yTile = 1;
 	int yRowOld, yColOld;
 	int moved;
 	int invIdx;
@@ -1761,7 +1773,7 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 	hit(dimension2D,row,col,&hitRow,&hitCol);
 	siren(dimension2D,row,col,&sirenRow,&sirenCol);
 	lailaps(dimension2D,row,col,&lRow,&lCol);
-	switches(dimension2D,row,col,&lRow,&lCol);
+	switches(dimension2D,row,col,&swRow,&swCol);
 
 	game->dmgTaken = 0;
 
@@ -1818,19 +1830,19 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 		switch(move){
 			case 'W': case 'w':
 				if(tileValidation(dimension2D,row,col,yRow,yCol,1))
-					movement(dimension2D,game,inventory,&yRow,&yCol,yRow-1,yCol,&verdict,&currentTile);
+					movement(dimension2D,game,inventory,&yRow,&yCol,yRow-1,yCol,&verdict,&yTile);
 					break;
 			case 'A': case 'a':
 				if(tileValidation(dimension2D,row,col,yRow,yCol,2))
-					movement(dimension2D,game,inventory,&yRow,&yCol,yRow,yCol-1,&verdict,&currentTile);
+					movement(dimension2D,game,inventory,&yRow,&yCol,yRow,yCol-1,&verdict,&yTile);
 					break;
 			case 'S': case 's':
 				if(tileValidation(dimension2D,row,col,yRow,yCol,3))
-					movement(dimension2D,game,inventory,&yRow,&yCol,yRow+1,yCol,&verdict,&currentTile);
+					movement(dimension2D,game,inventory,&yRow,&yCol,yRow+1,yCol,&verdict,&yTile);
 					break;
 			case 'D': case 'd':
 				if(tileValidation(dimension2D,row,col,yRow,yCol,4))
-					movement(dimension2D,game,inventory,&yRow,&yCol,yRow,yCol+1,&verdict,&currentTile);
+					movement(dimension2D,game,inventory,&yRow,&yCol,yRow,yCol+1,&verdict,&yTile);
 					break;
 			case 'X': case 'x':
 				playerMoveCount++;
@@ -1858,7 +1870,7 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 		playerMoveCount++;
 		batAbilities(dimension2D, playerMoveCount, game, inventory);
 		achievementUnlock(achievement, game, 0);
-		if (currentTile == 5 && moved == 0 && inventory[4].itemCount == 0){
+		if (yTile == 5 && moved == 0 && inventory[4].itemCount == 0){
 			game->hp -= 1;
 			game->dmgTaken += 1;
 			if (game->hp <= 0)
@@ -1881,7 +1893,8 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 	        saveGame(idolDungeon,game,inventory,hanamaru,achievement);
 			quit = 1;
 		}
-				
+		
+	
 		
 	}while(!quit && !verdict);
 	
@@ -1897,7 +1910,7 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 }
 
 /* This function sets up the dungeon layout of dungeon index 0
-Precondition: Player enters a dungeon
+Precondition: Player enters a dungeon #1
 @param struct gameTag *game: the structure containing the game statistics of the player
 @param charIdx: the index of a character in idolDungeon structure
 @param struct idolDungeonTag idolDungeon[]: the structure containing the pair of idols and dungeons associated
@@ -1928,7 +1941,7 @@ int awashimaMarinePark(struct gameTag *game, int charIdx, struct idolDungeonTag 
 
 
 /* This function sets up the dungeon layout of dungeon index 1
-Precondition: Player enters a dungeon
+Precondition: Player enters a dungeon #2
 @param struct gameTag *game: the structure containing the game statistics of the player
 @param charIdx: the index of a character in idolDungeon structure
 @param struct idolDungeonTag idolDungeon[]: the structure containing the pair of idols and dungeons associated
@@ -1958,7 +1971,7 @@ int izumitoSeaParadise(struct gameTag *game, int charIdx, struct idolDungeonTag 
 }
 
 /* This function sets up the dungeon layout of dungeon index 2 
-Precondition: Player enters a dungeon
+Precondition: Player enters a dungeon #3
 @param struct gameTag *game: the structure containing the game statistics of the player
 @param charIdx: the index of a character in idolDungeon structure
 @param struct idolDungeonTag idolDungeon[]: the structure containing the pair of idols and dungeons associated
