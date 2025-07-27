@@ -4,7 +4,7 @@ mp is 95% complete
 to do by priority: 
 - final boss 
 - test cases
-
+- BEFORE SUBMITTING, REMOVE THE FKING EASY EXITS IN EACH DUNGEON LAYOUT!!!!	
 Complete:
 - Main menu
 - achievements
@@ -1551,14 +1551,19 @@ void movement(grid dimension2D, struct gameTag *game, struct inventoryTag invent
 	
 	// THIS IS FOR PRESERVING TILES THAT HAVE BEEN PASSED THORUGH
 	dimension2D[*yRow][*yCol] = *yTile;
-	//dimension2D[*lRow][*lCol] = *lTile;
 	
-		if (dimension2D[*yRow][*yCol] == 9 && *yTile == 5){
-		    dimension2D[*yRow][*yCol] = 5;
-		} 
-		else if (dimension2D[*yRow][*yCol] == 9){
-		    dimension2D[*yRow][*yCol] = 1;
-		}
+		
+		if (dimension2D[*yRow][*yCol] == 9 && *yTile == 5)
+			dimension2D[*yRow][*yCol] = 5;
+		else if (dimension2D[*yRow][*yCol] == 9 && *yTile != 13)
+			dimension2D[*yRow][*yCol] = 1;
+		
+		
+		if (dimension2D[*lRow][*lCol] == 13 && *lTile == 5)
+			dimension2D[*lRow][*lCol] = 5;
+		else if (dimension2D[*lRow][*lCol] == 13)
+			dimension2D[*lRow][*lCol] = 1;
+
 
 		if (dimension2D[yTargetRow][yTargetCol] == 2){ // Wall digging 
 			dimension2D[yTargetRow][yTargetCol] = 1; // dig first  
@@ -1629,9 +1634,23 @@ void movement(grid dimension2D, struct gameTag *game, struct inventoryTag invent
 			*verdict = 1;
 		}
 		
-		else 
+		else
 			dimension2D[*yRow][*yCol] = 9; 
+		
+		
+		if (game->currentPlaythroughClear == game->hostagesSelected){
+		if (dimension2D[lTargetRow][lTargetCol] == 1 || dimension2D[lTargetRow][lTargetCol] == 4 || dimension2D[lTargetRow][lTargetCol] == 5){
+			*lTile = dimension2D[lTargetRow][lTargetCol];
+			dimension2D[lTargetRow][lTargetCol] = 13; 
+			*lRow = lTargetRow;
+			*lCol = lTargetCol;
+		}
+		else
+			dimension2D[*lRow][*lCol] = 13; 
+		}
+
 }
+
 /* This function allows the player to cycle their items to the right 
 Precondition: Enter a dungeon in game and input "]", if the user has an item on hand from their inventory
 @param struct inventoryTag inventory[]: the structure containing the player's inventory
@@ -1836,19 +1855,19 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 		
 		switch(move){
 			case 'W': case 'w':
-				if(tileValidation(dimension2D,row,col,yRow,yCol,1))
+				//if(tileValidation(dimension2D,row,col,yRow,yCol,1))
 					movement(dimension2D,game,inventory,&yRow,&yCol,yRow-1,yCol,&verdict,&yTile,&lRow,&lCol,&lTile,lRow-1,lCol);
 					break;
 			case 'A': case 'a':
-				if(tileValidation(dimension2D,row,col,yRow,yCol,2))
+				//if(tileValidation(dimension2D,row,col,yRow,yCol,2))
 					movement(dimension2D,game,inventory,&yRow,&yCol,yRow,yCol-1,&verdict,&yTile,&lRow,&lCol,&lTile,lRow,lCol-1);
 					break;
 			case 'S': case 's':
-				if(tileValidation(dimension2D,row,col,yRow,yCol,3))
+				//if(tileValidation(dimension2D,row,col,yRow,yCol,3))
 					movement(dimension2D,game,inventory,&yRow,&yCol,yRow+1,yCol,&verdict,&yTile,&lRow,&lCol,&lTile,lRow+1,lCol);
 					break;
 			case 'D': case 'd':
-				if(tileValidation(dimension2D,row,col,yRow,yCol,4))
+				//if(tileValidation(dimension2D,row,col,yRow,yCol,4))
 					movement(dimension2D,game,inventory,&yRow,&yCol,yRow,yCol+1,&verdict,&yTile,&lRow,&lCol,&lTile,lRow,lCol+1);
 					break;
 			case 'X': case 'x':
@@ -2026,8 +2045,8 @@ int sirenOfTheMirrorWorld(struct gameTag *game, int charIdx, struct idolDungeonT
 				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
+				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
-				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,5,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,7,9,13,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 					{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0} 
 				 	};
