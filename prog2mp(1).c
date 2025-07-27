@@ -1,10 +1,28 @@
 /* 
-mp is 95% complete
+mp is 96% complete
 
 to do by priority: 
 - final boss 
-- test cases
-- BEFORE SUBMITTING, REMOVE THE FKING EASY EXITS IN EACH DUNGEON LAYOUT!!!!	
+	- lailaps moves with yohane (done)
+	- spawn a pair of switches random location
+		- Yohane and Lailaps must then trigger both switches simultaneously
+		- The switches will then disappear and another new pair of switches will spawn elsewhere
+		- siren break barrier when 3 switch trigger
+		- When Spawning the switches, the pair of switches should NOT be further than two rows and five columns away
+	- spawn a bat every 8 moves
+		- 0 switch trigger: lvl1 dungeon behavior (use game->currentplauthroughclear)
+		- l switch trigger: lvl2 dungeon behavior
+		- 2+ switch trigger: lvl3 dungeon behavior
+	- siren 
+		- move toward y and h, all eight directions
+		- siren one taps you if he hit u
+	- if yohane attaack siren, spawn exit on siren spawnpoint and drop 750g, all bats die too (done)
+	 
+- test cases (can start now)
+
+- BEFORE SUBMITTING, REMOVE THE EASY EXITS IN EACH DUNGEON LAYOUT!!!!	
+
+- optional minor changes (don't force if cant): the current hp should display as an integer when whole number. 
 Complete:
 - Main menu
 - achievements
@@ -20,6 +38,7 @@ Complete:
 - player movements
 - bat movements
 - dungeon floors
+- lailaps movements
 */
 
 /*
@@ -1053,7 +1072,11 @@ void dungeonIdentifier(grid dimension2D, int nRow, int nCol){
 				printf("\e[0m"); //Resets the color to default
 			}else if(dimension2D[i][j] == 14) //Switches
 				printf("0");	
-			
+			else if(dimension2D[i][j] == 15){ //Siren Gold Tile
+				printf("\e[0;33m"); //Yellow color
+				printf("g");
+				printf("\e[0m"); //Resets the color to default
+			}
 		}
 		printf("\n");
 	}
@@ -1274,27 +1297,39 @@ void batAbilities(grid dimension2D, int playerMove, struct gameTag *game, struct
                             tempGrid[i][j] = currentTile;
                         }
                         
-                        else if (targetTile == 9 && attacked == 0){
+                        else if ((targetTile == 9 || targetTile == 13) && attacked == 0){
                             tempGrid[i][j] = 11; // convert to big B
 
                             if (inventory[2].itemCount > 0){
-                            	game->hp -= 0.5;
+                            	if (targetTile == 9)
+                            		game->hp -= 0.5;
+                            	if (targetTile == 13)
+                            		game->lailapsHP -= 0.5;
                             	game->dmgTaken += 0.5;
 							}
                             else if (game->currentPlaythroughClear == 0){
-                            	game->hp -= 0.5;
+                            	if (targetTile == 9)
+                            		game->hp -= 0.5;
+                            	if (targetTile == 13)
+                            		game->lailapsHP -= 0.5;
                             	game->dmgTaken += 0.5;
 							}
                             else if (game->currentPlaythroughClear == 1){
-                            	game->hp -= 1;
+                            	if (targetTile == 9)
+                            		game->hp -= 1;
+                            	if (targetTile == 13)
+                            		game->lailapsHP -= 1;
                             	game->dmgTaken += 1;
 							}
 							else{
-								game->hp -= 1.5;
+								if (targetTile == 9)
+                            		game->hp -= 1.5;
+                            	if (targetTile == 13)
+                            		game->lailapsHP -= 1.5;
 								game->dmgTaken += 1.5;
 							}   
                 			
-                			if (game->hp <= 0)
+                			if (game->hp <= 0 || game->lailapsHP <= 0)
                             	strcpy(game->killed, "Bat");
                             	
                             attacked = 1;
@@ -1440,7 +1475,27 @@ void switches(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol){
 	}
 }
 
+/* This function identifies the gold tiles in the dungeon
+Precondition: Enter a dungeon in game 
+@param dimension2D: the size of the dungeon in rows and columns
+@param nRow: the number of columns in the layout
+@param nCol: the number of columns in the layout
+@param tRow: the pointer to mark the row of the obstacle
+@param tCol: the pointer to mark the column of the obstacle
+*/
+void sirenGold(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol){
+	*tRow = -1;
+	*tCol = -1;
 
+	for(int i = 0; i < nRow; i++){
+		for(int j = 0; j < nCol; j++){
+			if(dimension2D[i][j] == 15){
+				*tRow = i;
+				*tCol = j;
+			}
+		}
+	}
+}
 /* This function verifies if the tile traversed to is a valid tile, by not going out of bounds
 Precondition: Enter a dungeon in game 
 @param dimension2D: the size of the dungeon in rows and columns
@@ -1520,14 +1575,14 @@ Precondition: Defeat a bat and claim the gold dropped by it
 @param struct gameTag *game: the structure containing the game statistics of the player
 */
 void obtainGoldBat(struct gameTag *game){
-	if (game->currentPlaythroughClear < game->hostagesSelected){
+	
 	if (game->currentPlaythroughClear == 0)
 		game->gold += 5;
 	if (game->currentPlaythroughClear == 1)
 		game->gold += 10;
 	if (game->currentPlaythroughClear == 2)
 		game->gold += 15;
-	}
+	
 }
 /* This function moves the player around in a dungeon depending on users input 
 Precondition: Enter a dungeon in game and press W, A, S, or D
@@ -1634,6 +1689,26 @@ void movement(grid dimension2D, struct gameTag *game, struct inventoryTag invent
 			*verdict = 1;
 		}
 		
+		else if (dimension2D[yTargetRow][yTargetCol] == 12){ // Siren
+			dimension2D[yTargetRow][yTargetCol] = 15;  // Gold spotted!       
+			dimension2D[*yRow][*yCol] = 9;
+			
+			for (int i = 0; i < MAX_ROW; i++)
+				for (int j = 0; j < MAX_COL; j++){
+					if (dimension2D[i][j] == 8 || dimension2D[i][j] == 11)
+						dimension2D[i][j] = 10;
+				}
+			
+			dimension2D[1][24] = 7; // spawn exit
+		}
+		else if (dimension2D[yTargetRow][yTargetCol] == 15){ // siren gold tile	
+			dimension2D[*yRow][*yCol] = 1; 
+			dimension2D[yTargetRow][yTargetCol] = 9;
+			*yRow = yTargetRow; 
+			*yCol = yTargetCol; 
+			
+			game->gold += 750;	
+		}
 		else
 			dimension2D[*yRow][*yCol] = 9; 
 		
@@ -1746,7 +1821,7 @@ void gameOver(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 
 	game->maxHP = 3;
     game->hp = 3.0;	
-	
+	game->lailapsHP = 4.0;
 	for (i = 2; i < MAX_INVENTORY; i++)
 		inventory[i].itemCount = 0;
 		
@@ -1775,7 +1850,7 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 	int row = MAX_ROW;
 	int col = MAX_COL;
 	int quit = 0, verdict = 0;
-	int wlRow, wlCol, spikeRow, spikeCol, wtRow, wtCol, heatRow, heatCol, tRow, tCol, eRow, eCol, bRow, bCol, yRow, yCol, gRow, gCol, hitRow, hitCol, sirenRow, sirenCol, lRow, lCol, swRow, swCol;
+	int wlRow, wlCol, spikeRow, spikeCol, wtRow, wtCol, heatRow, heatCol, tRow, tCol, eRow, eCol, bRow, bCol, yRow, yCol, gRow, gCol, hitRow, hitCol, sirenRow, sirenCol, lRow, lCol, swRow, swCol, sgRow, sgCol;
 	char move;
 	
 	int playerMoveCount = 0;
@@ -1800,7 +1875,7 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 	siren(dimension2D,row,col,&sirenRow,&sirenCol);
 	lailaps(dimension2D,row,col,&lRow,&lCol);
 	switches(dimension2D,row,col,&swRow,&swCol);
-
+	sirenGold(dimension2D,row,col,&sgRow,&sgCol);
 	game->dmgTaken = 0;
 
 	do{
@@ -1909,7 +1984,7 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 				game->chocoMintUsageCount++;
 		}
 	
-		else if (game->hp <= 0){
+		else if (game->hp <= 0 || game->lailapsHP <= 0){
 			printf("\t\t\t\t  You Died!\n");
 			printf("\t\t\t\tKilled by: %s\n", game->killed);
 			system("pause");
@@ -2040,11 +2115,11 @@ int sirenOfTheMirrorWorld(struct gameTag *game, int charIdx, struct idolDungeonT
 	grid dungeon = {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, 
 				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,12,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
-				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
+				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
-				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
+				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,8,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,7,9,13,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
@@ -2200,6 +2275,7 @@ void newGamePlusSetup(struct idolDungeonTag idolDungeon[], struct gameTag *game,
 	
 	game->maxHP = 3;
 	game->hp = 3;
+	game->lailapsHP = 4;
 	
 	for (i = 2; i < MAX_INVENTORY; i++){
 		inventory[i].itemCount = 0;

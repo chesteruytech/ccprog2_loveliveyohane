@@ -126,6 +126,7 @@ void hit(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol);
 void siren(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol);
 void lailaps(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol);
 void switches(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol);
+void sirenGold(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol);
 int tileValidation(grid dimension2D, int nRow, int nCol, int cRow, int cCol, int nDir);
 void obtainTreasure(struct inventoryTag inventory[], struct gameTag game[]);
 void obtainGoldBat(struct gameTag *game);
