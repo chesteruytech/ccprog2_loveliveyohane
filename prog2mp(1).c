@@ -1534,15 +1534,18 @@ Precondition: Enter a dungeon in game and press W, A, S, or D
 @param dimension2D: the size of the dungeon in rows and columns
 @param struct gameTag *game: the structure containing the game statistics of the player
 @param struct inventoryTag inventory[]: the structure containing the player's inventory
-@param yRow: the current row of the player 
-@param yCol: the current column of the player
+@param yRow: the current row of yohane 
+@param yCol: the current column of yohane
 @param targetRow: the target row that the player wants to go to, dependent on what key the user pressed
 @param targetCol: the target column that the player wants to go to, dependent on what key the user pressed
 @param verdict: the verdict that confirms if the player has won the dungeon yet or not 
-@param yTile: the current tile identifer that the player is currently standing on
+@param yTile: the current tile identifer that yohane is currently standing on
+@param lRow: the current row of lailaps
+@param lCol: the current column of lailaps
+@param lTIle: the current tile identifier of lailaps 
 */
 void movement(grid dimension2D, struct gameTag *game, struct inventoryTag inventory[], 
-				int *yRow, int *yCol, int targetRow, int targetCol, int *verdict, int *yTile){
+				int *yRow, int *yCol, int targetRow, int targetCol, int *verdict, int *yTile, int *lRow, int *lCol, int *lTile){
 	
 	// THIS IS FOR PRESERVING TILES THAT HAVE BEEN PASSED THORUGH
 	dimension2D[*yRow][*yCol] = *yTile;
@@ -1755,6 +1758,7 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 	
 	int playerMoveCount = 0;
 	int yTile = 1;
+	int lTile = 1;
 	int yRowOld, yColOld;
 	int moved;
 	int invIdx;
@@ -1830,19 +1834,19 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 		switch(move){
 			case 'W': case 'w':
 				if(tileValidation(dimension2D,row,col,yRow,yCol,1))
-					movement(dimension2D,game,inventory,&yRow,&yCol,yRow-1,yCol,&verdict,&yTile);
+					movement(dimension2D,game,inventory,&yRow,&yCol,yRow-1,yCol,&verdict,&yTile,&lRow,&lCol,&lTile);
 					break;
 			case 'A': case 'a':
 				if(tileValidation(dimension2D,row,col,yRow,yCol,2))
-					movement(dimension2D,game,inventory,&yRow,&yCol,yRow,yCol-1,&verdict,&yTile);
+					movement(dimension2D,game,inventory,&yRow,&yCol,yRow,yCol-1,&verdict,&yTile,&lRow,&lCol,&lTile);
 					break;
 			case 'S': case 's':
 				if(tileValidation(dimension2D,row,col,yRow,yCol,3))
-					movement(dimension2D,game,inventory,&yRow,&yCol,yRow+1,yCol,&verdict,&yTile);
+					movement(dimension2D,game,inventory,&yRow,&yCol,yRow+1,yCol,&verdict,&yTile,&lRow,&lCol,&lTile);
 					break;
 			case 'D': case 'd':
 				if(tileValidation(dimension2D,row,col,yRow,yCol,4))
-					movement(dimension2D,game,inventory,&yRow,&yCol,yRow,yCol+1,&verdict,&yTile);
+					movement(dimension2D,game,inventory,&yRow,&yCol,yRow,yCol+1,&verdict,&yTile,&lRow,&lCol,&lTile);
 					break;
 			case 'X': case 'x':
 				playerMoveCount++;

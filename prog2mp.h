@@ -130,7 +130,7 @@ int tileValidation(grid dimension2D, int nRow, int nCol, int cRow, int cCol, int
 void obtainTreasure(struct inventoryTag inventory[], struct gameTag game[]);
 void obtainGoldBat(struct gameTag *game);
 void movement(grid dimension2D, struct gameTag *game, struct inventoryTag inventory[], 
-				int *yRow, int *yCol, int targetRow, int targetCol, int *verdict, int *currentTile);
+				int *yRow, int *yCol, int targetRow, int targetCol, int *verdict, int *yTile, int *lRow, int *lCol, int *lTile);
 void cycleItemForward(struct inventoryTag inventory[], struct gameTag *game);
 void cycleItemBackward(struct inventoryTag inventory[], struct gameTag *game);
 void useItem(struct inventoryTag inventory[], struct gameTag *game);
