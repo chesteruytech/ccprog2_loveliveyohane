@@ -1536,19 +1536,22 @@ Precondition: Enter a dungeon in game and press W, A, S, or D
 @param struct inventoryTag inventory[]: the structure containing the player's inventory
 @param yRow: the current row of yohane 
 @param yCol: the current column of yohane
-@param targetRow: the target row that the player wants to go to, dependent on what key the user pressed
-@param targetCol: the target column that the player wants to go to, dependent on what key the user pressed
+@param yTargetRow: the target row that yohane wants to go to, dependent on what key the user pressed
+@param yTargetCol: the target column that yohane wants to go to, dependent on what key the user pressed
 @param verdict: the verdict that confirms if the player has won the dungeon yet or not 
 @param yTile: the current tile identifer that yohane is currently standing on
 @param lRow: the current row of lailaps
 @param lCol: the current column of lailaps
 @param lTIle: the current tile identifier of lailaps 
+@param lTargetRow: the target row that lailaps wants to go to, dependent on what key the user pressed
+@param lTargetCol: the target column that lailaps wants to go to, dependent on what key the user pressed
 */
 void movement(grid dimension2D, struct gameTag *game, struct inventoryTag inventory[], 
-				int *yRow, int *yCol, int targetRow, int targetCol, int *verdict, int *yTile, int *lRow, int *lCol, int *lTile){
+				int *yRow, int *yCol, int yTargetRow, int yTargetCol, int *verdict, int *yTile, int *lRow, int *lCol, int *lTile, int lTargetRow, int lTargetCol){
 	
 	// THIS IS FOR PRESERVING TILES THAT HAVE BEEN PASSED THORUGH
 	dimension2D[*yRow][*yCol] = *yTile;
+	//dimension2D[*lRow][*lCol] = *lTile;
 	
 		if (dimension2D[*yRow][*yCol] == 9 && *yTile == 5){
 		    dimension2D[*yRow][*yCol] = 5;
@@ -1557,12 +1560,12 @@ void movement(grid dimension2D, struct gameTag *game, struct inventoryTag invent
 		    dimension2D[*yRow][*yCol] = 1;
 		}
 
-		if (dimension2D[targetRow][targetCol] == 2){ // Wall digging 
-			dimension2D[targetRow][targetCol] = 1; // dig first  
+		if (dimension2D[yTargetRow][yTargetCol] == 2){ // Wall digging 
+			dimension2D[yTargetRow][yTargetCol] = 1; // dig first  
 			dimension2D[*yRow][*yCol] = 9;  // stay still     
 		}
-		else if (dimension2D[targetRow][targetCol] == 3){ // Spike 
-			dimension2D[targetRow][targetCol] = 1; 
+		else if (dimension2D[yTargetRow][yTargetCol] == 3){ // Spike 
+			dimension2D[yTargetRow][yTargetCol] = 1; 
 			dimension2D[*yRow][*yCol] = 9;  
 			
 			if (inventory[2].itemCount == 0){ 
@@ -1573,56 +1576,56 @@ void movement(grid dimension2D, struct gameTag *game, struct inventoryTag invent
 			if (game->hp <= 0)
 				strcpy(game->killed, "Spike");
 		}
-		else if (dimension2D[targetRow][targetCol] == 4){ // Water tile
+		else if (dimension2D[yTargetRow][yTargetCol] == 4){ // Water tile
 		
 			if (inventory[4].itemCount == 0) 
 				dimension2D[*yRow][*yCol] = 9; 
 			else{  
 			*yTile = 4;
-		    dimension2D[targetRow][targetCol] = 9;
-		    *yRow = targetRow;
-		    *yCol = targetCol;
+		    dimension2D[yTargetRow][yTargetCol] = 9;
+		    *yRow = yTargetRow;
+		    *yCol = yTargetCol;
 			}
 		}
-		else if (dimension2D[targetRow][targetCol] == 5){ // heat tile 
+		else if (dimension2D[yTargetRow][yTargetCol] == 5){ // heat tile 
 		    *yTile = 5;
-		    dimension2D[targetRow][targetCol] = 9;
-		    *yRow = targetRow;
-		    *yCol = targetCol;
+		    dimension2D[yTargetRow][yTargetCol] = 9;
+		    *yRow = yTargetRow;
+		    *yCol = yTargetCol;
 		}
 
-		else if (dimension2D[targetRow][targetCol] == 6){ // treasure 
+		else if (dimension2D[yTargetRow][yTargetCol] == 6){ // treasure 
 		    *yTile = 1; 
-			dimension2D[targetRow][targetCol] = 9;
-			*yRow = targetRow; 
-			*yCol = targetCol; 
+			dimension2D[yTargetRow][yTargetCol] = 9;
+			*yRow = yTargetRow; 
+			*yCol = yTargetCol; 
 			
 			obtainTreasure(inventory, game);
 		}
-		else if (dimension2D[targetRow][targetCol] == 1){ // FREE SPACE 
+		else if (dimension2D[yTargetRow][yTargetCol] == 1){ // FREE SPACE 
 			*yTile = 1; 
-			dimension2D[targetRow][targetCol] = 9;
-			*yRow = targetRow; 
-			*yCol = targetCol; 
+			dimension2D[yTargetRow][yTargetCol] = 9;
+			*yRow = yTargetRow; 
+			*yCol = yTargetCol; 
 		}
 		
-		else if (dimension2D[targetRow][targetCol] == 8 || dimension2D[targetRow][targetCol] == 11){ // Yohane attacks bat
-			dimension2D[targetRow][targetCol] = 10;  // Gold spotted!       
+		else if (dimension2D[yTargetRow][yTargetCol] == 8 || dimension2D[yTargetRow][yTargetCol] == 11){ // Yohane attacks bat
+			dimension2D[yTargetRow][yTargetCol] = 10;  // Gold spotted!       
 			dimension2D[*yRow][*yCol] = 9; // stay still
 		}
-		else if (dimension2D[targetRow][targetCol] == 10){ // gold tile	
+		else if (dimension2D[yTargetRow][yTargetCol] == 10){ // gold tile	
 			dimension2D[*yRow][*yCol] = 1; 
-			dimension2D[targetRow][targetCol] = 9;
-			*yRow = targetRow; 
-			*yCol = targetCol; 
+			dimension2D[yTargetRow][yTargetCol] = 9;
+			*yRow = yTargetRow; 
+			*yCol = yTargetCol; 
 			
 			obtainGoldBat(game);	
 		}
-		else if (dimension2D[targetRow][targetCol] == 7){ // Exit
+		else if (dimension2D[yTargetRow][yTargetCol] == 7){ // Exit
 			dimension2D[*yRow][*yCol] = 1; 
-			dimension2D[targetRow][targetCol] = 9;
-			*yRow = targetRow; 
-			*yCol = targetCol;
+			dimension2D[yTargetRow][yTargetCol] = 9;
+			*yRow = yTargetRow; 
+			*yCol = yTargetCol;
 			*verdict = 1;
 		}
 		
@@ -1834,19 +1837,19 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 		switch(move){
 			case 'W': case 'w':
 				if(tileValidation(dimension2D,row,col,yRow,yCol,1))
-					movement(dimension2D,game,inventory,&yRow,&yCol,yRow-1,yCol,&verdict,&yTile,&lRow,&lCol,&lTile);
+					movement(dimension2D,game,inventory,&yRow,&yCol,yRow-1,yCol,&verdict,&yTile,&lRow,&lCol,&lTile,lRow-1,lCol);
 					break;
 			case 'A': case 'a':
 				if(tileValidation(dimension2D,row,col,yRow,yCol,2))
-					movement(dimension2D,game,inventory,&yRow,&yCol,yRow,yCol-1,&verdict,&yTile,&lRow,&lCol,&lTile);
+					movement(dimension2D,game,inventory,&yRow,&yCol,yRow,yCol-1,&verdict,&yTile,&lRow,&lCol,&lTile,lRow,lCol-1);
 					break;
 			case 'S': case 's':
 				if(tileValidation(dimension2D,row,col,yRow,yCol,3))
-					movement(dimension2D,game,inventory,&yRow,&yCol,yRow+1,yCol,&verdict,&yTile,&lRow,&lCol,&lTile);
+					movement(dimension2D,game,inventory,&yRow,&yCol,yRow+1,yCol,&verdict,&yTile,&lRow,&lCol,&lTile,lRow+1,lCol);
 					break;
 			case 'D': case 'd':
 				if(tileValidation(dimension2D,row,col,yRow,yCol,4))
-					movement(dimension2D,game,inventory,&yRow,&yCol,yRow,yCol+1,&verdict,&yTile,&lRow,&lCol,&lTile);
+					movement(dimension2D,game,inventory,&yRow,&yCol,yRow,yCol+1,&verdict,&yTile,&lRow,&lCol,&lTile,lRow,lCol+1);
 					break;
 			case 'X': case 'x':
 				playerMoveCount++;
