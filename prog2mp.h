@@ -74,6 +74,8 @@ struct gameTag{
 	int floorCount; // total floor count in that dungeon
 	int currentFloorIndex; // current floor player is in
 	int finalBoss; // for final boss fight status. 1 if yes, 0 if no
+	int switchSpawned;
+	int switchTriggerCount;
 };
 
 struct achievementTag{

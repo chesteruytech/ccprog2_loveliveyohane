@@ -1,22 +1,11 @@
 /* 
-mp is 97% complete
+mp is 98% complete
 
 to do by priority: 
-- final boss 
-	- lailaps moves with yohane (done)
-	- spawn a bat every 8 moves (done)
-	- if yohane attaack siren, spawn exit on siren spawnpoint and drop 750g, all bats die too (done)
-	- spawn a pair of switches random location
-		- Yohane and Lailaps must then trigger both switches simultaneously
-		- The switches will then disappear and another new pair of switches will spawn elsewhere
-		- siren break barrier when 3 switch trigger
-		- When Spawning the switches, the pair of switches should NOT be further than two rows and five columns away
-		bat behavior:
-		- 0 switch trigger: lvl1 dungeon behavior (use game->currentplaythroughclear)
-		- l switch trigger: lvl2 dungeon behavior
-		- 2+ switch trigger: lvl3 dungeon behavior
+- final boss
 	- siren 
 		- move toward y and h, all eight directions
+		- prio moving toward yohane
 		- siren one taps you if he hit u
 	 
 - test cases (can start now)
@@ -93,6 +82,9 @@ void initializeGame(struct gameTag *game){
 	game->maxLailapsHP = 4;
 	game->floorCount = 1;
 	game->currentFloorIndex = 0;
+	game->finalBoss = 0;
+	game->switchSpawned = 0;
+	game->switchTriggerCount = 0;
 }
 
 /* This function initalizes the idol and dungeon pair structure
@@ -1077,7 +1069,8 @@ void dungeonIdentifier(grid dimension2D, int nRow, int nCol){
 				printf("\e[0;33m"); //Yellow color
 				printf("g");
 				printf("\e[0m"); //Resets the color to default
-			}
+			}else if(dimension2D[i][j] == 16) //Siren disguise as free tile 
+				printf(".");
 		}
 		printf("\n");
 	}
@@ -1322,7 +1315,7 @@ void batAbilities(grid dimension2D, int playerMove, struct gameTag *game, struct
                             		game->lailapsHP -= 1;
                             	game->dmgTaken += 1;
 							}
-							else{
+							else if (game->currentPlaythroughClear >= 2){
 								if (targetTile == 9)
                             		game->hp -= 1.5;
                             	if (targetTile == 13)
@@ -1605,20 +1598,34 @@ Precondition: Enter a dungeon in game and press W, A, S, or D
 void movement(grid dimension2D, struct gameTag *game, struct inventoryTag inventory[], 
 				int *yRow, int *yCol, int yTargetRow, int yTargetCol, int *verdict, int *yTile, int *lRow, int *lCol, int *lTile, int lTargetRow, int lTargetCol){
 	
-	// THIS IS FOR PRESERVING TILES THAT HAVE BEEN PASSED THORUGH
-	dimension2D[*yRow][*yCol] = *yTile;
+		// THIS IS FOR PRESERVING TILES THAT HAVE BEEN PASSED THORUGH
+		dimension2D[*yRow][*yCol] = *yTile;
 	
+		if (game->finalBoss == 1 && *yTile == 14 && *lTile == 14) {
+		    *yTile = 1;
+		    *lTile = 1;
+		    dimension2D[*yRow][*yCol] = 1;
+		    dimension2D[*lRow][*lCol] = 1;
+		    game->switchSpawned = 0;
+		    game->switchTriggerCount++;
+		    game->currentPlaythroughClear++;
+		}
 		
 		if (dimension2D[*yRow][*yCol] == 9 && *yTile == 5)
 			dimension2D[*yRow][*yCol] = 5;
 		else if (dimension2D[*yRow][*yCol] == 9 && *yTile != 13)
 			dimension2D[*yRow][*yCol] = 1;
 		
+		if (dimension2D[*yRow][*yCol] == 9 && *yTile == 14)
+			dimension2D[*yRow][*yCol] = 14;
+		else if (dimension2D[*yRow][*yCol] == 9)
+			dimension2D[*yRow][*yCol] = 1;
 		
-		if (dimension2D[*lRow][*lCol] == 13 && *lTile == 5)
-			dimension2D[*lRow][*lCol] = 5;
+		if (dimension2D[*lRow][*lCol] == 13 && *lTile == 14)
+			dimension2D[*lRow][*lCol] = 14;
 		else if (dimension2D[*lRow][*lCol] == 13)
 			dimension2D[*lRow][*lCol] = 1;
+			
 
 
 		if (dimension2D[yTargetRow][yTargetCol] == 2){ // Wall digging 
@@ -1654,7 +1661,7 @@ void movement(grid dimension2D, struct gameTag *game, struct inventoryTag invent
 		    *yRow = yTargetRow;
 		    *yCol = yTargetCol;
 		}
-
+		
 		else if (dimension2D[yTargetRow][yTargetCol] == 6){ // treasure 
 		    *yTile = 1; 
 			dimension2D[yTargetRow][yTargetCol] = 9;
@@ -1700,7 +1707,7 @@ void movement(grid dimension2D, struct gameTag *game, struct inventoryTag invent
 						dimension2D[i][j] = 10;
 				}
 			game->finalBoss = 0;
-			dimension2D[1][24] = 7; // spawn exit
+			dimension2D[1][24] = 7; 
 		}
 		else if (dimension2D[yTargetRow][yTargetCol] == 15){ // siren gold tile	
 			dimension2D[*yRow][*yCol] = 1; 
@@ -1710,21 +1717,29 @@ void movement(grid dimension2D, struct gameTag *game, struct inventoryTag invent
 			
 			game->gold += 750;	
 		}
+		else if (dimension2D[yTargetRow][yTargetCol] == 14){ // switch tile 
+		    *yTile = 14;
+		    dimension2D[yTargetRow][yTargetCol] = 9;
+		    *yRow = yTargetRow;
+		    *yCol = yTargetCol;
+		}
 		else
 			dimension2D[*yRow][*yCol] = 9; 
-		
-		
+			
 		if (game->finalBoss == 1 || game->currentPlaythroughClear >= game->hostagesSelected){
-		if (dimension2D[lTargetRow][lTargetCol] == 1 || dimension2D[lTargetRow][lTargetCol] == 4 || dimension2D[lTargetRow][lTargetCol] == 5){
-			*lTile = dimension2D[lTargetRow][lTargetCol];
-			dimension2D[lTargetRow][lTargetCol] = 13; 
-			*lRow = lTargetRow;
-			*lCol = lTargetCol;
-		}
-		else
-			dimension2D[*lRow][*lCol] = 13; 
-		}
+				
+			if (dimension2D[lTargetRow][lTargetCol] == 1 || dimension2D[lTargetRow][lTargetCol] == 14){
+				*lTile = dimension2D[lTargetRow][lTargetCol];
+				dimension2D[lTargetRow][lTargetCol] = 13; 
+				*lRow = lTargetRow;
+				*lCol = lTargetCol;
+			}
+			
+			else
+				dimension2D[*lRow][*lCol] = 13; 
+				
 
+		}
 }
 
 /* This function allows the player to cycle their items to the right 
@@ -1860,7 +1875,9 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 	int yRowOld, yColOld;
 	int moved;
 	int invIdx;
-	int spawnRow, spawnCol;
+	int spawnRow, spawnCol, pairSpawnRow, pairSpawnCol;
+	game->switchSpawned = 0;
+	game->switchTriggerCount = 0;
 	srand(time(NULL));
 	
 	// Tile location/s
@@ -1882,11 +1899,34 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 	
 	if (game->currentPlaythroughClear == game->hostagesSelected)
 		game->finalBoss = 1;
-			
+	
+	if (game->finalBoss == 1 && game->switchSpawned == 0){
+		while (game->switchSpawned == 0){
+			spawnRow = (rand() % (MAX_ROW-4)) + 2;
+			spawnCol = (rand() % (MAX_COL-10)) + 5;	
+			 
+	
+		if (dimension2D[spawnRow][spawnCol] == 1){
+			pairSpawnRow = spawnRow + (rand() % 5) - 2; 
+			pairSpawnCol = spawnCol + (rand() % 11) - 5; 
+	
+			if (spawnRow > 0 && spawnRow < MAX_ROW-1 && spawnCol > 0 && spawnCol < MAX_COL-1 && dimension2D[spawnRow][spawnCol] == 1 &&
+			pairSpawnRow > 0 && pairSpawnRow < MAX_ROW-1 && pairSpawnCol > 0 && pairSpawnCol < MAX_COL-1 && dimension2D[pairSpawnRow][pairSpawnCol] == 1){
+				dimension2D[spawnRow][spawnCol] = 14;
+				dimension2D[pairSpawnRow][pairSpawnCol] = 14;
+				game->switchSpawned = 1;
+				}
+			}
+		}
+	}
+	
+	if (game->finalBoss == 1)
+		game->currentPlaythroughClear = 0;
+				
 	do{
 		system("cls");
 		
-		if (game->currentPlaythroughClear < game->hostagesSelected){
+		if (game->currentPlaythroughClear < game->hostagesSelected && game->finalBoss == 0){
 			printf("Dungeon #%d: %s\n", dungeonIndex+1, idolDungeon[charIdx].dungeon);
 			printf("Floor %d of %d\n", game->currentFloorIndex+1, game->floorCount);
 		}
@@ -1896,7 +1936,7 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 		printf("\n");
 		printf("HP: %.1f / %d", game->hp, game->maxHP);
 		
-		if (game->currentPlaythroughClear == game->hostagesSelected){
+		if (game->finalBoss == 1){
 			printf("    Lailaps HP: %.1f / %d", game->lailapsHP, game->maxLailapsHP);
 			printf("\t\t");
 		}
@@ -1951,7 +1991,6 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 					movement(dimension2D,game,inventory,&yRow,&yCol,yRow,yCol+1,&verdict,&yTile,&lRow,&lCol,&lTile,lRow,lCol+1);
 					break;
 			case 'X': case 'x':
-				playerMoveCount++;
 				break;
 			case '[': 
 				cycleItemForward(inventory,game);
@@ -1976,6 +2015,7 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 		playerMoveCount++;
 		batAbilities(dimension2D, playerMoveCount, game, inventory);
 		achievementUnlock(achievement, game, 0);
+
 		
 		// spawn bat every 8 moves until siren is defeated
 		if (playerMoveCount % 8 == 0 && playerMoveCount > 0 && game->finalBoss == 1){
@@ -1987,13 +2027,33 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 				dimension2D[spawnRow][spawnCol] = 8;
 		}
 		
-		// spawn switch (WIP)
-		if (game->finalBoss == 1){
-			do{
-				spawnRow = (rand() % MAX_ROW) + 1;
-				spawnCol = (rand() % MAX_COL) + 1;	
-			} while (dimension2D[spawnRow][spawnCol] != 1);
-			dimension2D[spawnRow][spawnCol] = 14;
+		if (game->finalBoss == 1 && game->switchTriggerCount < 3 && game->switchSpawned == 0){
+			while (game->switchSpawned == 0){
+				spawnRow = (rand() % (MAX_ROW - 4)) + 2;
+				spawnCol = (rand() % (MAX_COL - 10)) + 5;
+		
+				if (dimension2D[spawnRow][spawnCol] == 1){
+					pairSpawnRow = spawnRow + (rand() % 5) - 2;
+					pairSpawnCol = spawnCol + (rand() % 11) - 5;
+		
+					if (spawnRow > 0 && spawnRow < MAX_ROW-1 && spawnCol > 0 && spawnCol < MAX_COL-1 && dimension2D[spawnRow][spawnCol] == 1 &&
+					pairSpawnRow > 0 && pairSpawnRow < MAX_ROW-1 && pairSpawnCol > 0 && pairSpawnCol < MAX_COL-1 && dimension2D[pairSpawnRow][pairSpawnCol] == 1){
+						dimension2D[spawnRow][spawnCol] = 14;
+						dimension2D[pairSpawnRow][pairSpawnCol] = 14;
+						game->switchSpawned = 1;
+					}
+				}
+			}
+		}
+		// break barrier
+		 if (game->switchTriggerCount == 3){
+			for (int i = 1; i < 4; i++){
+				for (int j = 1; j < MAX_COL-1; j++){
+					if (dimension2D[i][j] == 0 || dimension2D[i][j] == 16){
+						dimension2D[i][j] = 1;
+					}
+				}
+			}
 		}
 		
 		if (yTile == 5 && moved == 0 && inventory[4].itemCount == 0){
@@ -2138,16 +2198,16 @@ Precondition: Player clears three dungeons in a single playthrough
 int sirenOfTheMirrorWorld(struct gameTag *game, int charIdx, struct idolDungeonTag idolDungeon[], 
 					int dungeonIndex, struct inventoryTag inventory[], struct achievementTag achievement[], struct hanamaruTag hanamaru[]){
 	grid dungeon = {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, 
-				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,12,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
-				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
-				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
+				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,16,16,16,16,16,16,12,16,16,16,16,16,16,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
+				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,16,16,16,16,16,16,16,16,16,16,16,16,16,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
+				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,8,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
-				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,7,9,13,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
+				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,9,13,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 					{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0} 
 				 	};
 
@@ -2176,8 +2236,30 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 	do{
 	    printf("Choice: ");
 	    scanf(" %c", &choice);
+		
+		if (choice == '1' && game->currentPlaythroughClear == game->hostagesSelected){
+			system("cls");
+			win = sirenOfTheMirrorWorld(game, charIdx, idolDungeon, index, inventory, achievement, hanamaru);
+			if (win == 1){
+				game->totalPlaythroughClear++;
+				
+				if (game->gold == 0)
+					game->flawless = 1;
+				
+				itemUnlock(charIdx, hanamaru);
+	        	achievementUnlock(achievement, game, 1);
+	        	game->newGamePlus = 1;
+            	system("cls");
+	        	newGamePlusSetup(idolDungeon, game, inventory, hanamaru, achievement);
+	        	saveGame(idolDungeon,game,inventory,hanamaru,achievement);
+			}
+			terminated = 1;
 			
-		if (choice >= '1' && choice < '1' + game->hostagesSelected && game->currentPlaythroughClear < game->hostagesSelected){ 
+			system("pause");
+			system("cls");
+		}
+			
+		else if (choice >= '1' && choice < '1' + game->hostagesSelected && game->currentPlaythroughClear < game->hostagesSelected){ 
 			index = choice - '1'; 
 			charIdx = game->hostages[index]; 
 			system("cls");
@@ -2229,28 +2311,6 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
         	}
             system("cls");
 			showDungeonMenu(idolDungeon, game, inventory);
-		}
-		
-		else if (choice == '1' && game->currentPlaythroughClear == game->hostagesSelected){
-			system("cls");
-			win = sirenOfTheMirrorWorld(game, charIdx, idolDungeon, index, inventory, achievement, hanamaru);
-			if (win == 1){
-				game->totalPlaythroughClear++;
-				
-				if (game->gold == 0)
-					game->flawless = 1;
-				
-				itemUnlock(charIdx, hanamaru);
-	        	achievementUnlock(achievement, game, 1);
-	        	game->newGamePlus = 1;
-            	system("cls");
-	        	newGamePlusSetup(idolDungeon, game, inventory, hanamaru, achievement);
-	        	saveGame(idolDungeon,game,inventory,hanamaru,achievement);
-			}
-			terminated = 1;
-			
-			system("pause");
-			system("cls");
 		}
 		
 		// Inventory
