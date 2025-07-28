@@ -1828,7 +1828,7 @@ void gameOver(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 		
 	game->currentFloorIndex = 0;
 	game->currentPlaythroughClear = 0;
-	
+	game->finalBoss = 0;
 	for (i = 0; i < game->hostagesSelected; i++)
 		game->clearStatusTemp[i] = 0;
 	
@@ -1977,15 +1977,23 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 		batAbilities(dimension2D, playerMoveCount, game, inventory);
 		achievementUnlock(achievement, game, 0);
 		
+		// spawn bat every 8 moves until siren is defeated
 		if (playerMoveCount % 8 == 0 && playerMoveCount > 0 && game->finalBoss == 1){
 			
 			do{
 				spawnRow = (rand() % MAX_ROW) + 1;
 				spawnCol = (rand() % MAX_COL) + 1;	
 			} while (dimension2D[spawnRow][spawnCol] != 1);
-			
-			// if (dimension2D[spawnRow][spawnCol] == 1)
 				dimension2D[spawnRow][spawnCol] = 8;
+		}
+		
+		// spawn switch (WIP)
+		if (game->finalBoss == 1){
+			do{
+				spawnRow = (rand() % MAX_ROW) + 1;
+				spawnCol = (rand() % MAX_COL) + 1;	
+			} while (dimension2D[spawnRow][spawnCol] != 1);
+			dimension2D[spawnRow][spawnCol] = 14;
 		}
 		
 		if (yTile == 5 && moved == 0 && inventory[4].itemCount == 0){
@@ -2293,7 +2301,7 @@ void newGamePlusSetup(struct idolDungeonTag idolDungeon[], struct gameTag *game,
 	game->maxHP = 3;
 	game->hp = 3;
 	game->lailapsHP = 4;
-	
+	game->finalBoss = 0;
 	for (i = 2; i < MAX_INVENTORY; i++){
 		inventory[i].itemCount = 0;
 	}
