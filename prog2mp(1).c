@@ -1,5 +1,5 @@
 /* 
-mp is 96% complete
+mp is 97% complete
 
 to do by priority: 
 - final boss 
@@ -9,10 +9,11 @@ to do by priority:
 		- The switches will then disappear and another new pair of switches will spawn elsewhere
 		- siren break barrier when 3 switch trigger
 		- When Spawning the switches, the pair of switches should NOT be further than two rows and five columns away
-	- spawn a bat every 8 moves
-		- 0 switch trigger: lvl1 dungeon behavior (use game->currentplauthroughclear)
+		bat behavior:
+		- 0 switch trigger: lvl1 dungeon behavior (use game->currentplaythroughclear)
 		- l switch trigger: lvl2 dungeon behavior
 		- 2+ switch trigger: lvl3 dungeon behavior
+	- spawn a bat every 8 moves (done)
 	- siren 
 		- move toward y and h, all eight directions
 		- siren one taps you if he hit u
@@ -1251,7 +1252,7 @@ void batAbilities(grid dimension2D, int playerMove, struct gameTag *game, struct
     int nDir;
     int attacked = 0;
     int currentTile;
-
+	
     // this updates the bats in real time (revert big B to small after attacking the player)
     for (i = 0; i < MAX_ROW; i++)
         for (j = 0; j < MAX_COL; j++){
@@ -1859,6 +1860,8 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 	int yRowOld, yColOld;
 	int moved;
 	int invIdx;
+	int finalBoss = 0;
+	int spawnRow, spawnCol;
 	srand(time(NULL));
 	
 	// Tile location/s
@@ -1971,6 +1974,21 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 		playerMoveCount++;
 		batAbilities(dimension2D, playerMoveCount, game, inventory);
 		achievementUnlock(achievement, game, 0);
+		
+		if (game->currentPlaythroughClear == game->hostagesSelected)
+			finalBoss = 1;
+		
+		if (playerMoveCount % 8 == 0 && playerMoveCount > 0 && finalBoss == 1){
+			
+			do{
+				spawnRow = (rand() % MAX_ROW) + 1;
+				spawnCol = (rand() % MAX_COL) + 1;	
+			} while (dimension2D[spawnRow][spawnCol] != 1);
+			
+			// if (dimension2D[spawnRow][spawnCol] == 1)
+				dimension2D[spawnRow][spawnCol] = 8;
+		}
+		
 		if (yTile == 5 && moved == 0 && inventory[4].itemCount == 0){
 			game->hp -= 1;
 			game->dmgTaken += 1;
