@@ -1699,7 +1699,7 @@ void movement(grid dimension2D, struct gameTag *game, struct inventoryTag invent
 					if (dimension2D[i][j] == 8 || dimension2D[i][j] == 11)
 						dimension2D[i][j] = 10;
 				}
-			
+			game->finalBoss = 0;
 			dimension2D[1][24] = 7; // spawn exit
 		}
 		else if (dimension2D[yTargetRow][yTargetCol] == 15){ // siren gold tile	
@@ -1860,7 +1860,6 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 	int yRowOld, yColOld;
 	int moved;
 	int invIdx;
-	int finalBoss = 0;
 	int spawnRow, spawnCol;
 	srand(time(NULL));
 	
@@ -1880,7 +1879,10 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 	switches(dimension2D,row,col,&swRow,&swCol);
 	sirenGold(dimension2D,row,col,&sgRow,&sgCol);
 	game->dmgTaken = 0;
-
+	
+	if (game->currentPlaythroughClear == game->hostagesSelected)
+		game->finalBoss = 1;
+			
 	do{
 		system("cls");
 		
@@ -1975,10 +1977,7 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 		batAbilities(dimension2D, playerMoveCount, game, inventory);
 		achievementUnlock(achievement, game, 0);
 		
-		if (game->currentPlaythroughClear == game->hostagesSelected)
-			finalBoss = 1;
-		
-		if (playerMoveCount % 8 == 0 && playerMoveCount > 0 && finalBoss == 1){
+		if (playerMoveCount % 8 == 0 && playerMoveCount > 0 && game->finalBoss == 1){
 			
 			do{
 				spawnRow = (rand() % MAX_ROW) + 1;
