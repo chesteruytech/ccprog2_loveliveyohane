@@ -1492,11 +1492,11 @@ void batAbilities(grid dimension2D, int playerMove, struct gameTag *game, struct
                             tempGrid[targetRow][targetCol] = 8;
                             tempGrid[i][j] = currentTile;
                         }
-                        else if (targetTile == 4 && tempGrid[targetRow][targetCol] == 4){
-	                        currentTile = 4;
-							tempGrid[targetRow][targetCol] = 8;
-                            tempGrid[i][j] = currentTile;
-                        }
+                       // else if (targetTile == 4 && tempGrid[targetRow][targetCol] == 4){
+	                //        currentTile = 4;
+			//				tempGrid[targetRow][targetCol] = 8;
+                        //    tempGrid[i][j] = currentTile;
+                        //}
                         
                         else if ((targetTile == 9 || targetTile == 13) && attacked == 0){
                             tempGrid[i][j] = 11; 
