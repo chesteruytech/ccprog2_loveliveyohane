@@ -1,23 +1,7 @@
-/* 
-mp is 98% complete
-
-to do by priority: 
-- final boss
-	- siren 
-		- move toward yohane, all eight directions
-		- siren one taps you if he hit u
-	 
-- test cases (can start now)
-
-- BEFORE SUBMITTING, REMOVE THE EASY EXITS IN EACH DUNGEON LAYOUT!!!!	
-
-- optional minor changes (don't force if cant): the current hp should display as an integer when whole number. 
-*/
-
 /*
 Description: Yohane the Parhelion! Siren in the Mirror World Machine Project CCPROG2
 Programmed by: Jon Regan Choa, Chester Aldrin Uy, S14
-Last modified: July 29, 2025
+Last modified: July 28, 2025
 Version: v10.0
 [Acknowledgements: time.h, conio.h, an older CCPROG2 machine project that was done by Regan]
 */
@@ -872,7 +856,7 @@ void hanamaruStore(struct idolDungeonTag idolDungeon[], struct gameTag *game, st
 		            inventory[index].itemCount++;
 		            game->goldSpent = game->goldSpent + hanamaru[index].price;
 		            
-		            if (index >= 5 && index <= 7 && hanamaru[index].availability == 1 /*&& game->hp <= 6*/){
+		            if (index >= 5 && index <= 7 && hanamaru[index].availability == 1){
 					    game->maxHP += 1;
 					    game->hp += 1;
 					}
@@ -1486,9 +1470,9 @@ void batAbilities(grid dimension2D, int playerMove, struct gameTag *game, struct
                 if (dimension2D[i][j] == 8 && tempGrid[i][j] == 8){
                 	
                     if (game->currentPlaythroughClear == 2)
-                        direction = rand() % 8; // diagonal moves
+                        direction = rand() % 8; 
                     else
-                        direction = rand() % 4; // cardinal
+                        direction = rand() % 4; 
 
                     nDir = direction + 1; 
                     
@@ -1515,7 +1499,7 @@ void batAbilities(grid dimension2D, int playerMove, struct gameTag *game, struct
                         }
                         
                         else if ((targetTile == 9 || targetTile == 13) && attacked == 0){
-                            tempGrid[i][j] = 11; // convert to big B
+                            tempGrid[i][j] = 11; 
 
                             if (inventory[2].itemCount > 0){
                             	if (targetTile == 9)
@@ -1844,6 +1828,7 @@ void gameOver(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 	game->currentFloorIndex = 0;
 	game->currentPlaythroughClear = 0;
 	game->finalBoss = 0;
+	game->switchTriggerCount = 0;
 	for (i = 0; i < game->hostagesSelected; i++)
 		game->clearStatusTemp[i] = 0;
 	
@@ -1868,7 +1853,7 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 	int quit = 0, verdict = 0;
 	int wlRow, wlCol, spikeRow, spikeCol, wtRow, wtCol, heatRow, heatCol, tRow, tCol, eRow, eCol, bRow, bCol, yRow, yCol, gRow, gCol, hitRow, hitCol, sirenRow, sirenCol, lRow, lCol, swRow, swCol, sgRow, sgCol;
 	char move;
-	
+	int i, j;
 	int playerMoveCount = 0;
 	int yTile = 1;
 	int lTile = 1;
@@ -1876,6 +1861,7 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 	int moved;
 	int invIdx;
 	int spawnRow, spawnCol, pairSpawnRow, pairSpawnCol;
+	int sTargetRow, sTargetCol, sTargetTile;
 	game->switchSpawned = 0;
 	game->switchTriggerCount = 0;
 	srand(time(NULL));
@@ -1975,19 +1961,15 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 		
 		switch(move){
 			case 'W': case 'w':
-				//if(tileValidation(dimension2D,row,col,yRow,yCol,1))
 					movement(dimension2D,game,inventory,&yRow,&yCol,yRow-1,yCol,&verdict,&yTile,&lRow,&lCol,&lTile,lRow-1,lCol);
 					break;
 			case 'A': case 'a':
-				//if(tileValidation(dimension2D,row,col,yRow,yCol,2))
 					movement(dimension2D,game,inventory,&yRow,&yCol,yRow,yCol-1,&verdict,&yTile,&lRow,&lCol,&lTile,lRow,lCol-1);
 					break;
 			case 'S': case 's':
-				//if(tileValidation(dimension2D,row,col,yRow,yCol,3))
 					movement(dimension2D,game,inventory,&yRow,&yCol,yRow+1,yCol,&verdict,&yTile,&lRow,&lCol,&lTile,lRow+1,lCol);
 					break;
 			case 'D': case 'd':
-				//if(tileValidation(dimension2D,row,col,yRow,yCol,4))
 					movement(dimension2D,game,inventory,&yRow,&yCol,yRow,yCol+1,&verdict,&yTile,&lRow,&lCol,&lTile,lRow,lCol+1);
 					break;
 			case 'X': case 'x':
@@ -2015,9 +1997,9 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 		playerMoveCount++;
 		batAbilities(dimension2D, playerMoveCount, game, inventory);
 		achievementUnlock(achievement, game, 0);
-
 		
-		// spawn bat every 8 moves until siren is defeated
+		// final boss things
+		// spawn bat
 		if (playerMoveCount % 8 == 0 && playerMoveCount > 0 && game->finalBoss == 1){
 			
 			do{
@@ -2027,6 +2009,7 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 				dimension2D[spawnRow][spawnCol] = 8;
 		}
 		
+		// spawn new switches after first set is activated
 		if (game->finalBoss == 1 && game->switchTriggerCount < 3 && game->switchSpawned == 0){
 			while (game->switchSpawned == 0){
 				spawnRow = (rand() % (MAX_ROW - 4)) + 2;
@@ -2045,16 +2028,47 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 				}
 			}
 		}
-		// break barrier
-		 if (game->switchTriggerCount == 3){
-			for (int i = 1; i < 4; i++){
-				for (int j = 1; j < MAX_COL-1; j++){
+		
+			// siren mechanics
+		if (game->switchTriggerCount == 3 && game->finalBoss == 1){
+			// remove  the barrier
+			for (i = 1; i < 4; i++){
+				for (j = 1; j < MAX_COL-1; j++){
 					if (dimension2D[i][j] == 0 || dimension2D[i][j] == 16){
 						dimension2D[i][j] = 1;
 					}
 				}
 			}
-			// siren code goes here
+				
+		    siren(dimension2D, row, col, &sirenRow, &sirenCol);
+		    yohane(dimension2D, row, col, &yRow, &yCol);
+		    sTargetRow = sirenRow;
+		    sTargetCol = sirenCol;
+		
+		    if (sirenRow < yRow) 
+				sTargetRow++;
+		    else if (sirenRow > yRow) 
+				sTargetRow--;
+		
+		    if (sirenCol < yCol) 
+				sTargetCol++;
+		    else if (sirenCol > yCol)
+				sTargetCol--;
+		
+		    sTargetTile = dimension2D[sTargetRow][sTargetCol];
+		
+		    if (sTargetTile == 9 || sTargetTile == 13){
+		        strcpy(game->killed, "Siren");
+		        if (sTargetTile == 9)
+		        	game->hp = 0; 
+		        else
+		        	game->lailapsHP = 0;
+		    }
+		
+		    if (sTargetTile == 1 || sTargetTile == 9 || sTargetTile == 13){
+		        dimension2D[sirenRow][sirenCol] = 1;
+		        dimension2D[sTargetRow][sTargetCol] = 12;  
+		    }
 		}
 		
 		if (yTile == 5 && moved == 0 && inventory[4].itemCount == 0){
@@ -2110,7 +2124,7 @@ int awashimaMarinePark(struct gameTag *game, int charIdx, struct idolDungeonTag 
 					int dungeonIndex, struct inventoryTag inventory[], struct achievementTag achievement[], struct hanamaruTag hanamaru[]){
 				
 	grid dungeon = {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, 
-				 	{0,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,7,9,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
+				 	{0,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,9,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 				 	{0,1,1,6,1,1,3,1,1,1,1,5,1,1,1,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,8,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 				 	{0,1,1,1,1,1,3,1,1,1,1,5,5,1,1,1,1,1,1,1,3,1,1,1,1,1,1,1,4,4,1,1,1,1,1,1,1,1,3,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 				 	{0,1,1,1,1,1,3,1,1,1,1,1,1,1,1,8,1,1,1,3,3,1,1,1,1,1,1,1,4,4,1,1,1,1,1,1,1,1,3,3,1,1,1,1,3,1,1,1,8,1,1,1,1,1,0},
@@ -2141,7 +2155,7 @@ int izumitoSeaParadise(struct gameTag *game, int charIdx, struct idolDungeonTag 
 					int dungeonIndex, struct inventoryTag inventory[], struct achievementTag achievement[], struct hanamaruTag hanamaru[]){
 	
 	grid dungeon = {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, 
-				 	{0,1,1,1,1,1,3,1,1,1,1,1,1,7,9,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
+				 	{0,1,1,1,1,1,3,1,1,1,1,1,1,1,9,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 				 	{0,1,1,6,1,1,3,1,1,1,1,5,1,1,1,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,8,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 				 	{0,1,1,1,1,1,3,1,1,1,1,5,5,1,1,1,1,1,1,1,3,1,1,1,1,1,1,1,4,4,1,1,1,1,1,1,1,1,3,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 				 	{0,1,1,1,1,1,3,1,1,1,1,1,1,1,1,8,1,1,1,3,3,1,1,1,1,1,1,1,4,4,1,1,1,1,1,1,1,1,3,3,1,1,1,1,3,1,1,1,8,1,1,1,1,1,0},
@@ -2170,7 +2184,7 @@ Precondition: Player enters a dungeon #3
 int shougetsuConfectionary(struct gameTag *game, int charIdx, struct idolDungeonTag idolDungeon[], 
 					int dungeonIndex, struct inventoryTag inventory[], struct achievementTag achievement[], struct hanamaruTag hanamaru[]){
 	grid dungeon = {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, 
-				 	{0,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,7,9,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
+				 	{0,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,9,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 				 	{0,1,1,6,1,1,3,1,1,1,1,5,1,1,1,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,8,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 				 	{0,1,1,1,1,1,3,1,1,1,1,5,5,1,1,1,1,1,1,1,3,1,1,1,1,1,1,1,4,4,1,1,1,1,1,1,1,1,3,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 				 	{0,1,1,1,1,1,3,1,1,1,1,1,1,1,1,8,1,1,1,3,3,1,1,1,1,1,1,1,4,4,1,1,1,1,1,1,1,1,3,3,1,1,1,1,3,1,1,1,8,1,1,1,1,1,0},
@@ -2205,7 +2219,7 @@ int sirenOfTheMirrorWorld(struct gameTag *game, int charIdx, struct idolDungeonT
 				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
-				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,8,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
+				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
 				 	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,9,13,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0}, 
@@ -2264,7 +2278,7 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 			index = choice - '1'; 
 			charIdx = game->hostages[index]; 
 			system("cls");
-        	if (game->clearStatusTemp[index] == 1 /*|| game->clearStatus[charIdx] == 1*/)
+        	if (game->clearStatusTemp[index] == 1)
         		printf("Dungeon is cleared. You can no longer enter\n");
         	else{
 	        	printf("Entering dungeon %d\n\n", index+1);
@@ -2299,7 +2313,7 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 	        	printf("\n%s has been successfully rescued!\n", idolDungeon[charIdx].idol);
 	        	game->rescuedCount[charIdx]++;
 
-	        	game->clearStatus[charIdx] = 1; // rescued in THAT playthrough
+	        	game->clearStatus[charIdx] = 1; 
 	        	game->clearStatusTemp[index] = 1;
 				game->currentPlaythroughClear++;	
 	        	game->dungeonClears++; 
@@ -2363,6 +2377,7 @@ void newGamePlusSetup(struct idolDungeonTag idolDungeon[], struct gameTag *game,
 	game->hp = 3;
 	game->lailapsHP = 4;
 	game->finalBoss = 0;
+	game->switchTriggerCount = 0;
 	for (i = 2; i < MAX_INVENTORY; i++){
 		inventory[i].itemCount = 0;
 	}
@@ -2400,7 +2415,6 @@ void continueGame(struct idolDungeonTag idolDungeon[], struct gameTag *game, str
 	system("cls");
 	
 	loadGame(idolDungeon, game, inventory, hanamaru, achievement);	
-    //showHostages(idolDungeon, game);
     showDungeonMenu(idolDungeon, game, inventory);
     gameMenu(idolDungeon, game, inventory, hanamaru, achievement);
 }
