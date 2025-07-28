@@ -4,8 +4,7 @@ mp is 98% complete
 to do by priority: 
 - final boss
 	- siren 
-		- move toward y and h, all eight directions
-		- prio moving toward yohane
+		- move toward yohane, all eight directions
 		- siren one taps you if he hit u
 	 
 - test cases (can start now)
@@ -13,22 +12,6 @@ to do by priority:
 - BEFORE SUBMITTING, REMOVE THE EASY EXITS IN EACH DUNGEON LAYOUT!!!!	
 
 - optional minor changes (don't force if cant): the current hp should display as an integer when whole number. 
-Complete:
-- Main menu
-- achievements
-- dungeon menu
-- hostage selection
-- inventory
-- hanamaru shop
-- save file
-- load file
-- game over
-- use and cycle items
-- new game + 
-- player movements
-- bat movements
-- dungeon floors
-- lailaps movements
 */
 
 /*
@@ -351,7 +334,7 @@ int isNumber(char choice[]){
     if (choice[0] == '\0')
         return 0;
 
-    while (choice[count] != '\0') {
+    while (choice[count] != '\0'){
         if (choice[count] < '0' || choice[count] > '9')
             return 0;
 		else 
@@ -369,7 +352,7 @@ int strToInt(char choice[]){
     int count = 0;
     int num = 0;
 
-    while (choice[count] != '\0') {
+    while (choice[count] != '\0'){
         num = num * 10 + (choice[count] - '0');
         count++;
     }
@@ -383,15 +366,17 @@ Precondition: Program is running
 @param str: the current month/day/year in the form of a string
 @param digits: string length of date format
 */
-void intToStr(int num, char* str, int digits) {
-    int i, pos = digits - 1;
+void intToStr(int num, char* str, int digits){
+	
+    int i;
+	int pos = digits - 1;
 
     for (i = 0; i < digits; i++)
         str[i] = '0';
 
     str[digits] = '\0';
 
-    while (num > 0 && pos >= 0) {
+    while (num > 0 && pos >= 0){
         str[pos] = (num % 10) + '0';
         num /= 10;
         pos--;
@@ -409,11 +394,11 @@ void getCurrentDate(char *output){
 
     char mm[3], dd[3], yyyy[5], hh[3], min[3];
 
-    intToStr(t->tm_mon + 1, mm, 2); // month
-    intToStr(t->tm_mday, dd, 2); // day
-    intToStr(t->tm_year + 1900, yyyy, 4); // year
-    intToStr(t->tm_hour, hh, 2); // hour
-    intToStr(t->tm_min, min, 2); // minutes
+    intToStr(t->tm_mon + 1, mm, 2); 
+    intToStr(t->tm_mday, dd, 2); 
+    intToStr(t->tm_year + 1900, yyyy, 4); 
+    intToStr(t->tm_hour, hh, 2); 
+    intToStr(t->tm_min, min, 2);
 
  
     output[0] = '\0'; 
@@ -1222,125 +1207,6 @@ void bats(grid dimension2D, int nRow, int nCol, int *tRow, int *tCol){
 		}
 	}
 }
-/* This function identifies the abilities of the bats in game and updates their 
-position in the map, including their behavior depending on dungeon level
-Precondition: Press any key while in a dungeon 
-@param dimension2D: the size of the dungeon in rows and columns
-@param playerMove: the amount of times the player has moved
-@param struct gameTag *game: the structure containing the game statistics of the player
-@param struct inventoryTag inventory[]: the structure containing the player's inventory
-*/
-void batAbilities(grid dimension2D, int playerMove, struct gameTag *game, struct inventoryTag inventory[]){
-	
-    int i, j;
-    
-    // directions by index
-    int rowDirection[8] = {-1, 1, 0, 0, -1, -1, 1, 1}; 
-    int colDirection[8] = {0, 0, -1, 1, -1, 1, -1, 1};
-    
-    int tempGrid[MAX_ROW][MAX_COL];
-    int direction;
-    int targetRow, targetCol;
-    int targetTile;
-    int nDir;
-    int attacked = 0;
-    int currentTile;
-	
-    // this updates the bats in real time (revert big B to small after attacking the player)
-    for (i = 0; i < MAX_ROW; i++)
-        for (j = 0; j < MAX_COL; j++){
-            if (dimension2D[i][j] == 11)
-                tempGrid[i][j] = 8;
-            else
-                tempGrid[i][j] = dimension2D[i][j];
-        }
-        
-
-    if ((game->currentPlaythroughClear == 0 && playerMove % 2 == 0) || game->currentPlaythroughClear >= 1){
-    	
-        for (i = 0; i < MAX_ROW; i++)
-            for (j = 0; j < MAX_COL; j++){
-                if (dimension2D[i][j] == 8 && tempGrid[i][j] == 8){
-                	
-                    if (game->currentPlaythroughClear == 2)
-                        direction = rand() % 8; // diagonal moves
-                    else
-                        direction = rand() % 4; // cardinal
-
-                    nDir = direction + 1; 
-                    
-                    targetRow = i + rowDirection[direction];
-                    targetCol = j + colDirection[direction];
-
-                    if (tileValidation(dimension2D, MAX_ROW, MAX_COL, i, j, nDir)){
-                        targetTile = dimension2D[targetRow][targetCol];
-
-                        if (targetTile == 1 && tempGrid[targetRow][targetCol] == 1){
-                        	
-                            if (dimension2D[i][j] == 4)
-                                currentTile = 4;
-                            else 
-                                currentTile = 1;
-
-                            tempGrid[targetRow][targetCol] = 8;
-                            tempGrid[i][j] = currentTile;
-                        }
-                        else if (targetTile == 4 && tempGrid[targetRow][targetCol] == 4){
-	                        currentTile = 4;
-							tempGrid[targetRow][targetCol] = 8;
-                            tempGrid[i][j] = currentTile;
-                        }
-                        
-                        else if ((targetTile == 9 || targetTile == 13) && attacked == 0){
-                            tempGrid[i][j] = 11; // convert to big B
-
-                            if (inventory[2].itemCount > 0){
-                            	if (targetTile == 9)
-                            		game->hp -= 0.5;
-                            	if (targetTile == 13)
-                            		game->lailapsHP -= 0.5;
-                            	game->dmgTaken += 0.5;
-							}
-                            else if (game->currentPlaythroughClear == 0){
-                            	if (targetTile == 9)
-                            		game->hp -= 0.5;
-                            	if (targetTile == 13)
-                            		game->lailapsHP -= 0.5;
-                            	game->dmgTaken += 0.5;
-							}
-                            else if (game->currentPlaythroughClear == 1){
-                            	if (targetTile == 9)
-                            		game->hp -= 1;
-                            	if (targetTile == 13)
-                            		game->lailapsHP -= 1;
-                            	game->dmgTaken += 1;
-							}
-							else if (game->currentPlaythroughClear >= 2){
-								if (targetTile == 9)
-                            		game->hp -= 1.5;
-                            	if (targetTile == 13)
-                            		game->lailapsHP -= 1.5;
-								game->dmgTaken += 1.5;
-							}   
-                			
-                			if (game->hp <= 0 || game->lailapsHP <= 0)
-                            	strcpy(game->killed, "Bat");
-                            	
-                            attacked = 1;
-                        }
-                    }
-                }
-            }
-    }
-
-    // update the map after everything 
-    for (i = 0; i < MAX_ROW; i++){
-        for (j = 0; j < MAX_COL; j++) {
-            dimension2D[i][j] = tempGrid[i][j];
-        }
-    }
-    
-}
 /* This function identifies the player in the dungeon
 Precondition: Enter a dungeon in game 
 @param dimension2D: the size of the dungeon in rows and columns
@@ -1578,6 +1444,125 @@ void obtainGoldBat(struct gameTag *game){
 		game->gold += 15;
 	
 }
+
+/* This function identifies the abilities of the bats in game and updates their 
+position in the map, including their behavior depending on dungeon level
+Precondition: Press any key while in a dungeon 
+@param dimension2D: the size of the dungeon in rows and columns
+@param playerMove: the amount of times the player has moved
+@param struct gameTag *game: the structure containing the game statistics of the player
+@param struct inventoryTag inventory[]: the structure containing the player's inventory
+*/
+void batAbilities(grid dimension2D, int playerMove, struct gameTag *game, struct inventoryTag inventory[]){
+	
+    int i, j;
+    
+    // directions by index
+    int rowDirection[8] = {-1, 1, 0, 0, -1, -1, 1, 1}; 
+    int colDirection[8] = {0, 0, -1, 1, -1, 1, -1, 1};
+    
+    int tempGrid[MAX_ROW][MAX_COL];
+    int direction;
+    int targetRow, targetCol;
+    int targetTile;
+    int nDir;
+    int attacked = 0;
+    int currentTile;
+	
+    // this updates the bats in real time (revert big B to small after attacking the player)
+    for (i = 0; i < MAX_ROW; i++)
+        for (j = 0; j < MAX_COL; j++){
+            if (dimension2D[i][j] == 11)
+                tempGrid[i][j] = 8;
+            else
+                tempGrid[i][j] = dimension2D[i][j];
+        }
+        
+
+    if ((game->currentPlaythroughClear == 0 && playerMove % 2 == 0) || game->currentPlaythroughClear >= 1){
+    	
+        for (i = 0; i < MAX_ROW; i++)
+            for (j = 0; j < MAX_COL; j++){
+                if (dimension2D[i][j] == 8 && tempGrid[i][j] == 8){
+                	
+                    if (game->currentPlaythroughClear == 2)
+                        direction = rand() % 8; // diagonal moves
+                    else
+                        direction = rand() % 4; // cardinal
+
+                    nDir = direction + 1; 
+                    
+                    targetRow = i + rowDirection[direction];
+                    targetCol = j + colDirection[direction];
+
+                    if (tileValidation(dimension2D, MAX_ROW, MAX_COL, i, j, nDir)){
+                        targetTile = dimension2D[targetRow][targetCol];
+
+                        if (targetTile == 1 && tempGrid[targetRow][targetCol] == 1){
+                        	
+                            if (dimension2D[i][j] == 4)
+                                currentTile = 4;
+                            else 
+                                currentTile = 1;
+
+                            tempGrid[targetRow][targetCol] = 8;
+                            tempGrid[i][j] = currentTile;
+                        }
+                        else if (targetTile == 4 && tempGrid[targetRow][targetCol] == 4){
+	                        currentTile = 4;
+							tempGrid[targetRow][targetCol] = 8;
+                            tempGrid[i][j] = currentTile;
+                        }
+                        
+                        else if ((targetTile == 9 || targetTile == 13) && attacked == 0){
+                            tempGrid[i][j] = 11; // convert to big B
+
+                            if (inventory[2].itemCount > 0){
+                            	if (targetTile == 9)
+                            		game->hp -= 0.5;
+                            	if (targetTile == 13)
+                            		game->lailapsHP -= 0.5;
+                            	game->dmgTaken += 0.5;
+							}
+                            else if (game->currentPlaythroughClear == 0){
+                            	if (targetTile == 9)
+                            		game->hp -= 0.5;
+                            	if (targetTile == 13)
+                            		game->lailapsHP -= 0.5;
+                            	game->dmgTaken += 0.5;
+							}
+                            else if (game->currentPlaythroughClear == 1){
+                            	if (targetTile == 9)
+                            		game->hp -= 1;
+                            	if (targetTile == 13)
+                            		game->lailapsHP -= 1;
+                            	game->dmgTaken += 1;
+							}
+							else if (game->currentPlaythroughClear >= 2){
+								if (targetTile == 9)
+                            		game->hp -= 1.5;
+                            	if (targetTile == 13)
+                            		game->lailapsHP -= 1.5;
+								game->dmgTaken += 1.5;
+							}   
+                			
+                			if (game->hp <= 0 || game->lailapsHP <= 0)
+                            	strcpy(game->killed, "Bat");
+                            	
+                            attacked = 1;
+                        }
+                    }
+                }
+            }
+    }
+
+    // update the map after everything 
+    for (i = 0; i < MAX_ROW; i++){
+        for (j = 0; j < MAX_COL; j++) {
+            dimension2D[i][j] = tempGrid[i][j];
+        }
+    } 
+}
 /* This function moves the player around in a dungeon depending on users input 
 Precondition: Enter a dungeon in game and press W, A, S, or D
 @param dimension2D: the size of the dungeon in rows and columns
@@ -1734,7 +1719,22 @@ void movement(grid dimension2D, struct gameTag *game, struct inventoryTag invent
 				*lRow = lTargetRow;
 				*lCol = lTargetCol;
 			}
-			
+			else if (dimension2D[lTargetRow][lTargetCol] == 10){ // gold tile	
+				dimension2D[*lRow][*lCol] = 1; 
+				dimension2D[lTargetRow][lTargetCol] = 13;
+				*lRow = lTargetRow; 
+				*lCol = lTargetCol; 
+				
+				obtainGoldBat(game);	
+			}
+			else if (dimension2D[lTargetRow][lTargetCol] == 15){ // siren gold tile	
+				dimension2D[*lRow][*lCol] = 1; 
+				dimension2D[lTargetRow][lTargetCol] = 13;
+				*lRow = lTargetRow; 
+				*lCol = lTargetCol; 
+				
+				game->gold += 750;	
+			}
 			else
 				dimension2D[*lRow][*lCol] = 13; 
 				
@@ -2054,6 +2054,7 @@ int yohaneBaseLogic(grid dimension2D, struct gameTag *game, int charIdx, struct 
 					}
 				}
 			}
+			// siren code goes here
 		}
 		
 		if (yTile == 5 && moved == 0 && inventory[4].itemCount == 0){
