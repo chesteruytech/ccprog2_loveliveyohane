@@ -4,6 +4,8 @@ mp is 97% complete
 to do by priority: 
 - final boss 
 	- lailaps moves with yohane (done)
+	- spawn a bat every 8 moves (done)
+	- if yohane attaack siren, spawn exit on siren spawnpoint and drop 750g, all bats die too (done)
 	- spawn a pair of switches random location
 		- Yohane and Lailaps must then trigger both switches simultaneously
 		- The switches will then disappear and another new pair of switches will spawn elsewhere
@@ -13,11 +15,9 @@ to do by priority:
 		- 0 switch trigger: lvl1 dungeon behavior (use game->currentplaythroughclear)
 		- l switch trigger: lvl2 dungeon behavior
 		- 2+ switch trigger: lvl3 dungeon behavior
-	- spawn a bat every 8 moves (done)
 	- siren 
 		- move toward y and h, all eight directions
 		- siren one taps you if he hit u
-	- if yohane attaack siren, spawn exit on siren spawnpoint and drop 750g, all bats die too (done)
 	 
 - test cases (can start now)
 
@@ -1581,7 +1581,7 @@ void obtainGoldBat(struct gameTag *game){
 		game->gold += 5;
 	if (game->currentPlaythroughClear == 1)
 		game->gold += 10;
-	if (game->currentPlaythroughClear == 2)
+	if (game->currentPlaythroughClear >= 2)
 		game->gold += 15;
 	
 }
@@ -1714,7 +1714,7 @@ void movement(grid dimension2D, struct gameTag *game, struct inventoryTag invent
 			dimension2D[*yRow][*yCol] = 9; 
 		
 		
-		if (game->currentPlaythroughClear == game->hostagesSelected){
+		if (game->finalBoss == 1 || game->currentPlaythroughClear >= game->hostagesSelected){
 		if (dimension2D[lTargetRow][lTargetCol] == 1 || dimension2D[lTargetRow][lTargetCol] == 4 || dimension2D[lTargetRow][lTargetCol] == 5){
 			*lTile = dimension2D[lTargetRow][lTargetCol];
 			dimension2D[lTargetRow][lTargetCol] = 13; 
