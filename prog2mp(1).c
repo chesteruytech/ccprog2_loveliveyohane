@@ -1492,11 +1492,12 @@ void batAbilities(grid dimension2D, int playerMove, struct gameTag *game, struct
                             tempGrid[targetRow][targetCol] = 8;
                             tempGrid[i][j] = currentTile;
                         }
-                       // else if (targetTile == 4 && tempGrid[targetRow][targetCol] == 4){
-	                //        currentTile = 4;
-			//				tempGrid[targetRow][targetCol] = 8;
-                        //    tempGrid[i][j] = currentTile;
-                        //}
+                        /*
+                        else if (targetTile == 4 && tempGrid[targetRow][targetCol] == 4){
+	                        currentTile = 4;
+							tempGrid[targetRow][targetCol] = 8;
+                            tempGrid[i][j] = currentTile;
+                        }*/
                         
                         else if ((targetTile == 9 || targetTile == 13) && attacked == 0){
                             tempGrid[i][j] = 11; 
@@ -2310,7 +2311,12 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 	        	}
 	        	
 	        	if (win == 1){
-	        	printf("\n%s has been successfully rescued!\n", idolDungeon[charIdx].idol);
+	        	printf("************************************************\n");
+	        	printf("                Dungeon Cleared!\n");
+	        	printf("        %s Completed!\n", idolDungeon[charIdx].dungeon);
+	        	printf("                %s Rescued!\n", idolDungeon[charIdx].idol);
+	        	printf("************************************************\n");
+	        	system("pause");
 	        	game->rescuedCount[charIdx]++;
 
 	        	game->clearStatus[charIdx] = 1; 
