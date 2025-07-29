@@ -2316,7 +2316,21 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 	        	printf("        %s Completed!\n", idolDungeon[charIdx].dungeon);
 	        	printf("                %s Rescued!\n", idolDungeon[charIdx].idol);
 	        	printf("************************************************\n");
-	        	system("pause");
+	        	getch();
+	        	printf("%s: Yohane-chan, zura! You're here!\n\n", idolDungeon[charIdx].idol);
+	        	getch();
+	        	printf("Yohane: %s! We have to get out of here quickly!\n\n", idolDungeon[charIdx].idol);
+	        	getch();
+	        	printf("%s: Oh? I was wondering what this place was and why there are so many bats everywhere, zura!\n\n", idolDungeon[charIdx].idol);
+	        	getch();
+	        	printf("Yohane: Seems like there's a Siren that wants to take your voices and is holding you in this dimension so that your counterparts in the real world can't sing!'\n\n");
+	        	getch();
+	        	printf("%s: Really? That sounds terrifying, zura. What have we got to do?\n\n", idolDungeon[charIdx].idol);
+	        	getch();
+	        	printf("Yohane: First, we have to get out of here, Zuramaru! I know the way out.\n\n");
+	        	getch();
+	        	printf("%s: Lead the way, zura!\n\n", idolDungeon[charIdx].idol);
+	        	getch();
 	        	game->rescuedCount[charIdx]++;
 
 	        	game->clearStatus[charIdx] = 1; 
