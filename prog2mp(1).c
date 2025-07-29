@@ -2323,7 +2323,7 @@ void gameMenu(struct idolDungeonTag idolDungeon[], struct gameTag *game, struct 
 	        	getch();
 	        	printf("%s: Oh? I was wondering what this place was and why there are so many bats everywhere, zura!\n\n", idolDungeon[charIdx].idol);
 	        	getch();
-	        	printf("Yohane: Seems like there's a Siren that wants to take your voices and is holding you in this dimension so that your counterparts in the real world can't sing!'\n\n");
+	        	printf("Yohane: Seems like there's a Siren that wants to take your voices and is holding you in this dimension so that your counterparts in the real world can't sing!\n\n");
 	        	getch();
 	        	printf("%s: Really? That sounds terrifying, zura. What have we got to do?\n\n", idolDungeon[charIdx].idol);
 	        	getch();
